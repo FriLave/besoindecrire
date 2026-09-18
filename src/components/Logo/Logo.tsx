@@ -17,7 +17,7 @@ export const Logo = (props: Props) => {
   return (
     <span
       className={clsx(
-        'max-w-[9.375rem] w-full h-[34px] flex items-center font-semibold text-xl tracking-tight',
+        'max-w-[9.375rem] w-full h-[34px] flex items-center font-semibold text-xl tracking-tight text-foreground',
         className,
       )}
     >

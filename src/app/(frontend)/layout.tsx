@@ -1,8 +1,7 @@
 import type { Metadata } from 'next'
 
 import { cn } from '@/utilities/ui'
-import { GeistMono } from 'geist/font/mono'
-import { GeistSans } from 'geist/font/sans'
+import { GeistMono, GeistSans } from '@/client/fonts'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
@@ -23,6 +22,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
       <head>
         <InitTheme />
+        {/* Anti-flash: globals.css hides <html> until InitTheme sets
+            data-theme. If JS is disabled (or that script fails), that
+            hide would be permanent. This restores visibility in that
+            case without touching the anti-flash mechanism itself. */}
+        <noscript>
+          <style>{`html { opacity: initial; }`}</style>
+        </noscript>
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
       <body>
