@@ -1,5 +1,7 @@
 import type { RequiredDataFromCollectionSlug } from 'payload'
 
+import { SITE_DESCRIPTION, SITE_NAME } from '@/client/site'
+
 // Used for pre-seeded content so that the homepage is not empty
 export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
   slug: 'home',
@@ -19,7 +21,7 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: 'Payload Website Template',
+                text: SITE_NAME,
                 version: 1,
               },
             ],
@@ -41,7 +43,7 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
                     format: 0,
                     mode: 'normal',
                     style: '',
-                    text: 'Visit the admin dashboard',
+                    text: "Accédez à l'espace d'administration",
                     version: 1,
                   },
                 ],
@@ -61,7 +63,7 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
                 format: 0,
                 mode: 'normal',
                 style: '',
-                text: ' to make your account and seed content for your website.',
+                text: ' pour créer votre compte et générer le contenu de démonstration de votre site.',
                 version: 1,
               },
             ],
@@ -80,8 +82,8 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
     },
   },
   meta: {
-    description: 'An open-source website built with Payload and Next.js.',
-    title: 'Payload Website Template',
+    description: SITE_DESCRIPTION,
+    title: SITE_NAME,
   },
   title: 'Home',
   layout: [],

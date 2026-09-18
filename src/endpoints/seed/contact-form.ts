@@ -1,5 +1,7 @@
 import { RequiredDataFromCollectionSlug } from 'payload'
 
+import { SITE_NAME } from '@/client/site'
+
 export const contactForm: RequiredDataFromCollectionSlug<'forms'> = {
   confirmationMessage: {
     root: {
@@ -35,7 +37,7 @@ export const contactForm: RequiredDataFromCollectionSlug<'forms'> = {
   createdAt: '2023-01-12T21:47:41.374Z',
   emails: [
     {
-      emailFrom: '"Payload" \u003Cdemo@payloadcms.com\u003E',
+      emailFrom: `"${SITE_NAME}" <no-reply@example.com>`,
       emailTo: '{{email}}',
       message: {
         root: {

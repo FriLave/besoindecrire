@@ -6,6 +6,13 @@ import { headers } from 'next/headers'
 export const maxDuration = 60 // This function can run for a maximum of 60 seconds
 
 export async function POST(): Promise<Response> {
+  // This endpoint clears collections before reseeding. It is a local dev
+  // setup path and a future test fixture, never a production operation:
+  // a client clicking it on a live site would wipe their real content.
+  if (process.env.NODE_ENV === 'production') {
+    return new Response('Seeding is disabled in production.', { status: 403 })
+  }
+
   const payload = await getPayload({ config })
   const requestHeaders = await headers()
 

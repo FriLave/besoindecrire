@@ -1,4 +1,7 @@
 import type { CollectionSlug, GlobalSlug, Payload, PayloadRequest, File } from 'payload'
+import fs from 'fs/promises'
+import path from 'path'
+import { fileURLToPath } from 'url'
 
 import { contactForm as contactFormData } from './contact-form'
 import { contact as contactPageData } from './contact-page'
@@ -58,12 +61,8 @@ export const seed = async ({
   payload.logger.info(`— Seeding media...`)
 
   const [image2Buffer, hero1Buffer] = await Promise.all([
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/website/src/endpoints/seed/image-post2.webp',
-    ),
-    fetchFileByURL(
-      'https://raw.githubusercontent.com/payloadcms/payload/refs/heads/3.x/templates/website/src/endpoints/seed/image-hero1.webp',
-    ),
+    readLocalFile('image-post2.webp'),
+    readLocalFile('image-hero1.webp'),
   ])
 
   const [image2Doc, imageHomeDoc] = await Promise.all([
@@ -129,24 +128,18 @@ export const seed = async ({
           {
             link: {
               type: 'custom',
-              label: 'Admin',
-              url: '/admin',
+              label: 'Mentions légales',
+              url: '#',
             },
           },
           {
             link: {
-              type: 'custom',
-              label: 'Source Code',
-              newTab: true,
-              url: 'https://github.com/payloadcms/payload/tree/3.x/templates/website',
-            },
-          },
-          {
-            link: {
-              type: 'custom',
-              label: 'Payload',
-              newTab: true,
-              url: 'https://payloadcms.com/',
+              type: 'reference',
+              label: 'Contact',
+              reference: {
+                relationTo: 'pages',
+                value: contactPage.id,
+              },
             },
           },
         ],
@@ -157,22 +150,17 @@ export const seed = async ({
   payload.logger.info('Seeded database successfully!')
 }
 
-async function fetchFileByURL(url: string): Promise<File> {
-  const res = await fetch(url, {
-    credentials: 'include',
-    method: 'GET',
-  })
-
-  if (!res.ok) {
-    throw new Error(`Failed to fetch file from ${url}, status: ${res.status}`)
-  }
-
-  const data = await res.arrayBuffer()
+// Seed media ships alongside this module as local .webp files, so seeding
+// never depends on network access to a third party.
+async function readLocalFile(filename: string): Promise<File> {
+  const dirname = path.dirname(fileURLToPath(import.meta.url))
+  const filePath = path.join(dirname, filename)
+  const data = await fs.readFile(filePath)
 
   return {
-    name: url.split('/').pop() || `file-${Date.now()}`,
-    data: Buffer.from(data),
-    mimetype: `image/${url.split('.').pop()}`,
+    name: filename,
+    data,
+    mimetype: `image/${filename.split('.').pop()}`,
     size: data.byteLength,
   }
 }
