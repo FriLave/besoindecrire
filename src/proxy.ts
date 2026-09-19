@@ -13,7 +13,7 @@ import { NextResponse, type NextRequest } from 'next/server'
  * equivalent so the default locale never has two valid public URLs for the
  * same content (would be duplicate content for SEO).
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   if (pathname === '/fr' || pathname.startsWith('/fr/')) {

@@ -30,7 +30,7 @@ export default async function RootLayout({ children, params }: Args) {
   const { isEnabled } = await draftMode()
   const { locale: localeParam } = await params
 
-  // The middleware only ever routes valid locales here. This guard only
+  // The proxy only ever routes valid locales here. This guard only
   // matters for requests that somehow bypass it (e.g. a direct internal
   // fetch); it redirects to the default locale root rather than calling
   // `notFound()`, since this is the root layout providing `<html>`/`<body>`

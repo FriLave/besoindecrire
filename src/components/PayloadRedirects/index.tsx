@@ -1,7 +1,7 @@
 import type React from 'react'
 import type { Page } from '@/payload-types'
 
-import { getCachedDocument } from '@/utilities/getDocument'
+import { getCachedDocumentByID } from '@/utilities/getDocument'
 import { getCachedRedirects } from '@/utilities/getRedirects'
 import { getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
 import { notFound, redirect } from 'next/navigation'
@@ -25,19 +25,25 @@ export const PayloadRedirects: React.FC<Props> = async ({ disableNotFound, local
 
     let redirectUrl: string
 
-    if (typeof redirectItem.to?.reference?.value === 'string') {
-      const collection = redirectItem.to?.reference?.relationTo
-      const id = redirectItem.to?.reference?.value
+    const reference = redirectItem.to?.reference
+    const referenceValue = reference?.value
 
-      const document = (await getCachedDocument(collection, id, locale)()) as Page
+    // Payload only populates a relationship's `value` into the full
+    // document when it is included in the query result (see `depth` in
+    // `getRedirects`). Otherwise `value` is left as the raw id (a
+    // `number` on this project's Postgres adapter, a `string` on
+    // Mongo) - fetch the document ourselves in that case.
+    if (referenceValue && typeof referenceValue === 'object') {
+      redirectUrl = getLocalizedPath(locale, referenceValue.slug)
+    } else if (reference && referenceValue != null) {
+      const document = (await getCachedDocumentByID(
+        reference.relationTo,
+        referenceValue,
+        locale,
+      )()) as Page
       redirectUrl = getLocalizedPath(locale, document?.slug)
     } else {
-      redirectUrl = getLocalizedPath(
-        locale,
-        typeof redirectItem.to?.reference?.value === 'object'
-          ? redirectItem.to?.reference?.value?.slug
-          : undefined,
-      )
+      redirectUrl = getLocalizedPath(locale, undefined)
     }
 
     if (redirectUrl) redirect(redirectUrl)
