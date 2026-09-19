@@ -11,7 +11,12 @@ import { imageHero1 } from './image-hero-1'
 
 const collections: CollectionSlug[] = ['media', 'pages', 'forms', 'form-submissions']
 
-const globals: GlobalSlug[] = ['header', 'footer']
+// Kept as a literal tuple (not `GlobalSlug[]`) so `global` narrows to exactly
+// 'header' | 'footer' below — both reset with the same `{ navItems: [] }`
+// shape. Widening this to `GlobalSlug[]` pulls every registered global
+// (e.g. `site-settings`, which has no `navItems`) into the union and breaks
+// the object literal below.
+const globals = ['header', 'footer'] as const satisfies readonly GlobalSlug[]
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app

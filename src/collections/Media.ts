@@ -28,6 +28,7 @@ export const Media: CollectionConfig = {
       name: 'alt',
       type: 'text',
       //required: true,
+      localized: true,
     },
     {
       name: 'caption',
@@ -37,6 +38,7 @@ export const Media: CollectionConfig = {
           return [...rootFeatures, FixedToolbarFeature(), InlineToolbarFeature()]
         },
       }),
+      localized: true,
     },
   ],
   upload: {

@@ -24,3 +24,14 @@ export const getCachedGlobal = <T extends Global>(slug: T, depth = 0) =>
   unstable_cache(async () => getGlobal<T>(slug, depth), [slug], {
     tags: [`global_${slug}`],
   })
+
+/**
+ * Convenience cached getter for the `site-settings` global, following the
+ * same pattern used by `getCachedGlobal('header', ...)` / `('footer', ...)`
+ * in `src/Header/Component.tsx` / `src/Footer/Component.tsx`.
+ *
+ * Not yet wired into any consumer: `src/client/site.ts`'s `SITE_NAME` /
+ * `SITE_DESCRIPTION` remain the build-time fallback until a later
+ * routing/SEO pass rewires callers to read from this global instead.
+ */
+export const getCachedSiteSettings = () => getCachedGlobal('site-settings', 0)

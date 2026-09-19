@@ -8,10 +8,13 @@
  * edit to give the site its identity, instead of inlining new hardcoded
  * strings into upstream-owned code (components, utilities, plugins...).
  *
- * NOTE: `SITE_NAME` below is a deliberate placeholder. It will eventually
- * be superseded by a `site-settings` Payload global so that the site name
- * can be edited by the client from the admin UI rather than in code. Until
- * that global exists, this constant is the single source of truth.
+ * NOTE: the `site-settings` Payload global (`src/globals/SiteSettings/`) now
+ * exists and is the editable, localized source of truth for the site's name
+ * and description from the admin UI. `SITE_NAME` / `SITE_DESCRIPTION` below
+ * are the build-time fallback: the value used before the global is ever
+ * populated, and by any code that isn't (yet) reading from the global.
+ * Routing/SEO passes will rewire consumers to read the global instead; this
+ * file keeps exporting the same names so nothing breaks until they do.
  */
 
 export const SITE_NAME = 'Site Vitrine'
