@@ -7,13 +7,18 @@ import React from 'react'
 
 import { Error } from '../Error'
 import { Width } from '../Width'
+import type { Locale } from '@/utilities/getLocalizedPath'
+import { getUI } from '@/i18n/ui'
 
 export const Text: React.FC<
   TextField & {
+    locale: Locale
     errors: Partial<FieldErrorsImpl>
     register: UseFormRegister<FieldValues>
   }
-> = ({ name, defaultValue, errors, label, register, required, width }) => {
+> = ({ locale,
+  name, defaultValue, errors, label, register, required, width }) => {
+  const ui = getUI(locale)
   return (
     <Width width={width}>
       <Label htmlFor={name}>
@@ -21,12 +26,12 @@ export const Text: React.FC<
 
         {required && (
           <span className="required">
-            * <span className="sr-only">(required)</span>
+            * <span className="sr-only">{ui.form.requiredIndicator}</span>
           </span>
         )}
       </Label>
       <Input defaultValue={defaultValue} id={name} type="text" {...register(name, { required })} />
-      {errors[name] && <Error name={name} />}
+      {errors[name] && <Error locale={locale} name={name} />}
     </Width>
   )
 }

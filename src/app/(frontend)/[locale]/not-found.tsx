@@ -2,20 +2,8 @@ import Link from 'next/link'
 import React from 'react'
 
 import { Button } from '@/components/ui/button'
+import { getUI } from '@/i18n/ui'
 import { defaultLocale, getLocalizedPath, locales, type Locale } from '@/utilities/getLocalizedPath'
-
-const copy: Record<Locale, { cta: string; description: string; title: string }> = {
-  fr: {
-    cta: "Retour à l'accueil",
-    description: "Cette page n'a pas pu être trouvée.",
-    title: '404',
-  },
-  en: {
-    cta: 'Go home',
-    description: 'This page could not be found.',
-    title: '404',
-  },
-}
 
 type Args = {
   params: Promise<{ locale?: string }>
@@ -45,7 +33,7 @@ export default async function NotFound({ params }: Args) {
     ? resolved?.locale
     : defaultLocale) as Locale
 
-  const { cta, description, title } = copy[locale]
+  const { cta, description, title } = getUI(locale).notFound
 
   return (
     <div className="container py-28">

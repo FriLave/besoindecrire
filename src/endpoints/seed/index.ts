@@ -3,11 +3,14 @@ import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { contactForm as contactFormData } from './contact-form'
+import { contactForm as contactFormData, contactFormTranslation } from './contact-form'
 import { contact as contactPageData } from './contact-page'
 import { home } from './home'
 import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
+import { preserveIds } from './preserve-ids'
+import { siteSettingsCopy } from './site-settings'
+import { locales, type Locale } from '@/utilities/getLocalizedPath'
 
 const collections: CollectionSlug[] = ['media', 'pages', 'forms', 'form-submissions']
 
@@ -17,6 +20,56 @@ const collections: CollectionSlug[] = ['media', 'pages', 'forms', 'form-submissi
 // (e.g. `site-settings`, which has no `navItems`) into the union and breaks
 // the object literal below.
 const globals = ['header', 'footer'] as const satisfies readonly GlobalSlug[]
+
+/**
+ * Every locale after the first (`locales[0]`, the configured default). Payload
+ * has no "create in every locale at once" call: a document is always created
+ * in the default locale, then translated with one `update` per additional
+ * locale. With exactly two locales configured (`fr`, `en`) this is a single
+ * extra locale today, but written to scale to more without changes here.
+ */
+const additionalLocales = locales.slice(1)
+
+type NavItem = {
+  link: {
+    label: string
+    reference?: { relationTo: 'pages'; value: number }
+    type: 'custom' | 'reference'
+    url?: string
+  }
+}
+
+const headerNavItems: Record<Locale, (contactPageId: number) => NavItem[]> = {
+  fr: (contactPageId) => [
+    { link: { type: 'reference', label: 'Contact', reference: { relationTo: 'pages', value: contactPageId } } },
+  ],
+  en: (contactPageId) => [
+    {
+      link: {
+        type: 'reference',
+        label: 'Contact us',
+        reference: { relationTo: 'pages', value: contactPageId },
+      },
+    },
+  ],
+}
+
+const footerNavItems: Record<Locale, (contactPageId: number) => NavItem[]> = {
+  fr: (contactPageId) => [
+    { link: { type: 'custom', label: 'Mentions légales', url: '#' } },
+    { link: { type: 'reference', label: 'Contact', reference: { relationTo: 'pages', value: contactPageId } } },
+  ],
+  en: (contactPageId) => [
+    { link: { type: 'custom', label: 'Legal notice', url: '#' } },
+    {
+      link: {
+        type: 'reference',
+        label: 'Contact us',
+        reference: { relationTo: 'pages', value: contactPageId },
+      },
+    },
+  ],
+}
 
 // Next.js revalidation errors are normal when seeding the database without a server running
 // i.e. running `yarn seed` locally instead of using the admin UI within an active app
@@ -63,7 +116,7 @@ export const seed = async ({
       .map((collection) => payload.db.deleteVersions({ collection, req, where: {} })),
   )
 
-  payload.logger.info(`— Seeding media...`)
+  payload.logger.info(`— Seeding media (${locales[0]})...`)
 
   const [image2Buffer, hero1Buffer] = await Promise.all([
     readLocalFile('image-post2.webp'),
@@ -73,84 +126,138 @@ export const seed = async ({
   const [image2Doc, imageHomeDoc] = await Promise.all([
     payload.create({
       collection: 'media',
-      data: image2,
+      data: image2(locales[0]),
       file: image2Buffer,
     }),
     payload.create({
       collection: 'media',
-      data: imageHero1,
+      data: imageHero1(locales[0]),
       file: hero1Buffer,
     }),
   ])
 
-  payload.logger.info(`— Seeding contact form...`)
+  payload.logger.info(`— Seeding contact form (${locales[0]})...`)
 
   const contactForm = await payload.create({
     collection: 'forms',
     depth: 0,
-    data: contactFormData,
+    data: contactFormData(locales[0]),
   })
 
-  payload.logger.info(`— Seeding pages...`)
+  payload.logger.info(`— Seeding pages (${locales[0]})...`)
 
-  const [_, contactPage] = await Promise.all([
+  const [homePage, contactPage] = await Promise.all([
     payload.create({
       collection: 'pages',
       depth: 0,
-      data: home({ heroImage: imageHomeDoc, metaImage: image2Doc }),
+      data: home({ heroImage: imageHomeDoc, locale: locales[0], metaImage: image2Doc }),
     }),
     payload.create({
       collection: 'pages',
       depth: 0,
-      data: contactPageData({ contactForm: contactForm }),
+      data: contactPageData({ contactForm, locale: locales[0] }),
     }),
   ])
 
-  payload.logger.info(`— Seeding globals...`)
+  payload.logger.info(`— Seeding globals (${locales[0]})...`)
 
-  await Promise.all([
+  const [headerDoc, footerDoc] = await Promise.all([
     payload.updateGlobal({
       slug: 'header',
       data: {
-        navItems: [
-          {
-            link: {
-              type: 'reference',
-              label: 'Contact',
-              reference: {
-                relationTo: 'pages',
-                value: contactPage.id,
-              },
-            },
-          },
-        ],
+        navItems: headerNavItems[locales[0]](contactPage.id),
       },
     }),
     payload.updateGlobal({
       slug: 'footer',
       data: {
-        navItems: [
-          {
-            link: {
-              type: 'custom',
-              label: 'Mentions légales',
-              url: '#',
-            },
-          },
-          {
-            link: {
-              type: 'reference',
-              label: 'Contact',
-              reference: {
-                relationTo: 'pages',
-                value: contactPage.id,
-              },
-            },
-          },
-        ],
+        navItems: footerNavItems[locales[0]](contactPage.id),
       },
     }),
+    payload.updateGlobal({
+      slug: 'site-settings',
+      data: siteSettingsCopy[locales[0]],
+    }),
   ])
+
+  for (const locale of additionalLocales) {
+    payload.logger.info(`— Translating media into ${locale}...`)
+
+    await Promise.all([
+      payload.update({
+        collection: 'media',
+        id: image2Doc.id,
+        locale,
+        data: image2(locale),
+      }),
+      payload.update({
+        collection: 'media',
+        id: imageHomeDoc.id,
+        locale,
+        data: imageHero1(locale),
+      }),
+    ])
+
+    payload.logger.info(`— Translating contact form into ${locale}...`)
+
+    // `fields` is a `blocks` array (each field is its own row with an
+    // auto-generated `id`) - `preserveIds` reuses the `fr` row ids so this
+    // `update` translates the existing rows' localized `label` instead of
+    // replacing them with brand-new, `fr`-less rows. See `preserve-ids.ts`.
+    await payload.update({
+      collection: 'forms',
+      id: contactForm.id,
+      locale,
+      data: preserveIds(contactForm, contactFormTranslation(locale)),
+    })
+
+    payload.logger.info(`— Translating pages into ${locale}...`)
+
+    // Same reasoning for `hero.links` and `layout` (and `layout[].columns`
+    // for the Content block) - all `array`/`blocks` fields.
+    await Promise.all([
+      payload.update({
+        collection: 'pages',
+        id: homePage.id,
+        locale,
+        data: preserveIds(
+          homePage,
+          home({ heroImage: imageHomeDoc, locale, metaImage: image2Doc }),
+        ),
+      }),
+      payload.update({
+        collection: 'pages',
+        id: contactPage.id,
+        locale,
+        data: preserveIds(contactPage, contactPageData({ contactForm, locale })),
+      }),
+    ])
+
+    payload.logger.info(`— Translating globals into ${locale}...`)
+
+    // Same reasoning for `navItems`.
+    await Promise.all([
+      payload.updateGlobal({
+        slug: 'header',
+        locale,
+        data: preserveIds(headerDoc, {
+          navItems: headerNavItems[locale](contactPage.id),
+        }),
+      }),
+      payload.updateGlobal({
+        slug: 'footer',
+        locale,
+        data: preserveIds(footerDoc, {
+          navItems: footerNavItems[locale](contactPage.id),
+        }),
+      }),
+      payload.updateGlobal({
+        slug: 'site-settings',
+        locale,
+        data: siteSettingsCopy[locale],
+      }),
+    ])
+  }
 
   payload.logger.info('Seeded database successfully!')
 }

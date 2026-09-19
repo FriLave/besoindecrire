@@ -7,13 +7,18 @@ import React from 'react'
 
 import { Error } from '../Error'
 import { Width } from '../Width'
+import type { Locale } from '@/utilities/getLocalizedPath'
+import { getUI } from '@/i18n/ui'
 
 export const Email: React.FC<
   EmailField & {
+    locale: Locale
     errors: Partial<FieldErrorsImpl>
     register: UseFormRegister<FieldValues>
   }
-> = ({ name, defaultValue, errors, label, register, required, width }) => {
+> = ({ locale,
+  name, defaultValue, errors, label, register, required, width }) => {
+  const ui = getUI(locale)
   return (
     <Width width={width}>
       <Label htmlFor={name}>
@@ -21,7 +26,7 @@ export const Email: React.FC<
 
         {required && (
           <span className="required">
-            * <span className="sr-only">(required)</span>
+            * <span className="sr-only">{ui.form.requiredIndicator}</span>
           </span>
         )}
       </Label>
@@ -32,7 +37,7 @@ export const Email: React.FC<
         {...register(name, { pattern: /^\S[^\s@]*@\S+$/, required })}
       />
 
-      {errors[name] && <Error name={name} />}
+      {errors[name] && <Error locale={locale} name={name} />}
     </Width>
   )
 }

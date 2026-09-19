@@ -11,22 +11,24 @@ import { useRouter } from 'next/navigation'
 import './index.scss'
 
 import { getClientSideURL } from '@/utilities/getURL'
+import { getUI } from '@/i18n/ui'
+import { defaultLocale, type Locale } from '@/utilities/getLocalizedPath'
 
 const baseClass = 'admin-bar'
 
-const collectionLabels = {
-  pages: {
-    plural: 'Pages',
-    singular: 'Page',
-  },
-}
-
-const Title: React.FC = () => <span>Dashboard</span>
-
 export const AdminBar: React.FC<{
   adminBarProps?: PayloadAdminBarProps
+  locale?: Locale
 }> = (props) => {
-  const { adminBarProps } = props || {}
+  const { adminBarProps, locale = defaultLocale } = props || {}
+  const ui = getUI(locale)
+  const collectionLabels = {
+    pages: {
+      plural: ui.adminBar.pagesPlural,
+      singular: ui.adminBar.pagesSingular,
+    },
+  }
+  const Title: React.FC = () => <span>{ui.adminBar.dashboard}</span>
   const segments = useSelectedLayoutSegments()
   const [show, setShow] = useState(false)
   const collection = (
@@ -57,8 +59,8 @@ export const AdminBar: React.FC<{
           cmsURL={getClientSideURL()}
           collectionSlug={collection}
           collectionLabels={{
-            plural: collectionLabels[collection]?.plural || 'Pages',
-            singular: collectionLabels[collection]?.singular || 'Page',
+            plural: collectionLabels[collection]?.plural || ui.adminBar.pagesPlural,
+            singular: collectionLabels[collection]?.singular || ui.adminBar.pagesSingular,
           }}
           logo={<Title />}
           onAuthChange={onAuthChange}

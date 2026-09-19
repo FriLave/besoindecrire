@@ -14,21 +14,26 @@ import { Controller } from 'react-hook-form'
 
 import { Error } from '../Error'
 import { Width } from '../Width'
+import type { Locale } from '@/utilities/getLocalizedPath'
+import { getUI } from '@/i18n/ui'
 import { stateOptions } from './options'
 
 export const State: React.FC<
   StateField & {
+    locale: Locale
     control: Control
     errors: Partial<FieldErrorsImpl>
   }
-> = ({ name, control, errors, label, required, width }) => {
+> = ({ locale,
+  name, control, errors, label, required, width }) => {
+  const ui = getUI(locale)
   return (
     <Width width={width}>
       <Label htmlFor={name}>
         {label}
         {required && (
           <span className="required">
-            * <span className="sr-only">(required)</span>
+            * <span className="sr-only">{ui.form.requiredIndicator}</span>
           </span>
         )}
       </Label>
@@ -58,7 +63,7 @@ export const State: React.FC<
         }}
         rules={{ required }}
       />
-      {errors[name] && <Error name={name} />}
+      {errors[name] && <Error locale={locale} name={name} />}
     </Width>
   )
 }

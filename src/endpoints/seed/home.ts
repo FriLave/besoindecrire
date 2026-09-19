@@ -1,17 +1,144 @@
 import type { RequiredDataFromCollectionSlug } from 'payload'
 import type { Media } from '@/payload-types'
 
-import { SITE_DESCRIPTION, SITE_NAME } from '@/client/site'
+import type { Locale } from '@/utilities/getLocalizedPath'
+import { getLocalizedPath } from '@/utilities/getLocalizedPath'
+
+import { contactSlugs } from './contact-page'
+import { heading, link, paragraph, richText, text } from './lexical-helpers'
+
+type HomeCopy = {
+  cta: {
+    heading: string
+    linkLabel: string
+    para1: string
+    para2: string
+  }
+  hero: {
+    ctaLabel: string
+    heading: string
+    linkLabel: string
+    para1: string
+    para2: string
+  }
+  meta: {
+    description: string
+    title: string
+  }
+  pageTitle: string
+  services: {
+    custom: { heading: string; text: string }
+    easy: { heading: string; text: string }
+    fast: { heading: string; text: string }
+    heading: string
+    seo: { heading: string; text: string }
+    support: { heading: string; text: string }
+  }
+}
+
+const copy: Record<Locale, HomeCopy> = {
+  fr: {
+    cta: {
+      heading: "Envie d'en savoir plus ?",
+      linkLabel: 'Contactez-nous',
+      para1: 'Ce bloc est un exemple de mise en page personnalisable. ',
+      para2: ' pour en discuter.',
+    },
+    hero: {
+      ctaLabel: 'Contact',
+      heading: 'Site Vitrine',
+      linkLabel: 'Contactez-nous',
+      para1: 'Un site vitrine simple, rapide et facile à mettre à jour. ',
+      para2: ' pour discuter de votre projet.',
+    },
+    meta: {
+      description: 'Un site vitrine simple, rapide et facile à mettre à jour.',
+      title: 'Site Vitrine',
+    },
+    pageTitle: 'Accueil',
+    services: {
+      custom: {
+        heading: 'Sur mesure',
+        text: 'Chaque site est conçu pour répondre aux besoins spécifiques de votre activité.',
+      },
+      easy: {
+        heading: 'Facile à mettre à jour',
+        text: 'Modifiez vos textes et vos images en toute autonomie, sans écrire une ligne de code.',
+      },
+      fast: {
+        heading: 'Rapide et fiable',
+        text: 'Des pages optimisées pour offrir la meilleure expérience à vos visiteurs.',
+      },
+      heading: 'Nos services',
+      seo: {
+        heading: 'Référencement',
+        text: 'Un site pensé dès le départ pour être bien référencé sur les moteurs de recherche.',
+      },
+      support: {
+        heading: 'Assistance',
+        text: 'Une équipe disponible pour vous accompagner à chaque étape de votre projet.',
+      },
+    },
+  },
+  en: {
+    cta: {
+      heading: 'Want to know more?',
+      linkLabel: 'Contact us',
+      para1: 'This block is an example of customizable layout. ',
+      para2: ' to talk about it.',
+    },
+    hero: {
+      ctaLabel: 'Contact',
+      heading: 'Showcase Site',
+      linkLabel: 'Contact us',
+      para1: 'A simple, fast, and easy-to-update showcase website. ',
+      para2: ' to discuss your project.',
+    },
+    meta: {
+      description: 'A simple, fast, and easy-to-update showcase website.',
+      title: 'Showcase Site',
+    },
+    pageTitle: 'Home',
+    services: {
+      custom: {
+        heading: 'Tailor-made',
+        text: 'Every site is designed to meet the specific needs of your business.',
+      },
+      easy: {
+        heading: 'Easy to update',
+        text: 'Edit your text and images independently, without writing a single line of code.',
+      },
+      fast: {
+        heading: 'Fast and reliable',
+        text: 'Pages optimized to give your visitors the best possible experience.',
+      },
+      heading: 'Our services',
+      seo: {
+        heading: 'Search engine optimization',
+        text: 'A site designed from the ground up to rank well on search engines.',
+      },
+      support: {
+        heading: 'Support',
+        text: 'A team available to help you at every step of your project.',
+      },
+    },
+  },
+}
 
 type HomeArgs = {
   heroImage: Media
+  locale: Locale
   metaImage: Media
 }
 
 export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> = ({
   heroImage,
+  locale,
   metaImage,
 }) => {
+  const c = copy[locale]
+  const contactHref = getLocalizedPath(locale, contactSlugs[locale])
+
   return {
     slug: 'home',
     _status: 'published',
@@ -22,93 +149,20 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
           link: {
             type: 'custom',
             appearance: 'outline',
-            label: 'Contact',
-            url: '/contact',
+            label: c.hero.ctaLabel,
+            url: contactHref,
           },
         },
       ],
       media: heroImage.id,
-      richText: {
-        root: {
-          type: 'root',
-          children: [
-            {
-              type: 'heading',
-              children: [
-                {
-                  type: 'text',
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: SITE_NAME,
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              tag: 'h1',
-              version: 1,
-            },
-            {
-              type: 'paragraph',
-              children: [
-                {
-                  type: 'text',
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: 'Un site vitrine simple, rapide et facile à mettre à jour. ',
-                  version: 1,
-                },
-                {
-                  type: 'link',
-                  children: [
-                    {
-                      type: 'text',
-                      detail: 0,
-                      format: 0,
-                      mode: 'normal',
-                      style: '',
-                      text: 'Contactez-nous',
-                      version: 1,
-                    },
-                  ],
-                  direction: 'ltr',
-                  fields: {
-                    linkType: 'custom',
-                    newTab: false,
-                    url: '/contact',
-                  },
-                  format: '',
-                  indent: 0,
-                  version: 3,
-                },
-                {
-                  type: 'text',
-                  detail: 0,
-                  format: 0,
-                  mode: 'normal',
-                  style: '',
-                  text: ' pour discuter de votre projet.',
-                  version: 1,
-                },
-              ],
-              direction: 'ltr',
-              format: '',
-              indent: 0,
-              textFormat: 0,
-              version: 1,
-            },
-          ],
-          direction: 'ltr',
-          format: '',
-          indent: 0,
-          version: 1,
-        },
-      },
+      richText: richText([
+        heading('h1', c.hero.heading),
+        paragraph([
+          text(c.hero.para1),
+          link(c.hero.linkLabel, contactHref),
+          text(c.hero.para2),
+        ]),
+      ]),
     },
     layout: [
       {
@@ -116,301 +170,47 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
         blockType: 'content',
         columns: [
           {
-            richText: {
-              root: {
-                type: 'root',
-                children: [
-                  {
-                    type: 'heading',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Nos services',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    tag: 'h2',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                version: 1,
-              },
-            },
+            richText: richText([heading('h2', c.services.heading)]),
             size: 'full',
           },
           {
             enableLink: false,
-            richText: {
-              root: {
-                type: 'root',
-                children: [
-                  {
-                    type: 'heading',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Sur mesure',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    tag: 'h3',
-                    version: 1,
-                  },
-                  {
-                    type: 'paragraph',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Chaque site est conçu pour répondre aux besoins spécifiques de votre activité.',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    textFormat: 0,
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                version: 1,
-              },
-            },
+            richText: richText([
+              heading('h3', c.services.custom.heading),
+              paragraph([text(c.services.custom.text)]),
+            ]),
             size: 'oneThird',
           },
           {
             enableLink: false,
-            richText: {
-              root: {
-                type: 'root',
-                children: [
-                  {
-                    type: 'heading',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Rapide et fiable',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    tag: 'h3',
-                    version: 1,
-                  },
-                  {
-                    type: 'paragraph',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Des pages optimisées pour offrir la meilleure expérience à vos visiteurs.',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    textFormat: 0,
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                version: 1,
-              },
-            },
+            richText: richText([
+              heading('h3', c.services.fast.heading),
+              paragraph([text(c.services.fast.text)]),
+            ]),
             size: 'oneThird',
           },
           {
             enableLink: false,
-            richText: {
-              root: {
-                type: 'root',
-                children: [
-                  {
-                    type: 'heading',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Facile à mettre à jour',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    tag: 'h3',
-                    version: 1,
-                  },
-                  {
-                    type: 'paragraph',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Modifiez vos textes et vos images en toute autonomie, sans écrire une ligne de code.',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    textFormat: 0,
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                version: 1,
-              },
-            },
+            richText: richText([
+              heading('h3', c.services.easy.heading),
+              paragraph([text(c.services.easy.text)]),
+            ]),
             size: 'oneThird',
           },
           {
             enableLink: false,
-            richText: {
-              root: {
-                type: 'root',
-                children: [
-                  {
-                    type: 'heading',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Référencement',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    tag: 'h3',
-                    version: 1,
-                  },
-                  {
-                    type: 'paragraph',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Un site pensé dès le départ pour être bien référencé sur les moteurs de recherche.',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    textFormat: 0,
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                version: 1,
-              },
-            },
+            richText: richText([
+              heading('h3', c.services.seo.heading),
+              paragraph([text(c.services.seo.text)]),
+            ]),
             size: 'oneThird',
           },
           {
             enableLink: false,
-            richText: {
-              root: {
-                type: 'root',
-                children: [
-                  {
-                    type: 'heading',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Assistance',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    tag: 'h3',
-                    version: 1,
-                  },
-                  {
-                    type: 'paragraph',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Une équipe disponible pour vous accompagner à chaque étape de votre projet.',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    format: '',
-                    indent: 0,
-                    textFormat: 0,
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                version: 1,
-              },
-            },
+            richText: richText([
+              heading('h3', c.services.support.heading),
+              paragraph([text(c.services.support.text)]),
+            ]),
             size: 'oneThird',
           },
         ],
@@ -423,94 +223,17 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
       {
         blockName: 'CTA',
         blockType: 'cta',
-        richText: {
-          root: {
-            type: 'root',
-            children: [
-              {
-                type: 'heading',
-                children: [
-                  {
-                    type: 'text',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: "Envie d'en savoir plus ?",
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                tag: 'h3',
-                version: 1,
-              },
-              {
-                type: 'paragraph',
-                children: [
-                  {
-                    type: 'text',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: 'Ce bloc est un exemple de mise en page personnalisable. ',
-                    version: 1,
-                  },
-                  {
-                    type: 'link',
-                    children: [
-                      {
-                        type: 'text',
-                        detail: 0,
-                        format: 0,
-                        mode: 'normal',
-                        style: '',
-                        text: 'Contactez-nous',
-                        version: 1,
-                      },
-                    ],
-                    direction: 'ltr',
-                    fields: {
-                      linkType: 'custom',
-                      newTab: false,
-                      url: '/contact',
-                    },
-                    format: '',
-                    indent: 0,
-                    version: 2,
-                  },
-                  {
-                    type: 'text',
-                    detail: 0,
-                    format: 0,
-                    mode: 'normal',
-                    style: '',
-                    text: ' pour en discuter.',
-                    version: 1,
-                  },
-                ],
-                direction: 'ltr',
-                format: '',
-                indent: 0,
-                textFormat: 0,
-                version: 1,
-              },
-            ],
-            direction: 'ltr',
-            format: '',
-            indent: 0,
-            version: 1,
-          },
-        },
+        richText: richText([
+          heading('h3', c.cta.heading),
+          paragraph([text(c.cta.para1), link(c.cta.linkLabel, contactHref), text(c.cta.para2)]),
+        ]),
       },
     ],
     meta: {
-      description: SITE_DESCRIPTION,
+      description: c.meta.description,
       image: heroImage.id,
-      title: SITE_NAME,
+      title: c.meta.title,
     },
-    title: 'Home',
+    title: c.pageTitle,
   }
 }

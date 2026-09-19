@@ -69,9 +69,12 @@ export default async function Page({ params: paramsPromise }: Args) {
     locale,
   })
 
+  let usingStaticFallback = false
+
   // Remove this code once your website is seeded
   if (!page && slug === 'home') {
-    page = homeStatic
+    page = homeStatic(locale)
+    usingStaticFallback = true
   }
 
   if (!page) {
@@ -82,7 +85,7 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   const otherLocale = locales.find((candidate) => candidate !== locale) ?? locale
   let alternateSlug = 'home'
-  if (page !== homeStatic && typeof page.id === 'number') {
+  if (!usingStaticFallback && typeof page.id === 'number') {
     alternateSlug = await queryAlternateSlug({ id: page.id, locale: otherLocale })
   }
   const alternateLink: AlternateLocaleLink = { locale: otherLocale, slug: alternateSlug }

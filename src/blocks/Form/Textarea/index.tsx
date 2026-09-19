@@ -7,14 +7,19 @@ import React from 'react'
 
 import { Error } from '../Error'
 import { Width } from '../Width'
+import type { Locale } from '@/utilities/getLocalizedPath'
+import { getUI } from '@/i18n/ui'
 
 export const Textarea: React.FC<
   TextField & {
+    locale: Locale
     errors: Partial<FieldErrorsImpl>
     register: UseFormRegister<FieldValues>
     rows?: number
   }
-> = ({ name, defaultValue, errors, label, register, required, rows = 3, width }) => {
+> = ({ locale,
+  name, defaultValue, errors, label, register, required, rows = 3, width }) => {
+  const ui = getUI(locale)
   return (
     <Width width={width}>
       <Label htmlFor={name}>
@@ -22,7 +27,7 @@ export const Textarea: React.FC<
 
         {required && (
           <span className="required">
-            * <span className="sr-only">(required)</span>
+            * <span className="sr-only">{ui.form.requiredIndicator}</span>
           </span>
         )}
       </Label>
@@ -34,7 +39,7 @@ export const Textarea: React.FC<
         {...register(name, { required: required })}
       />
 
-      {errors[name] && <Error name={name} />}
+      {errors[name] && <Error locale={locale} name={name} />}
     </Width>
   )
 }

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import React from 'react'
 
 import { useAlternateLocale } from '@/providers/AlternateLocale'
+import { getUI } from '@/i18n/ui'
 import { getLocalizedPath, locales, type Locale } from '@/utilities/getLocalizedPath'
 
 const labels: Record<Locale, string> = {
@@ -26,7 +27,7 @@ export const LocaleSwitcher: React.FC<{ locale: Locale }> = ({ locale }) => {
 
   return (
     <Link
-      aria-label={`Switch to ${labels[otherLocale]}`}
+      aria-label={getUI(locale).localeSwitcher.switchTo(labels[otherLocale])}
       className="text-white underline-offset-4 hover:underline"
       href={href}
     >

@@ -66,6 +66,7 @@ export default async function RootLayout({ children, params }: Args) {
             adminBarProps={{
               preview: isEnabled,
             }}
+            locale={locale}
           />
 
           <Header locale={locale} />
