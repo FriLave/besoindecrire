@@ -2,6 +2,8 @@ import type { GlobalAfterChangeHook } from 'payload'
 
 import { revalidateTag } from 'next/cache'
 
+import { locales } from '@/utilities/getLocalizedPath'
+
 export const revalidateSiteSettings: GlobalAfterChangeHook = ({
   doc,
   req: { payload, context },
@@ -9,7 +11,9 @@ export const revalidateSiteSettings: GlobalAfterChangeHook = ({
   if (!context.disableRevalidate) {
     payload.logger.info(`Revalidating site settings`)
 
-    revalidateTag('global_site-settings', 'max')
+    for (const locale of locales) {
+      revalidateTag(`global_site-settings_${locale}`, 'max')
+    }
   }
 
   return doc

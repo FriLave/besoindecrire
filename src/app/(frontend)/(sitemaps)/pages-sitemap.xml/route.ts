@@ -3,6 +3,14 @@ import { getPayload } from 'payload'
 import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
 
+import { defaultLocale, getLocalizedPath } from '@/utilities/getLocalizedPath'
+
+// NOTE: this sitemap only lists the default locale (`fr`) for now.
+// Emitting per-locale sitemaps (and adding the other locale's tag) is
+// explicitly out of scope for this pass - see pass 4c. The `locale` is
+// still pinned explicitly (instead of relying on Payload's implicit
+// default) and included in the cache key so this stays correct if that
+// default ever changes.
 const getPagesSitemap = unstable_cache(
   async () => {
     const payload = await getPayload({ config })
@@ -16,6 +24,7 @@ const getPagesSitemap = unstable_cache(
       overrideAccess: false,
       draft: false,
       depth: 0,
+      locale: defaultLocale,
       limit: 1000,
       pagination: false,
       where: {
@@ -38,7 +47,7 @@ const getPagesSitemap = unstable_cache(
           .filter((page) => Boolean(page?.slug))
           .map((page) => {
             return {
-              loc: page?.slug === 'home' ? `${SITE_URL}/` : `${SITE_URL}/${page?.slug}`,
+              loc: `${SITE_URL}${getLocalizedPath(defaultLocale, page?.slug)}`,
               lastmod: page.updatedAt || dateFallback,
             }
           })
@@ -46,7 +55,7 @@ const getPagesSitemap = unstable_cache(
 
     return [...defaultSitemap, ...sitemap]
   },
-  ['pages-sitemap'],
+  ['pages-sitemap', defaultLocale],
   {
     tags: ['pages-sitemap'],
   },

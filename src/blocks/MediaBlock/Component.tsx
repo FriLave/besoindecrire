@@ -5,6 +5,7 @@ import React from 'react'
 import RichText from '@/components/RichText'
 
 import type { MediaBlock as MediaBlockProps } from '@/payload-types'
+import type { Locale } from '@/utilities/getLocalizedPath'
 
 import { Media } from '../../components/Media'
 
@@ -14,6 +15,7 @@ type Props = MediaBlockProps & {
   className?: string
   enableGutter?: boolean
   imgClassName?: string
+  locale: Locale
   staticImage?: StaticImageData
   disableInnerContainer?: boolean
 }
@@ -24,6 +26,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
     className,
     enableGutter = true,
     imgClassName,
+    locale,
     media,
     staticImage,
     disableInnerContainer,
@@ -59,7 +62,7 @@ export const MediaBlock: React.FC<Props> = (props) => {
             captionClassName,
           )}
         >
-          <RichText data={caption} enableGutter={false} />
+          <RichText data={caption} enableGutter={false} locale={locale} />
         </div>
       )}
     </div>

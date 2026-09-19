@@ -1,23 +1,29 @@
 import React from 'react'
 
 import type { Page } from '@/payload-types'
+import type { Locale } from '@/utilities/getLocalizedPath'
 
 import { CMSLink } from '@/components/Link'
 import { Media } from '@/components/Media'
 import RichText from '@/components/RichText'
 
-export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richText }) => {
+export const MediumImpactHero: React.FC<Page['hero'] & { locale: Locale }> = ({
+  links,
+  locale,
+  media,
+  richText,
+}) => {
   return (
     <div className="">
       <div className="container mb-8">
-        {richText && <RichText className="mb-6" data={richText} enableGutter={false} />}
+        {richText && <RichText className="mb-6" data={richText} enableGutter={false} locale={locale} />}
 
         {Array.isArray(links) && links.length > 0 && (
           <ul className="flex gap-4">
             {links.map(({ link }, i) => {
               return (
                 <li key={i}>
-                  <CMSLink {...link} />
+                  <CMSLink {...link} locale={locale} />
                 </li>
               )
             })}
@@ -35,7 +41,7 @@ export const MediumImpactHero: React.FC<Page['hero']> = ({ links, media, richTex
             />
             {media?.caption && (
               <div className="mt-3">
-                <RichText data={media.caption} enableGutter={false} />
+                <RichText data={media.caption} enableGutter={false} locale={locale} />
               </div>
             )}
           </div>

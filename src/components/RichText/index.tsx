@@ -17,47 +17,54 @@ import type {
 } from '@/payload-types'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { cn } from '@/utilities/ui'
+import { getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
 
 type NodeTypes = DefaultNodeTypes | SerializedBlockNode<CTABlockProps | MediaBlockProps>
 
-const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
-  const { value } = linkNode.fields.doc!
-  if (typeof value !== 'object') {
-    throw new Error('Expected value to be an object')
+const internalDocToHref =
+  (locale: Locale) =>
+  ({ linkNode }: { linkNode: SerializedLinkNode }) => {
+    const { value } = linkNode.fields.doc!
+    if (typeof value !== 'object') {
+      throw new Error('Expected value to be an object')
+    }
+    const slug = typeof value.slug === 'string' ? value.slug : undefined
+    return getLocalizedPath(locale, slug)
   }
-  const slug = value.slug
-  return `/${slug}`
-}
 
-const jsxConverters: JSXConvertersFunction<NodeTypes> = ({ defaultConverters }) => ({
-  ...defaultConverters,
-  ...LinkJSXConverter({ internalDocToHref }),
-  blocks: {
-    mediaBlock: ({ node }) => (
-      <MediaBlock
-        className="col-start-1 col-span-3"
-        imgClassName="m-0"
-        {...node.fields}
-        captionClassName="mx-auto max-w-[48rem]"
-        enableGutter={false}
-        disableInnerContainer={true}
-      />
-    ),
-    cta: ({ node }) => <CallToActionBlock {...node.fields} />,
-  },
-})
+const getJsxConverters =
+  (locale: Locale): JSXConvertersFunction<NodeTypes> =>
+  ({ defaultConverters }) => ({
+    ...defaultConverters,
+    ...LinkJSXConverter({ internalDocToHref: internalDocToHref(locale) }),
+    blocks: {
+      mediaBlock: ({ node }) => (
+        <MediaBlock
+          className="col-start-1 col-span-3"
+          imgClassName="m-0"
+          {...node.fields}
+          captionClassName="mx-auto max-w-[48rem]"
+          enableGutter={false}
+          disableInnerContainer={true}
+          locale={locale}
+        />
+      ),
+      cta: ({ node }) => <CallToActionBlock {...node.fields} locale={locale} />,
+    },
+  })
 
 type Props = {
   data: DefaultTypedEditorState
   enableGutter?: boolean
   enableProse?: boolean
+  locale: Locale
 } & React.HTMLAttributes<HTMLDivElement>
 
 export default function RichText(props: Props) {
-  const { className, enableProse = true, enableGutter = true, ...rest } = props
+  const { className, enableProse = true, enableGutter = true, locale, ...rest } = props
   return (
     <ConvertRichText
-      converters={jsxConverters}
+      converters={getJsxConverters(locale)}
       className={cn(
         'payload-richtext',
         {

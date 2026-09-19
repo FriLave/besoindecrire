@@ -10,6 +10,7 @@ import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
+import type { Locale } from '@/utilities/getLocalizedPath'
 
 export type FormBlockType = {
   blockName?: string
@@ -22,6 +23,7 @@ export type FormBlockType = {
 export const FormBlock: React.FC<
   {
     id?: string
+    locale: Locale
   } & FormBlockType
 > = (props) => {
   const {
@@ -29,6 +31,7 @@ export const FormBlock: React.FC<
     form: formFromProps,
     form: { id: formID, confirmationMessage, confirmationType, redirect, submitButtonLabel } = {},
     introContent,
+    locale,
   } = props
 
   const formMethods = useForm({
@@ -116,12 +119,17 @@ export const FormBlock: React.FC<
   return (
     <div className="container lg:max-w-[48rem]">
       {enableIntro && introContent && !hasSubmitted && (
-        <RichText className="mb-8 lg:mb-12" data={introContent} enableGutter={false} />
+        <RichText
+          className="mb-8 lg:mb-12"
+          data={introContent}
+          enableGutter={false}
+          locale={locale}
+        />
       )}
       <div className="p-4 lg:p-6 border border-border rounded-[0.8rem]">
         <FormProvider {...formMethods}>
           {!isLoading && hasSubmitted && confirmationType === 'message' && (
-            <RichText data={confirmationMessage} />
+            <RichText data={confirmationMessage} locale={locale} />
           )}
           {isLoading && !hasSubmitted && <p>Loading, please wait...</p>}
           {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
@@ -142,6 +150,7 @@ export const FormBlock: React.FC<
                             {...formMethods}
                             control={control}
                             errors={errors}
+                            locale={locale}
                             register={register}
                           />
                         </div>

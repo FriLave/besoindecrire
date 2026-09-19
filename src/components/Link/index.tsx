@@ -1,5 +1,6 @@
 import { Button, type ButtonProps } from '@/components/ui/button'
 import { cn } from '@/utilities/ui'
+import { getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
 import Link from 'next/link'
 import React from 'react'
 
@@ -10,6 +11,7 @@ type CMSLinkType = {
   children?: React.ReactNode
   className?: string
   label?: string | null
+  locale: Locale
   newTab?: boolean | null
   reference?: {
     relationTo: 'pages'
@@ -27,6 +29,7 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
     children,
     className,
     label,
+    locale,
     newTab,
     reference,
     size: sizeFromProps,
@@ -35,9 +38,7 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
 
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-      ? `${reference?.relationTo !== 'pages' ? `/${reference?.relationTo}` : ''}/${
-          reference.value.slug
-        }`
+      ? getLocalizedPath(locale, reference.value.slug)
       : url
 
   if (!href) return null
