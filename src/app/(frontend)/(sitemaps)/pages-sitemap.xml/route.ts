@@ -1,16 +1,28 @@
-import { getServerSideSitemap } from 'next-sitemap'
+import { getServerSideSitemap, type IAlternateRef, type ISitemapField } from 'next-sitemap'
 import { getPayload } from 'payload'
 import config from '@payload-config'
 import { unstable_cache } from 'next/cache'
 
-import { defaultLocale, getLocalizedPath } from '@/utilities/getLocalizedPath'
+import { getLocalizedPath, locales, type Locale, type LocalizedValue } from '@/utilities/getLocalizedPath'
 
-// NOTE: this sitemap only lists the default locale (`fr`) for now.
-// Emitting per-locale sitemaps (and adding the other locale's tag) is
-// explicitly out of scope for this pass - see pass 4c. The `locale` is
-// still pinned explicitly (instead of relying on Payload's implicit
-// default) and included in the cache key so this stays correct if that
-// default ever changes.
+// Without this, a plain `export async function GET()` with no dynamic API
+// calls is treated as a static route and its Response is cached at the
+// route level, independently of the `unstable_cache` below - busting the
+// `pages-sitemap` tag would then recompute the data but this route would
+// keep serving its own separately cached (stale) Response forever. Forcing
+// it dynamic makes every request re-run `GET`, which re-checks the
+// `unstable_cache` entry (still cheap: it only recomputes once the tag is
+// actually revalidated).
+export const dynamic = 'force-dynamic'
+
+/**
+ * One combined sitemap listing every published page in BOTH locales, each
+ * entry cross-referencing the other via `alternateRefs` (hreflang) - the
+ * structure Google recommends over splitting locales into separate sitemap
+ * files. Slugs are localized, so the two locales' URLs for the same
+ * document can differ entirely (e.g. `/contact` vs `/en/contact-us`);
+ * `locale: 'all'` fetches both in a single query instead of one per locale.
+ */
 const getPagesSitemap = unstable_cache(
   async () => {
     const payload = await getPayload({ config })
@@ -24,7 +36,7 @@ const getPagesSitemap = unstable_cache(
       overrideAccess: false,
       draft: false,
       depth: 0,
-      locale: defaultLocale,
+      locale: 'all',
       limit: 1000,
       pagination: false,
       where: {
@@ -40,22 +52,49 @@ const getPagesSitemap = unstable_cache(
 
     const dateFallback = new Date().toISOString()
 
-    const defaultSitemap: { loc: string; lastmod: string }[] = []
+    const sitemap: ISitemapField[] = []
 
-    const sitemap = results.docs
-      ? results.docs
-          .filter((page) => Boolean(page?.slug))
-          .map((page) => {
-            return {
-              loc: `${SITE_URL}${getLocalizedPath(defaultLocale, page?.slug)}`,
-              lastmod: page.updatedAt || dateFallback,
-            }
-          })
-      : []
+    for (const page of results.docs ?? []) {
+      const localizedSlugs = page.slug as unknown as LocalizedValue<string | null | undefined>
 
-    return [...defaultSitemap, ...sitemap]
+      // Absolute URL per locale, for the locales the page actually has a slug in.
+      const localizedUrls = locales.reduce<Partial<Record<Locale, string>>>(
+        (acc, locale) => {
+          const slug = localizedSlugs?.[locale]
+          if (slug) {
+            acc[locale] = `${SITE_URL}${getLocalizedPath(locale, slug)}`
+          }
+          return acc
+        },
+        {},
+      )
+
+      const availableLocales = locales.filter((locale) => Boolean(localizedUrls[locale]))
+
+      if (availableLocales.length === 0) {
+        continue
+      }
+
+      const alternateRefs: IAlternateRef[] = availableLocales.map((locale) => ({
+        href: localizedUrls[locale] as string,
+        hreflang: locale,
+        hrefIsAbsolute: true,
+      }))
+
+      // One <url> entry per locale the page is available in, each carrying
+      // the full set of alternates (including itself, as Google recommends).
+      for (const locale of availableLocales) {
+        sitemap.push({
+          loc: localizedUrls[locale] as string,
+          lastmod: page.updatedAt || dateFallback,
+          alternateRefs,
+        })
+      }
+    }
+
+    return sitemap
   },
-  ['pages-sitemap', defaultLocale],
+  ['pages-sitemap'],
   {
     tags: ['pages-sitemap'],
   },

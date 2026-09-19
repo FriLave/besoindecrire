@@ -10,6 +10,8 @@ import { Header } from '@/Header/Component'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
+import { getCachedSiteSettings } from '@/utilities/getGlobals'
+import { SITE_DESCRIPTION, SITE_NAME } from '@/client/site'
 import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
 
@@ -75,10 +77,19 @@ export default async function RootLayout({ children, params }: Args) {
   )
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getServerSideURL()),
-  openGraph: mergeOpenGraph(),
-  twitter: {
-    card: 'summary_large_image',
-  },
+export async function generateMetadata({ params }: Args): Promise<Metadata> {
+  const { locale: localeParam } = await params
+  const locale = (locales as string[]).includes(localeParam) ? (localeParam as Locale) : defaultLocale
+
+  const siteSettings = await getCachedSiteSettings(locale)()
+  const siteName = siteSettings?.siteName || SITE_NAME
+  const siteDescription = siteSettings?.siteDescription || SITE_DESCRIPTION
+
+  return {
+    metadataBase: new URL(getServerSideURL()),
+    openGraph: mergeOpenGraph(undefined, { locale, siteName, siteDescription }),
+    twitter: {
+      card: 'summary_large_image',
+    },
+  }
 }

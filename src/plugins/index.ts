@@ -9,15 +9,20 @@ import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/
 import { Page } from '@/payload-types'
 import { SITE_NAME } from '@/client/site'
 import { getServerSideURL } from '@/utilities/getURL'
+import { getCachedSiteSettings } from '@/utilities/getGlobals'
+import { defaultLocale, getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
 
-const generateTitle: GenerateTitle<Page> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | ${SITE_NAME}` : SITE_NAME
+const generateTitle: GenerateTitle<Page> = async ({ doc, locale }) => {
+  const siteSettings = await getCachedSiteSettings((locale as Locale) || defaultLocale)()
+  const siteName = siteSettings?.siteName || SITE_NAME
+
+  return doc?.title ? `${doc.title} | ${siteName}` : siteName
 }
 
-const generateURL: GenerateURL<Page> = ({ doc }) => {
+const generateURL: GenerateURL<Page> = ({ doc, locale }) => {
   const url = getServerSideURL()
 
-  return doc?.slug ? `${url}/${doc.slug}` : url
+  return `${url}${getLocalizedPath((locale as Locale) || defaultLocale, doc?.slug)}`
 }
 
 /**

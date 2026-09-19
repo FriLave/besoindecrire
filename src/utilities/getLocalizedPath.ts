@@ -11,6 +11,15 @@ export type Locale = Config['locale']
 export const locales: Locale[] = ['fr', 'en']
 
 /**
+ * Shape of a localized field's value when a document is queried with
+ * `locale: 'all'` - Payload returns `{ fr: T, en: T }` instead of a single
+ * locale's value, but the generated types don't model this (they always
+ * type the field for a single resolved locale). Callers doing a
+ * `locale: 'all'` query cast the field to this type.
+ */
+export type LocalizedValue<T> = Partial<Record<Locale, T>>
+
+/**
  * The default locale is served unprefixed (`/`, `/contact`). Every other
  * locale is served under its own path prefix (`/en`, `/en/contact`).
  */
