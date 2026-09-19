@@ -3,7 +3,7 @@ import React from 'react'
 
 import { Button } from '@/components/ui/button'
 import { getUI } from '@/i18n/ui'
-import { defaultLocale, getLocalizedPath, locales, type Locale } from '@/utilities/getLocalizedPath'
+import { defaultLocale, getLocalizedPath, isLocale, type Locale } from '@/utilities/getLocalizedPath'
 
 type Args = {
   params: Promise<{ locale?: string }>
@@ -29,9 +29,8 @@ type Args = {
  */
 export default async function NotFound({ params }: Args) {
   const resolved = await params
-  const locale = ((locales as string[]).includes(resolved?.locale ?? '')
-    ? resolved?.locale
-    : defaultLocale) as Locale
+  const localeParam = resolved?.locale
+  const locale: Locale = isLocale(localeParam) ? localeParam : defaultLocale
 
   const { cta, description, title } = getUI(locale).notFound
 

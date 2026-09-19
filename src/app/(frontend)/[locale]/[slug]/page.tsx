@@ -4,13 +4,14 @@ import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
 import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
 import React, { cache } from 'react'
 import { homeStatic } from '@/endpoints/seed/home-static'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
 import { generateMeta } from '@/utilities/generateMeta'
-import { locales, type Locale, type LocalizedValue } from '@/utilities/getLocalizedPath'
+import { isLocale, locales, type Locale, type LocalizedValue } from '@/utilities/getLocalizedPath'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import type { AlternateLocaleLink } from '@/providers/AlternateLocale'
@@ -51,14 +52,22 @@ export async function generateStaticParams({
 
 type Args = {
   params: Promise<{
-    locale: Locale
+    // Raw route param, always an unvalidated string at this boundary - see
+    // `isLocale` for why. Narrowed to `Locale` via the `isLocale` guard
+    // below before it's used anywhere, in particular before any Payload
+    // query.
+    locale: string
     slug?: string
   }>
 }
 
 export default async function Page({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
-  const { locale, slug = 'home' } = await paramsPromise
+  const { locale: localeParam, slug = 'home' } = await paramsPromise
+  if (!isLocale(localeParam)) {
+    notFound()
+  }
+  const locale = localeParam
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const url = '/' + decodedSlug
@@ -105,7 +114,11 @@ export default async function Page({ params: paramsPromise }: Args) {
 }
 
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
-  const { locale, slug = 'home' } = await paramsPromise
+  const { locale: localeParam, slug = 'home' } = await paramsPromise
+  if (!isLocale(localeParam)) {
+    notFound()
+  }
+  const locale = localeParam
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
   const page = await queryPageBySlug({

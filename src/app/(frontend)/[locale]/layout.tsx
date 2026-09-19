@@ -17,7 +17,7 @@ import { redirect } from 'next/navigation'
 
 import '../globals.css'
 import { getServerSideURL } from '@/utilities/getURL'
-import { defaultLocale, getLocalizedPath, locales, type Locale } from '@/utilities/getLocalizedPath'
+import { defaultLocale, getLocalizedPath, isLocale, locales } from '@/utilities/getLocalizedPath'
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }))
@@ -34,14 +34,18 @@ export default async function RootLayout({ children, params }: Args) {
 
   // The proxy only ever routes valid locales here. This guard only
   // matters for requests that somehow bypass it (e.g. a direct internal
-  // fetch); it redirects to the default locale root rather than calling
-  // `notFound()`, since this is the root layout providing `<html>`/`<body>`
-  // and there is no outer layout for a not-found boundary to render into.
-  if (!(locales as string[]).includes(localeParam)) {
+  // fetch, or a static asset path like `/favicon.ico` that the proxy's
+  // matcher deliberately excludes and that Next then falls through to this
+  // single-segment dynamic route). It redirects to the default locale root
+  // rather than calling `notFound()`, since this is the root layout
+  // providing `<html>`/`<body>` and there is no outer layout for a
+  // not-found boundary to render into - either way, no Payload query runs
+  // with an unvalidated locale value.
+  if (!isLocale(localeParam)) {
     redirect(getLocalizedPath(defaultLocale, 'home'))
   }
 
-  const locale = localeParam as Locale
+  const locale = localeParam
 
   return (
     <html
@@ -80,7 +84,7 @@ export default async function RootLayout({ children, params }: Args) {
 
 export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const { locale: localeParam } = await params
-  const locale = (locales as string[]).includes(localeParam) ? (localeParam as Locale) : defaultLocale
+  const locale = isLocale(localeParam) ? localeParam : defaultLocale
 
   const siteSettings = await getCachedSiteSettings(locale)()
   const siteName = siteSettings?.siteName || SITE_NAME

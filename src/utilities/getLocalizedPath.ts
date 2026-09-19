@@ -11,6 +11,20 @@ export type Locale = Config['locale']
 export const locales: Locale[] = ['fr', 'en']
 
 /**
+ * Type guard for the raw `locale` route param (always an unvalidated
+ * `string` at the Next.js routing boundary, no matter what the generated
+ * route type claims). Anything that isn't one of `locales` - e.g. a
+ * browser's default `/favicon.ico` request falling through to the
+ * `[locale]` segment, or any other unexpected path segment - must be
+ * rejected via this guard before it reaches a Payload query, since an
+ * unrecognized value passed as `locale` produces a Postgres enum error
+ * rather than an empty result.
+ */
+export function isLocale(value: string | null | undefined): value is Locale {
+  return (locales as string[]).includes(value ?? '')
+}
+
+/**
  * Shape of a localized field's value when a document is queried with
  * `locale: 'all'` - Payload returns `{ fr: T, en: T }` instead of a single
  * locale's value, but the generated types don't model this (they always
