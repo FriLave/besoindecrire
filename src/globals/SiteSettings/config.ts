@@ -1,11 +1,13 @@
 import type { GlobalConfig } from 'payload'
 
+import { adminOrAbove } from '@/access/roles'
 import { revalidateSiteSettings } from './hooks/revalidateSiteSettings'
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   access: {
     read: () => true,
+    update: adminOrAbove,
   },
   admin: {
     description:

@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../../access/authenticated'
+import { editorOrAbove } from '../../access/roles'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
@@ -24,10 +24,10 @@ import {
 export const Pages: CollectionConfig<'pages'> = {
   slug: 'pages',
   access: {
-    create: authenticated,
-    delete: authenticated,
+    create: editorOrAbove,
+    delete: editorOrAbove,
     read: authenticatedOrPublished,
-    update: authenticated,
+    update: editorOrAbove,
   },
   // This config controls what's populated by default when a page is referenced
   // (see Payload's `defaultPopulate` collection config docs)

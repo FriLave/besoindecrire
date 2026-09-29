@@ -2,6 +2,7 @@ import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { Block, Field, Plugin } from 'payload'
+import { editorOrAbove } from '@/access/roles'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -60,6 +61,7 @@ export const plugins: Plugin[] = [
   redirectsPlugin({
     collections: ['pages'],
     overrides: {
+      access: { create: editorOrAbove, delete: editorOrAbove, update: editorOrAbove },
       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
@@ -101,7 +103,12 @@ export const plugins: Plugin[] = [
     fields: {
       payment: false,
     },
+    formSubmissionOverrides: {
+      // create stays public (anonymous submissions); update stays false
+      access: { delete: editorOrAbove },
+    },
     formOverrides: {
+      access: { create: editorOrAbove, delete: editorOrAbove, update: editorOrAbove },
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
           if ('name' in field && field.name === 'title') {

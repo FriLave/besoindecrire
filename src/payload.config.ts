@@ -11,6 +11,7 @@ import { Pages } from './collections/Pages'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
+import { FeatureFlags } from './globals/FeatureFlags/config'
 import { SiteSettings } from './globals/SiteSettings/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
@@ -57,7 +58,7 @@ export default buildConfig({
   }),
   collections: [Pages, Media, Users],
   cors: [getServerSideURL()].filter(Boolean),
-  globals: [Header, Footer, SiteSettings],
+  globals: [Header, Footer, SiteSettings, FeatureFlags],
   // Allows each admin user to pick their own interface language from their
   // account page. English stays the admin default (see `localization` below,
   // which is unrelated to this) — do not set `fallbackLanguage: 'fr'` here.
