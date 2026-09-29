@@ -1,29 +1,36 @@
 import { formBuilderPlugin } from '@payloadcms/plugin-form-builder'
+import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
+import { searchPlugin } from '@payloadcms/plugin-search'
 import { Block, Field, Plugin } from 'payload'
 import { editorOrAbove } from '@/access/roles'
+import { whenBlog } from '@/access/blogEnabled'
+import { modules } from '@/client/modules'
+import { searchFields } from '@/search/fieldOverrides'
+import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
-import { Page } from '@/payload-types'
+import { Page, Post } from '@/payload-types'
 import { SITE_NAME } from '@/client/site'
 import { getServerSideURL } from '@/utilities/getURL'
 import { getCachedSiteSettings } from '@/utilities/getGlobals'
 import { defaultLocale, getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
 
-const generateTitle: GenerateTitle<Page> = async ({ doc, locale }) => {
+const generateTitle: GenerateTitle<Page | Post> = async ({ doc, locale }) => {
   const siteSettings = await getCachedSiteSettings((locale as Locale) || defaultLocale)()
   const siteName = siteSettings?.siteName || SITE_NAME
 
   return doc?.title ? `${doc.title} | ${siteName}` : siteName
 }
 
-const generateURL: GenerateURL<Page> = ({ doc, locale }) => {
+const generateURL: GenerateURL<Page | Post> = ({ collectionConfig, doc, locale }) => {
   const url = getServerSideURL()
+  const collection = collectionConfig?.slug === 'posts' ? 'posts' : 'pages'
 
-  return `${url}${getLocalizedPath((locale as Locale) || defaultLocale, doc?.slug)}`
+  return `${url}${getLocalizedPath((locale as Locale) || defaultLocale, doc?.slug, collection)}`
 }
 
 /**
@@ -59,7 +66,7 @@ const localizeFormFieldLabels = (fields: Field[]): Field[] =>
 
 export const plugins: Plugin[] = [
   redirectsPlugin({
-    collections: ['pages'],
+    collections: modules.blog ? ['pages', 'posts'] : ['pages'],
     overrides: {
       access: { create: editorOrAbove, delete: editorOrAbove, update: editorOrAbove },
       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
@@ -95,6 +102,14 @@ export const plugins: Plugin[] = [
       },
     },
   }),
+  ...(modules.blog
+    ? [
+        nestedDocsPlugin({
+          collections: ['categories'],
+          generateURL: (docs) => docs.reduce((url, doc) => `${url}/${doc.slug}`, ''),
+        }),
+      ]
+    : []),
   seoPlugin({
     generateTitle,
     generateURL,
@@ -146,4 +161,16 @@ export const plugins: Plugin[] = [
       },
     },
   }),
+  ...(modules.blog
+    ? [
+        searchPlugin({
+          collections: ['posts'],
+          beforeSync: beforeSyncWithSearch,
+          searchOverrides: {
+            access: { read: whenBlog(() => true) },
+            fields: ({ defaultFields }) => [...defaultFields, ...searchFields],
+          },
+        }),
+      ]
+    : []),
 ]

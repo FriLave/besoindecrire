@@ -4,6 +4,7 @@ import { defaultLocale, getLocalizedPath, type Locale } from './getLocalizedPath
 
 const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
   pages: '',
+  posts: '/blog', // path segment lives in getLocalizedPath; this map only types the accepted collections
 }
 
 type Props = {
@@ -24,8 +25,9 @@ export const generatePreviewPath = ({ collection, slug, req }: Props) => {
   // it, previewing an English draft rendered the (unprefixed) French page.
   const locale = (req.locale as Locale | undefined) || defaultLocale
 
-  // `getLocalizedPath` already handles `home` -> `/` or `/en`.
-  const localizedPath = `${collectionPrefixMap[collection]}${getLocalizedPath(locale, encodedSlug)}`
+  // `getLocalizedPath` handles the locale prefix, `home` -> `/` or `/en`, and
+  // the `/blog` segment for posts (locale prefix goes BEFORE `/blog`).
+  const localizedPath = getLocalizedPath(locale, encodedSlug, collection === 'posts' ? 'posts' : 'pages')
 
   const encodedParams = new URLSearchParams({
     path: localizedPath,

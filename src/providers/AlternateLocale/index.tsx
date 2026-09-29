@@ -5,6 +5,7 @@ import type { Locale } from '@/utilities/getLocalizedPath'
 import React, { createContext, useCallback, use, useState } from 'react'
 
 export interface AlternateLocaleLink {
+  collection?: 'pages' | 'posts'
   locale: Locale
   slug: string
 }

@@ -23,7 +23,11 @@ export const LocaleSwitcher: React.FC<{ locale: Locale }> = ({ locale }) => {
   const otherLocale = locales.find((candidate) => candidate !== locale) ?? locale
 
   const targetSlug = alternateLink?.locale === otherLocale ? alternateLink.slug : 'home'
-  const href = getLocalizedPath(otherLocale, targetSlug)
+  const href = getLocalizedPath(
+    otherLocale,
+    targetSlug,
+    alternateLink?.locale === otherLocale ? alternateLink.collection : 'pages',
+  )
 
   return (
     <Link

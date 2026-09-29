@@ -2,24 +2,29 @@ import React, { Fragment } from 'react'
 
 import type { Page } from '@/payload-types'
 import type { Locale } from '@/utilities/getLocalizedPath'
+import { stripDisabledPostLinks } from '@/utilities/stripDisabledPostLinks'
 
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 
+import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
+
 const blockComponents = {
+  archive: ArchiveBlock,
   content: ContentBlock,
   cta: CallToActionBlock,
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
 }
 
-export const RenderBlocks: React.FC<{
+export const RenderBlocks = async (props: {
   blocks: Page['layout'][0][]
   locale: Locale
-}> = (props) => {
-  const { blocks, locale } = props
+}) => {
+  const { locale } = props
+  const blocks = await stripDisabledPostLinks(props.blocks)
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 

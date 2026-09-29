@@ -5,17 +5,8 @@ import { cn } from '@/utilities/ui'
 import { getUI } from '@/i18n/ui'
 import { defaultLocale, type Locale } from '@/utilities/getLocalizedPath'
 import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react'
+import Link from 'next/link'
 import * as React from 'react'
-
-/**
- * This primitive currently has no call site in the app (the blog/archive
- * feature it was scaffolded for is disabled by default - see CLAUDE.md
- * section 3). With nothing rendering it, there is no server component in
- * scope to thread a real `locale` down from, so it takes an optional
- * `locale` prop defaulting to `defaultLocale`: the smallest fix that keeps
- * it correct today and trivially wired up by whoever gives it a real call
- * site later.
- */
 
 const Pagination = ({ className, ...props }: React.ComponentProps<'nav'>) => (
   <nav
@@ -39,10 +30,11 @@ const PaginationItem: React.FC<
 type PaginationLinkProps = {
   isActive?: boolean
 } & Pick<ButtonProps, 'size'> &
-  React.ComponentProps<'button'>
+  React.ComponentProps<typeof Link>
 
+// Renders a real anchor so every page is crawlable.
 const PaginationLink = ({ className, isActive, size = 'icon', ...props }: PaginationLinkProps) => (
-  <button
+  <Link
     aria-current={isActive ? 'page' : undefined}
     className={cn(
       buttonVariants({

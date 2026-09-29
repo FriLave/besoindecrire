@@ -48,13 +48,20 @@ export const defaultLocale: Locale = 'fr'
  * The `home` slug (and an empty/missing slug) always resolves to the
  * locale's root - never to `/home` or `/en/home`.
  */
-export function getLocalizedPath(locale: Locale, slug?: string | null): string {
-  const isHome = !slug || slug === 'home'
-  const prefix = locale === defaultLocale ? '' : `/${locale}`
+export function getLocalizedPath(
+  locale: Locale,
+  slug?: string | null,
+  collection: 'pages' | 'posts' = 'pages',
+): string {
+  const localePrefix = locale === defaultLocale ? '' : `/${locale}`
 
-  if (isHome) {
-    return prefix || '/'
+  if (collection === 'posts') {
+    return slug ? `${localePrefix}/blog/${slug}` : `${localePrefix}/blog`
   }
 
-  return `${prefix}/${slug}`
+  if (!slug || slug === 'home') {
+    return localePrefix || '/'
+  }
+
+  return `${localePrefix}/${slug}`
 }

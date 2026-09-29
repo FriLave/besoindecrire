@@ -11,7 +11,11 @@ import {
   RichText as ConvertRichText,
 } from '@payloadcms/richtext-lexical/react'
 
+import { CodeBlock, CodeBlockProps } from '@/blocks/Code/Component'
+import { BannerBlock } from '@/blocks/Banner/Component'
+
 import type {
+  BannerBlock as BannerBlockProps,
   CallToActionBlock as CTABlockProps,
   MediaBlock as MediaBlockProps,
 } from '@/payload-types'
@@ -19,17 +23,19 @@ import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { cn } from '@/utilities/ui'
 import { getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
 
-type NodeTypes = DefaultNodeTypes | SerializedBlockNode<CTABlockProps | MediaBlockProps>
+type NodeTypes =
+  | DefaultNodeTypes
+  | SerializedBlockNode<CTABlockProps | MediaBlockProps | BannerBlockProps | CodeBlockProps>
 
 const internalDocToHref =
   (locale: Locale) =>
   ({ linkNode }: { linkNode: SerializedLinkNode }) => {
-    const { value } = linkNode.fields.doc!
+    const { value, relationTo } = linkNode.fields.doc!
     if (typeof value !== 'object') {
       throw new Error('Expected value to be an object')
     }
     const slug = typeof value.slug === 'string' ? value.slug : undefined
-    return getLocalizedPath(locale, slug)
+    return getLocalizedPath(locale, slug, relationTo === 'posts' ? 'posts' : 'pages')
   }
 
 const getJsxConverters =
@@ -38,6 +44,8 @@ const getJsxConverters =
     ...defaultConverters,
     ...LinkJSXConverter({ internalDocToHref: internalDocToHref(locale) }),
     blocks: {
+      banner: ({ node }) => <BannerBlock className="col-start-2 mb-4" {...node.fields} locale={locale} />,
+      code: ({ node }) => <CodeBlock className="col-start-2" {...node.fields} />,
       mediaBlock: ({ node }) => (
         <MediaBlock
           className="col-start-1 col-span-3"

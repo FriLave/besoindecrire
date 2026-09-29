@@ -7,7 +7,10 @@ import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Media } from './collections/Media'
+import { modules } from './client/modules'
 import { Pages } from './collections/Pages'
+import { Posts } from './collections/Posts'
+import { Categories } from './collections/Categories'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
@@ -56,7 +59,7 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
-  collections: [Pages, Media, Users],
+  collections: [Pages, Media, Users, ...(modules.blog ? [Posts, Categories] : [])],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, SiteSettings, FeatureFlags],
   // Allows each admin user to pick their own interface language from their

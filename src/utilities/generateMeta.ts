@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import type { Media, Page, Config } from '../payload-types'
+import type { Media, Page, Post, Config } from '../payload-types'
 
 import { SITE_DESCRIPTION, SITE_NAME } from '@/client/site'
 import { mergeOpenGraph } from './mergeOpenGraph'
@@ -20,7 +20,9 @@ const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
 }
 
 export const generateMeta = async (args: {
-  doc: Partial<Page> | null
+  doc: Partial<Page> | Partial<Post> | null
+  /** Which collection the doc belongs to; drives the URL prefix (`/blog` for posts). */
+  collection?: 'pages' | 'posts'
   /** Current locale, used to build the canonical URL and `og:locale`. */
   locale: Locale
   /**
@@ -36,7 +38,7 @@ export const generateMeta = async (args: {
    */
   localizedSlugs?: LocalizedValue<string | null | undefined>
 }): Promise<Metadata> => {
-  const { doc, locale, slug, localizedSlugs } = args
+  const { doc, locale, slug, localizedSlugs, collection = 'pages' } = args
 
   const serverUrl = getServerSideURL()
   const ogImage = getImageURL(doc?.meta?.image)
@@ -49,14 +51,14 @@ export const generateMeta = async (args: {
 
   const slugFor = (targetLocale: Locale) => localizedSlugs?.[targetLocale] ?? slug
 
-  const canonicalUrl = `${serverUrl}${getLocalizedPath(locale, slugFor(locale))}`
+  const canonicalUrl = `${serverUrl}${getLocalizedPath(locale, slugFor(locale), collection)}`
 
   const languages: Record<string, string> = {}
   for (const targetLocale of locales) {
-    languages[targetLocale] = `${serverUrl}${getLocalizedPath(targetLocale, slugFor(targetLocale))}`
+    languages[targetLocale] = `${serverUrl}${getLocalizedPath(targetLocale, slugFor(targetLocale), collection)}`
   }
   // x-default always points at the default-locale (fr) URL.
-  languages['x-default'] = `${serverUrl}${getLocalizedPath(defaultLocale, slugFor(defaultLocale))}`
+  languages['x-default'] = `${serverUrl}${getLocalizedPath(defaultLocale, slugFor(defaultLocale), collection)}`
 
   return {
     description: doc?.meta?.description,

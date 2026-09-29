@@ -4,19 +4,17 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect, useState } from 'react'
 
-import type { Header } from '@/payload-types'
 import type { Locale } from '@/utilities/getLocalizedPath'
 
 import { getLocalizedPath } from '@/utilities/getLocalizedPath'
 import { Logo } from '@/components/Logo/Logo'
-import { HeaderNav } from './Nav'
 
 interface HeaderClientProps {
-  data: Header
+  children: React.ReactNode
   locale: Locale
 }
 
-export const HeaderClient: React.FC<HeaderClientProps> = ({ data, locale }) => {
+export const HeaderClient: React.FC<HeaderClientProps> = ({ children, locale }) => {
   /* Storing the value in a useState to avoid hydration errors */
   const [theme, setTheme] = useState<string | null>(null)
   const { headerTheme, setHeaderTheme } = useHeaderTheme()
@@ -38,7 +36,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, locale }) => {
         <Link href={getLocalizedPath(locale, 'home')}>
           <Logo loading="eager" priority="high" />
         </Link>
-        <HeaderNav data={data} locale={locale} />
+        {children}
       </div>
     </header>
   )

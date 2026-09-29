@@ -4,7 +4,7 @@ import { getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
 import Link from 'next/link'
 import React from 'react'
 
-import type { Page } from '@/payload-types'
+import type { Page, Post } from '@/payload-types'
 
 type CMSLinkType = {
   appearance?: 'inline' | ButtonProps['variant']
@@ -14,8 +14,8 @@ type CMSLinkType = {
   locale: Locale
   newTab?: boolean | null
   reference?: {
-    relationTo: 'pages'
-    value: Page | string | number
+    relationTo: 'pages' | 'posts'
+    value: Page | Post | string | number
   } | null
   size?: ButtonProps['size'] | null
   type?: 'custom' | 'reference' | null
@@ -38,10 +38,19 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
 
   const href =
     type === 'reference' && typeof reference?.value === 'object' && reference.value.slug
-      ? getLocalizedPath(locale, reference.value.slug)
+      ? getLocalizedPath(locale, reference.value.slug, reference.relationTo)
       : url
 
-  if (!href) return null
+  // A link with no destination (e.g. a post link neutralised by
+  // `stripDisabledPostLinks` while the blog is off) degrades to plain text.
+  if (!href) {
+    return type === 'custom' && (label || children) ? (
+      <span className={cn(className)}>
+        {label && label}
+        {children && children}
+      </span>
+    ) : null
+  }
 
   const size = appearance === 'link' ? 'clear' : sizeFromProps
   const newTabProps = newTab ? { rel: 'noopener noreferrer', target: '_blank' } : {}

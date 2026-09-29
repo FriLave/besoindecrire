@@ -20,6 +20,22 @@ export type UIDictionary = {
     dashboard: string
     pagesPlural: string
     pagesSingular: string
+    postsPlural: string
+    postsSingular: string
+    categoriesPlural: string
+    categoriesSingular: string
+  }
+  blog: {
+    author: string
+    /** Range label, e.g. "Showing 1 - 12 of 30 posts". */
+    range: (start: number, end: number, total: number) => string
+    noImage: string
+    noResults: string
+    pageNumber: (page: number) => string
+    published: string
+    relatedPosts: string
+    title: string
+    untitledCategory: string
   }
   form: {
     fieldRequired: string
@@ -41,6 +57,12 @@ export type UIDictionary = {
     next: string
     previous: string
   }
+  search: {
+    noResults: string
+    placeholder: string
+    submit: string
+    title: string
+  }
   theme: {
     auto: string
     dark: string
@@ -55,6 +77,28 @@ const dictionaries: Record<Locale, UIDictionary> = {
       dashboard: 'Tableau de bord',
       pagesPlural: 'Pages',
       pagesSingular: 'Page',
+      postsPlural: 'Articles',
+      postsSingular: 'Article',
+      categoriesPlural: 'Catégories',
+      categoriesSingular: 'Catégorie',
+    },
+    blog: {
+      author: 'Auteur',
+      range: (start, end, total) =>
+        `Affichage de ${start}${start !== end ? ` - ${end}` : ''} sur ${total} article${total > 1 ? 's' : ''}`,
+      noImage: 'Pas d’image',
+      noResults: 'Aucun article.',
+      pageNumber: (page) => `Page ${page}`,
+      published: 'Publié le',
+      relatedPosts: 'Articles similaires',
+      title: 'Blog',
+      untitledCategory: 'Catégorie sans titre',
+    },
+    search: {
+      noResults: 'Aucun résultat.',
+      placeholder: 'Rechercher',
+      submit: 'Rechercher',
+      title: 'Recherche',
     },
     form: {
       fieldRequired: 'Ce champ est requis',
@@ -87,6 +131,28 @@ const dictionaries: Record<Locale, UIDictionary> = {
       dashboard: 'Dashboard',
       pagesPlural: 'Pages',
       pagesSingular: 'Page',
+      postsPlural: 'Posts',
+      postsSingular: 'Post',
+      categoriesPlural: 'Categories',
+      categoriesSingular: 'Category',
+    },
+    blog: {
+      author: 'Author',
+      range: (start, end, total) =>
+        `Showing ${start}${start !== end ? ` - ${end}` : ''} of ${total} post${total > 1 ? 's' : ''}`,
+      noImage: 'No image',
+      noResults: 'No posts.',
+      pageNumber: (page) => `Page ${page}`,
+      published: 'Published on',
+      relatedPosts: 'Related posts',
+      title: 'Blog',
+      untitledCategory: 'Untitled category',
+    },
+    search: {
+      noResults: 'No results found.',
+      placeholder: 'Search',
+      submit: 'Search',
+      title: 'Search',
     },
     form: {
       fieldRequired: 'This field is required',

@@ -27,12 +27,22 @@ export const AdminBar: React.FC<{
       plural: ui.adminBar.pagesPlural,
       singular: ui.adminBar.pagesSingular,
     },
+    posts: {
+      plural: ui.adminBar.postsPlural,
+      singular: ui.adminBar.postsSingular,
+    },
+    categories: {
+      plural: ui.adminBar.categoriesPlural,
+      singular: ui.adminBar.categoriesSingular,
+    },
   }
   const Title: React.FC = () => <span>{ui.adminBar.dashboard}</span>
   const segments = useSelectedLayoutSegments()
   const [show, setShow] = useState(false)
+  // The public URL segment for posts is `/blog`, not the collection slug.
+  const segment = segments?.[1] === 'blog' ? 'posts' : segments?.[1]
   const collection = (
-    collectionLabels[segments?.[1] as keyof typeof collectionLabels] ? segments[1] : 'pages'
+    collectionLabels[segment as keyof typeof collectionLabels] ? segment : 'pages'
   ) as keyof typeof collectionLabels
   const router = useRouter()
 

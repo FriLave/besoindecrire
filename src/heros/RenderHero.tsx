@@ -2,6 +2,7 @@ import React from 'react'
 
 import type { Page } from '@/payload-types'
 import type { Locale } from '@/utilities/getLocalizedPath'
+import { stripDisabledPostLinks } from '@/utilities/stripDisabledPostLinks'
 
 import { HighImpactHero } from '@/heros/HighImpact'
 import { LowImpactHero } from '@/heros/LowImpact'
@@ -13,7 +14,8 @@ const heroes = {
   mediumImpact: MediumImpactHero,
 }
 
-export const RenderHero: React.FC<Page['hero'] & { locale: Locale }> = (props) => {
+export const RenderHero = async (rawProps: Page['hero'] & { locale: Locale }) => {
+  const props = await stripDisabledPostLinks(rawProps)
   const { type } = props || {}
 
   if (!type || type === 'none') return null

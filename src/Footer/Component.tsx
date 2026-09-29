@@ -1,3 +1,4 @@
+import { stripDisabledPostLinks } from '@/utilities/stripDisabledPostLinks'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import { getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
 import Link from 'next/link'
@@ -9,7 +10,7 @@ import { Logo } from '@/components/Logo/Logo'
 import { LocaleSwitcher } from '@/components/LocaleSwitcher'
 
 export async function Footer({ locale }: { locale: Locale }) {
-  const footerData = await getCachedGlobal('footer', locale, 1)()
+  const footerData = await stripDisabledPostLinks(await getCachedGlobal('footer', locale, 1)())
 
   const navItems = footerData?.navItems || []
 
