@@ -6,13 +6,25 @@ import { fileURLToPath } from 'url'
 import { contactForm as contactFormData, contactFormTranslation } from './contact-form'
 import { contact as contactPageData } from './contact-page'
 import { home } from './home'
+import { image1 } from './image-1'
 import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
+import { post1 } from './post-1'
+import { post2 } from './post-2'
+import { post3 } from './post-3'
 import { preserveIds } from './preserve-ids'
 import { siteSettingsCopy } from './site-settings'
 import { locales, type Locale } from '@/utilities/getLocalizedPath'
 
-const collections: CollectionSlug[] = ['media', 'pages', 'forms', 'form-submissions']
+const collections: CollectionSlug[] = [
+  'media',
+  'pages',
+  'forms',
+  'form-submissions',
+  'posts',
+  'categories',
+  'search',
+]
 
 // Kept as a literal tuple (not `GlobalSlug[]`) so `global` narrows to exactly
 // 'header' | 'footer' below — both reset with the same `{ navItems: [] }`
@@ -116,18 +128,49 @@ export const seed = async ({
       .map((collection) => payload.db.deleteVersions({ collection, req, where: {} })),
   )
 
+  payload.logger.info(`— Seeding demo author...`)
+
+  // Idempotent re-seed. Editor only: the real superadmin is the first registered user.
+  await payload.delete({
+    collection: 'users',
+    depth: 0,
+    where: { email: { equals: 'demo-author@example.com' } },
+  })
+
+  const demoAuthor = await payload.create({
+    collection: 'users',
+    data: {
+      name: 'Demo Author',
+      email: 'demo-author@example.com',
+      password: 'password',
+      role: 'editor',
+    },
+  })
+
   payload.logger.info(`— Seeding media (${locales[0]})...`)
 
-  const [image2Buffer, hero1Buffer] = await Promise.all([
+  const [image1Buffer, image2Buffer, image3Buffer, hero1Buffer] = await Promise.all([
+    readLocalFile('image-post1.webp'),
     readLocalFile('image-post2.webp'),
+    readLocalFile('image-post3.webp'),
     readLocalFile('image-hero1.webp'),
   ])
 
-  const [image2Doc, imageHomeDoc] = await Promise.all([
+  const [image1Doc, image2Doc, image3Doc, imageHomeDoc] = await Promise.all([
+    payload.create({
+      collection: 'media',
+      data: image1(locales[0]),
+      file: image1Buffer,
+    }),
     payload.create({
       collection: 'media',
       data: image2(locales[0]),
       file: image2Buffer,
+    }),
+    payload.create({
+      collection: 'media',
+      data: image2(locales[0]),
+      file: image3Buffer,
     }),
     payload.create({
       collection: 'media',
@@ -136,12 +179,108 @@ export const seed = async ({
     }),
   ])
 
+  payload.logger.info(`— Seeding categories (${locales[0]})...`)
+
+  const categoryNames = [
+    { fr: 'Technologie', en: 'Technology' },
+    { fr: 'Innovation', en: 'Innovation' },
+    { fr: 'Finance', en: 'Finance' },
+  ]
+
+  const categories = await Promise.all(
+    categoryNames.map((cat) =>
+      payload.create({
+        collection: 'categories',
+        depth: 0,
+        data: {
+          title: cat[locales[0] as Locale],
+          slug: cat[locales[0] as Locale].toLowerCase().replace(/\s+/g, '-'),
+        },
+      }),
+    ),
+  )
+
   payload.logger.info(`— Seeding contact form (${locales[0]})...`)
 
   const contactForm = await payload.create({
     collection: 'forms',
     depth: 0,
     data: contactFormData(locales[0]),
+  })
+
+  payload.logger.info(`— Seeding posts (${locales[0]})...`)
+
+  // Create posts in order so they have predictable createdAt
+  const post1Doc = await payload.create({
+    collection: 'posts',
+    depth: 0,
+    context: {
+      disableRevalidate: true,
+    },
+    data: post1({
+      heroImage: image1Doc,
+      blockImage: image2Doc,
+      author: demoAuthor,
+      locale: locales[0],
+    }),
+  })
+
+  const post2Doc = await payload.create({
+    collection: 'posts',
+    depth: 0,
+    context: {
+      disableRevalidate: true,
+    },
+    data: post2({
+      heroImage: image2Doc,
+      blockImage: image3Doc,
+      author: demoAuthor,
+      locale: locales[0],
+    }),
+  })
+
+  const post3Doc = await payload.create({
+    collection: 'posts',
+    depth: 0,
+    context: {
+      disableRevalidate: true,
+    },
+    data: post3({
+      heroImage: image3Doc,
+      blockImage: image1Doc,
+      author: demoAuthor,
+      locale: locales[0],
+    }),
+  })
+
+  // Update posts with related posts
+  // Sequential: parallel updates deadlock, the posts reference each other.
+  await payload.update({
+    id: post1Doc.id,
+    collection: 'posts',
+    context: { disableRevalidate: true },
+    data: {
+      relatedPosts: [post2Doc.id, post3Doc.id],
+      categories: [categories[0].id, categories[1].id],
+    },
+  })
+  await payload.update({
+    id: post2Doc.id,
+    collection: 'posts',
+    context: { disableRevalidate: true },
+    data: {
+      relatedPosts: [post1Doc.id, post3Doc.id],
+      categories: [categories[1].id, categories[2].id],
+    },
+  })
+  await payload.update({
+    id: post3Doc.id,
+    collection: 'posts',
+    context: { disableRevalidate: true },
+    data: {
+      relatedPosts: [post1Doc.id, post2Doc.id],
+      categories: [categories[2].id],
+    },
   })
 
   payload.logger.info(`— Seeding pages (${locales[0]})...`)
@@ -186,7 +325,19 @@ export const seed = async ({
     await Promise.all([
       payload.update({
         collection: 'media',
+        id: image1Doc.id,
+        locale,
+        data: image1(locale),
+      }),
+      payload.update({
+        collection: 'media',
         id: image2Doc.id,
+        locale,
+        data: image2(locale),
+      }),
+      payload.update({
+        collection: 'media',
+        id: image3Doc.id,
         locale,
         data: image2(locale),
       }),
@@ -197,6 +348,71 @@ export const seed = async ({
         data: imageHero1(locale),
       }),
     ])
+
+    payload.logger.info(`— Translating categories into ${locale}...`)
+
+    await Promise.all(
+      categories.map((cat, idx) =>
+        payload.update({
+          collection: 'categories',
+          id: cat.id,
+          locale,
+          data: {
+            title: categoryNames[idx][locale],
+            slug: categoryNames[idx][locale].toLowerCase().replace(/\s+/g, '-'),
+          },
+        }),
+      ),
+    )
+
+    payload.logger.info(`— Translating posts into ${locale}...`)
+
+    // Sequential: parallel updates deadlock, the posts reference each other.
+    await payload.update({
+      collection: 'posts',
+      context: { disableRevalidate: true },
+      id: post1Doc.id,
+      locale,
+      data: preserveIds(
+        post1Doc,
+        post1({
+          heroImage: image1Doc,
+          blockImage: image2Doc,
+          author: demoAuthor,
+          locale,
+        }),
+      ),
+    })
+    await payload.update({
+      collection: 'posts',
+      context: { disableRevalidate: true },
+      id: post2Doc.id,
+      locale,
+      data: preserveIds(
+        post2Doc,
+        post2({
+          heroImage: image2Doc,
+          blockImage: image3Doc,
+          author: demoAuthor,
+          locale,
+        }),
+      ),
+    })
+    await payload.update({
+      collection: 'posts',
+      context: { disableRevalidate: true },
+      id: post3Doc.id,
+      locale,
+      data: preserveIds(
+        post3Doc,
+        post3({
+          heroImage: image3Doc,
+          blockImage: image1Doc,
+          author: demoAuthor,
+          locale,
+        }),
+      ),
+    })
 
     payload.logger.info(`— Translating contact form into ${locale}...`)
 
@@ -258,6 +474,18 @@ export const seed = async ({
       }),
     ])
   }
+
+  payload.logger.info(`— Enabling blog feature flag...`)
+
+  await payload.updateGlobal({
+    slug: 'feature-flags',
+    data: {
+      blog: true,
+    },
+    context: {
+      disableRevalidate: true,
+    },
+  })
 
   payload.logger.info('Seeded database successfully!')
 }

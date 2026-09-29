@@ -8,6 +8,7 @@ import { contactSlugs } from './contact-page'
 import { heading, link, paragraph, richText, text } from './lexical-helpers'
 
 type HomeCopy = {
+  archiveIntro: string
   cta: {
     heading: string
     linkLabel: string
@@ -38,6 +39,7 @@ type HomeCopy = {
 
 const copy: Record<Locale, HomeCopy> = {
   fr: {
+    archiveIntro: 'Découvrez nos derniers articles',
     cta: {
       heading: "Envie d'en savoir plus ?",
       linkLabel: 'Contactez-nous',
@@ -81,6 +83,7 @@ const copy: Record<Locale, HomeCopy> = {
     },
   },
   en: {
+    archiveIntro: 'Discover our latest posts',
     cta: {
       heading: 'Want to know more?',
       linkLabel: 'Contact us',
@@ -226,6 +229,16 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
         richText: richText([
           heading('h3', c.cta.heading),
           paragraph([text(c.cta.para1), link(c.cta.linkLabel, contactHref), text(c.cta.para2)]),
+        ]),
+      },
+      {
+        blockName: 'Latest Posts',
+        blockType: 'archive',
+        populateBy: 'collection',
+        relationTo: 'posts',
+        limit: 3,
+        introContent: richText([
+          heading('h2', c.archiveIntro),
         ]),
       },
     ],

@@ -5,7 +5,6 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 let payload: Payload
 let originalBlog: boolean
 const suffix = Date.now()
-const ids: (number | string)[] = []
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const users: Record<'superadmin' | 'admin', any> = {} as any
 
@@ -23,14 +22,14 @@ describe('roles + blog flag access', () => {
         collection: 'users',
         data: { email: `${role}-${suffix}@access.test`, password: 'test', role },
       })
-      ids.push(u.id)
       users[role] = u
     }
   })
 
   afterAll(async () => {
     await setBlog(originalBlog)
-    for (const id of ids) await payload.delete({ collection: 'users', id, overrideAccess: true })
+    // Also catches users created inside tests (x2/x3), not only the beforeAll ones.
+    await payload.delete({ collection: 'users', where: { email: { contains: '@access.test' } } })
   })
 
   it('blog off: posts denied for anonymous and superadmin', async () => {
@@ -85,7 +84,6 @@ describe('roles + blog flag access', () => {
       overrideAccess: false,
       user: users.superadmin,
     })
-    ids.push(ok.id)
     expect(ok.role).toBe('superadmin')
   })
 
@@ -94,7 +92,6 @@ describe('roles + blog flag access', () => {
       collection: 'users',
       data: { email: `x3-${suffix}@access.test`, password: 'test', role: 'editor' },
     })
-    ids.push(target.id)
     await expect(
       payload.update({
         collection: 'users',
