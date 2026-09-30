@@ -25,6 +25,7 @@ import { SiteSettings } from './globals/SiteSettings/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { healthEndpoint } from './endpoints/health'
 import { purgeFormSubmissions } from './jobs/purgeFormSubmissions'
 
 const filename = fileURLToPath(import.meta.url)
@@ -73,7 +74,7 @@ export default buildConfig({
     ...(modules.blog ? [Posts, Categories] : []),
     ...(modules.payments ? [PrivateFiles, PaidDownloads, Purchases] : []),
   ],
-  endpoints: modules.payments ? paymentsEndpoints : [],
+  endpoints: [healthEndpoint, ...(modules.payments ? paymentsEndpoints : [])],
   // No SMTP_HOST: Payload falls back to logging emails to the console (dev).
   ...(process.env.SMTP_HOST
     ? {
@@ -115,11 +116,17 @@ export default buildConfig({
   jobs: {
     access: {
       run: ({ req }: { req: PayloadRequest }): boolean => {
-        // Logged-in users only; purge runs on Payload's built-in cron (autoRun).
-        return Boolean(req.user)
+        // Logged-in users; on Vercel also the Vercel Cron call (it sends `Authorization: Bearer $CRON_SECRET`).
+        if (req.user) return true
+        const secret = process.env.CRON_SECRET
+        return Boolean(
+          process.env.VERCEL && secret && req.headers.get('authorization') === `Bearer ${secret}`,
+        )
       },
     },
-    // Needs a long-running Node process. Same queue as the task schedule: autoRun enqueues due schedules, then runs them.
+    // Serverless (Vercel) has no long-lived process: vercel.json cron calls /api/payload-jobs/run instead.
+    shouldAutoRun: () => !process.env.VERCEL,
+    // Needs a long-running Node process (Docker). Same queue as the task schedule: autoRun enqueues due schedules, then runs them.
     autoRun: [{ cron: '*/15 * * * *', queue: 'maintenance', limit: 10 }],
     tasks: [purgeFormSubmissions],
   },

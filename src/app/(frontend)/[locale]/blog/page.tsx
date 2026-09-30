@@ -1,4 +1,5 @@
 import type { Metadata } from 'next/types'
+import { skipBuildDb } from '@/utilities/skipBuildDb'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
@@ -14,7 +15,7 @@ export const revalidate = 600
 type Args = { params: Promise<{ locale: string }> }
 
 export function generateStaticParams() {
-  return modules.blog ? locales.map((locale) => ({ locale })) : []
+  return modules.blog && !skipBuildDb() ? locales.map((locale) => ({ locale })) : []
 }
 
 export default async function Page({ params }: Args) {

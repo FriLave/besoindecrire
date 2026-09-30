@@ -1,4 +1,5 @@
 import type { Metadata } from 'next/types'
+import { skipBuildDb } from '@/utilities/skipBuildDb'
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { notFound } from 'next/navigation'
@@ -16,7 +17,7 @@ export const revalidate = 600
 type Args = { params: Promise<{ locale: string; pageNumber: string }> }
 
 export async function generateStaticParams({ params }: { params: { locale: string } }) {
-  if (!modules.blog || !(await isFeatureEnabled('blog'))) return []
+  if (skipBuildDb() || !modules.blog || !(await isFeatureEnabled('blog'))) return []
 
   const payload = await getPayload({ config: configPromise })
   const { totalDocs } = await payload.count({

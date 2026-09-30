@@ -1,0 +1,39 @@
+# Production stack: `docker compose -f docker-compose.prod.yml up --build -d`
+# Env is read from `.env` (see .env.example). DATABASE_URL is overridden below to target the `postgres` service.
+services:
+  app:
+    build: .
+    env_file: ${ENV_FILE:-.env}
+    environment:
+      DATABASE_URL: postgres://payload:${POSTGRES_PASSWORD:-payload}@postgres:5432/payload
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - media:/app/public/media
+      - private-files:/app/private-files
+    ports:
+      - '${APP_PORT:-3000}:3000'
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: payload
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-payload}
+      POSTGRES_DB: payload
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U payload']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # backup: added by Lot 4 (pg_dump to S3 or a local volume).
+
+volumes:
+  media:
+  private-files:
+  postgres-data:

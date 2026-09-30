@@ -56,6 +56,48 @@ les conventions de code.
 
 `pnpm seed:local` peuple la base de démo via la Local API (sans serveur, sans passer par `/next/seed`, qui reste désactivé en production). Destructif.
 
+## Déploiement
+
+Deux options, selon le client : Docker (par défaut) ou Vercel.
+
+> **Schéma de base** : le projet n'a pas encore de migrations (le schéma est créé par le mode `push` de Payload, actif seulement en développement). Tant que les migrations ne sont pas ajoutées, une base de production vierge n'a pas de tables. Lors d'un déploiement, une fois les migrations générées (`pnpm payload migrate:create`), les appliquer au démarrage avec l'option `prodMigrations` de `postgresAdapter` (fonctionne en image standalone, sans CLI Payload).
+
+### Docker
+
+```bash
+cp .env.example .env     # renseigner PAYLOAD_SECRET, PREVIEW_SECRET, NEXT_PUBLIC_SERVER_URL (https://...), SMTP_*, STRIPE_*
+# optionnel : POSTGRES_PASSWORD=... et APP_PORT=... dans l'env du shell ou `--env-file`
+docker compose -f docker-compose.prod.yml up --build -d
+```
+
+- L'app écoute sur le port 3000 (`APP_PORT`), `DATABASE_URL` est forcée vers le service `postgres` par le compose. Volumes : `media` (`public/media`), `private-files` (PDF payants) et `postgres-data`.
+- Le build n'a pas besoin de base : `SKIP_BUILD_DB=1` (posé par le `Dockerfile`) fait renvoyer `[]` aux `generateStaticParams`. Les pages sont générées à la première requête puis mises en cache (ISR), et revalidées à la publication.
+- Healthcheck : `GET /api/health` (200 + ping base). Le cron Payload (purge RGPD, queue `maintenance`) démarre avec le process (`src/instrumentation.ts`).
+- Premier compte : `https://<domaine>/admin/create-first-user`.
+- Données de démo (hors production uniquement, destructif) : `pnpm seed:local` depuis un poste ayant accès à la base.
+- Reverse proxy : placer Caddy ou Traefik devant le service `app` pour le TLS (ne pas exposer le port 3000 tel quel) et le faire pointer sur `app:3000`.
+
+### Vercel
+
+Prérequis :
+
+- Postgres managé (Neon, Supabase...) dans `DATABASE_URL`.
+- **Stockage S3 obligatoire** (pas encore implémenté, cf. migrations/S3) : le disque de Vercel n'est pas persistant, donc `public/media` et `private-files/` (le téléchargement payant lit le disque local) ne fonctionnent pas en l'état.
+- Variables d'env du projet, dont `CRON_SECRET` (Vercel l'envoie en `Authorization: Bearer`).
+
+`vercel.json` déclenche chaque jour à 3 h `GET /api/payload-jobs/run?queue=maintenance` : cet endpoint planifie les tâches dues (`handleSchedules`) puis exécute la queue. Sur Vercel, `autoRun` et `instrumentation.ts` sont désactivés (pas de process long). L'accès est accepté avec `CRON_SECRET` uniquement quand `VERCEL` est défini. Les plans Hobby limitent les crons à une exécution par jour.
+
+### Checklist de mise en production
+
+- [ ] `NEXT_PUBLIC_SERVER_URL` et domaine canonique (`siteUrl` dans les réglages du site) corrects, en https.
+- [ ] `noIndex` désactivé dans les réglages du site (activé en préproduction).
+- [ ] SMTP renseigné (`SMTP_*`, `EMAIL_FROM_*`) : sans lui, les emails (dont les liens de téléchargement) sont seulement loggés.
+- [ ] Module paiement : `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, webhook Stripe vers `https://<domaine>/api/webhooks/stripe`.
+- [ ] Vercel : `CRON_SECRET` défini.
+- [ ] Secrets (`PAYLOAD_SECRET`, `PREVIEW_SECRET`) générés aléatoirement, mot de passe Postgres changé.
+- [ ] Sauvegardes de la base et des volumes en place (à venir).
+- [ ] Données de démo retirées, textes légaux relus.
+
 ## Zone client
 
 `src/client/` est la **zone appartenant au client fork**. C'est le seul endroit à éditer

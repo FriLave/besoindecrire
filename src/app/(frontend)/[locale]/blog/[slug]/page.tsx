@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { skipBuildDb } from '@/utilities/skipBuildDb'
 import { RelatedPosts } from '@/blocks/RelatedPosts/Component'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
@@ -36,7 +37,7 @@ export async function generateStaticParams({
   params: { locale: string; slug: string }
 }) {
   // Only `locale` is populated here (see `[locale]/[slug]/page.tsx`).
-  if (!modules.blog || !(await isFeatureEnabled('blog'))) return []
+  if (skipBuildDb() || !modules.blog || !(await isFeatureEnabled('blog'))) return []
 
   const payload = await getPayload({ config: configPromise })
   const posts = await payload.find({

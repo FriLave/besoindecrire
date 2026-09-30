@@ -16,11 +16,13 @@ import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import '../globals.css'
+import { skipBuildDb } from '@/utilities/skipBuildDb'
 import { getSiteUrl } from '@/utilities/getSiteUrl'
 import { getImageURL } from '@/utilities/generateMeta'
 import { defaultLocale, getLocalizedPath, isLocale, locales } from '@/utilities/getLocalizedPath'
 
 export function generateStaticParams() {
+  if (skipBuildDb()) return []
   return locales.map((locale) => ({ locale }))
 }
 

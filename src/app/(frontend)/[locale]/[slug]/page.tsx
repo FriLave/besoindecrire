@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 
+import { skipBuildDb } from '@/utilities/skipBuildDb'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
@@ -38,6 +39,7 @@ export async function generateStaticParams({
   // (parent + own segment) here, even though only `locale` (resolved by
   // the parent `[locale]/layout.tsx`) is actually populated when this is
   // called - `slug` is what this function itself is generating.
+  if (skipBuildDb()) return []
   const locale = params.locale as Locale
   const payload = await getPayload({ config: configPromise })
   const pages = await payload.find({
