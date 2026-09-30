@@ -13,7 +13,10 @@ import { RenderHero } from '@/heros/RenderHero'
 import { JsonLd } from '@/components/JsonLd'
 import { getUI } from '@/i18n/ui'
 import { getSiteUrl } from '@/utilities/getSiteUrl'
-import { breadcrumbs } from '@/utilities/jsonLd'
+import { breadcrumbs, organization, website } from '@/utilities/jsonLd'
+import { getCachedSiteSettings } from '@/utilities/getGlobals'
+import { isFeatureEnabled } from '@/utilities/features'
+import { SITE_NAME } from '@/client/site'
 import { generateMeta } from '@/utilities/generateMeta'
 import { getLocalizedPath, isLocale, locales, type Locale, type LocalizedValue } from '@/utilities/getLocalizedPath'
 import PageClient from './page.client'
@@ -104,9 +107,22 @@ export default async function Page({ params: paramsPromise }: Args) {
   const alternateLink: AlternateLocaleLink = { locale: otherLocale, slug: alternateSlug }
 
   const siteUrl = await getSiteUrl()
+  const isHome = decodedSlug === 'home'
+  const settings = isHome ? await getCachedSiteSettings(locale)() : null
+  const siteName = settings?.siteName || SITE_NAME
 
   return (
     <article className="pt-16 pb-24">
+      {/* Site-wide schemas live on the home page, not in the layout: Next client-renders the
+          layout on 404s, where React warns about <script> elements. */}
+      {isHome && (
+        <>
+          <JsonLd data={organization(settings, siteName, siteUrl)} />
+          <JsonLd
+            data={website(siteName, siteUrl, locale, { search: await isFeatureEnabled('blog') })}
+          />
+        </>
+      )}
       {decodedSlug !== 'home' && (
         <JsonLd
           data={breadcrumbs([

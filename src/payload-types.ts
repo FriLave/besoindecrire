@@ -114,12 +114,14 @@ export interface Config {
     footer: Footer;
     'site-settings': SiteSetting;
     'feature-flags': FeatureFlag;
+    'payload-jobs-stats': PayloadJobsStat;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
     footer: FooterSelect<false> | FooterSelect<true>;
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
     'feature-flags': FeatureFlagsSelect<false> | FeatureFlagsSelect<true>;
+    'payload-jobs-stats': PayloadJobsStatsSelect<false> | PayloadJobsStatsSelect<true>;
   };
   locale: 'fr' | 'en';
   widgets: {
@@ -128,6 +130,7 @@ export interface Config {
   user: User;
   jobs: {
     tasks: {
+      purgeFormSubmissions: TaskPurgeFormSubmissions;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -217,6 +220,8 @@ export interface Page {
     | PricingTableBlock
     | GalleryBlock
     | FAQBlock
+    | LegalNoticeBlock
+    | PrivacyPolicyBlock
     | ArchiveBlock
   )[];
   meta?: {
@@ -766,6 +771,10 @@ export interface Form {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Small text shown under the submit button, with a link to the privacy policy. Keep it consistent with the retention period (3 years).
+   */
+  privacyNotice?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1006,6 +1015,66 @@ export interface FAQBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LegalNoticeBlock".
+ */
+export interface LegalNoticeBlock {
+  /**
+   * Legal notice template filled from Site settings > Legal. Provided for guidance only: to be validated by the client (not legal advice). Use the field below for extra content.
+   */
+  additionalContent?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'legalNotice';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PrivacyPolicyBlock".
+ */
+export interface PrivacyPolicyBlock {
+  /**
+   * Privacy policy template (GDPR art. 13) filled from Site settings > Legal. Provided for guidance only: to be validated by the client (not legal advice). Use the field below for extra content.
+   */
+  additionalContent?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'privacyPolicy';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ArchiveBlock".
  */
 export interface ArchiveBlock {
@@ -1184,7 +1253,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
+        taskSlug: 'inline' | 'purgeFormSubmissions' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1217,10 +1286,19 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'purgeFormSubmissions' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1355,6 +1433,8 @@ export interface PagesSelect<T extends boolean = true> {
         pricingTable?: T | PricingTableBlockSelect<T>;
         gallery?: T | GalleryBlockSelect<T>;
         faq?: T | FAQBlockSelect<T>;
+        legalNotice?: T | LegalNoticeBlockSelect<T>;
+        privacyPolicy?: T | PrivacyPolicyBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
       };
   meta?:
@@ -1622,6 +1702,30 @@ export interface FAQBlockSelect<T extends boolean = true> {
         answer?: T;
         id?: T;
       };
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LegalNoticeBlock_select".
+ */
+export interface LegalNoticeBlockSelect<T extends boolean = true> {
+  additionalContent?: T;
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PrivacyPolicyBlock_select".
+ */
+export interface PrivacyPolicyBlockSelect<T extends boolean = true> {
+  additionalContent?: T;
   paddingTop?: T;
   paddingBottom?: T;
   background?: T;
@@ -1961,6 +2065,7 @@ export interface FormsSelect<T extends boolean = true> {
         message?: T;
         id?: T;
       };
+  privacyNotice?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2043,6 +2148,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processing?: T;
+  meta?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -2179,6 +2285,63 @@ export interface SiteSetting {
    */
   noIndex?: boolean | null;
   /**
+   * Facts used by the "Legal notice" and "Privacy policy" blocks. Enter them once here.
+   */
+  legal: {
+    publisherType: 'company' | 'ei';
+    companyName?: string | null;
+    /**
+     * e.g. SAS, SARL
+     */
+    legalForm?: string | null;
+    /**
+     * e.g. 10 000 €
+     */
+    shareCapital?: string | null;
+    address?: string | null;
+    phone?: string | null;
+    email?: string | null;
+    siren?: string | null;
+    /**
+     * e.g. RCS Paris
+     */
+    registry?: string | null;
+    /**
+     * Displays "TVA non applicable, art. 293 B du CGI" (micro-enterprise franchise).
+     */
+    vatExempt?: boolean | null;
+    vatNumber?: string | null;
+    publicationDirector?: string | null;
+  };
+  host?: {
+    name?: string | null;
+    address?: string | null;
+    phone?: string | null;
+  };
+  regulatedProfession?: {
+    enabled?: boolean | null;
+    body?: string | null;
+    title?: string | null;
+    country?: string | null;
+    rulesUrl?: string | null;
+    /**
+     * Insurer name, address and coverage area.
+     */
+    insurer?: string | null;
+  };
+  dpo?: {
+    name?: string | null;
+    email?: string | null;
+  };
+  /**
+   * Linked automatically in the footer and in the contact form notice.
+   */
+  legalPages?: {
+    legalNotice?: (number | null) | Page;
+    privacyPolicy?: (number | null) | Page;
+    terms?: (number | null) | Page;
+  };
+  /**
    * Official profiles, declared to search engines.
    */
   socials?:
@@ -2200,6 +2363,24 @@ export interface SiteSetting {
 export interface FeatureFlag {
   id: number;
   blog?: boolean | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats".
+ */
+export interface PayloadJobsStat {
+  id: number;
+  stats?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2261,6 +2442,52 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   siteUrl?: T;
   defaultOgImage?: T;
   noIndex?: T;
+  legal?:
+    | T
+    | {
+        publisherType?: T;
+        companyName?: T;
+        legalForm?: T;
+        shareCapital?: T;
+        address?: T;
+        phone?: T;
+        email?: T;
+        siren?: T;
+        registry?: T;
+        vatExempt?: T;
+        vatNumber?: T;
+        publicationDirector?: T;
+      };
+  host?:
+    | T
+    | {
+        name?: T;
+        address?: T;
+        phone?: T;
+      };
+  regulatedProfession?:
+    | T
+    | {
+        enabled?: T;
+        body?: T;
+        title?: T;
+        country?: T;
+        rulesUrl?: T;
+        insurer?: T;
+      };
+  dpo?:
+    | T
+    | {
+        name?: T;
+        email?: T;
+      };
+  legalPages?:
+    | T
+    | {
+        legalNotice?: T;
+        privacyPolicy?: T;
+        terms?: T;
+      };
   socials?:
     | T
     | {
@@ -2284,6 +2511,16 @@ export interface FeatureFlagsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs-stats_select".
+ */
+export interface PayloadJobsStatsSelect<T extends boolean = true> {
+  stats?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "collections_widget".
  */
 export interface CollectionsWidget {
@@ -2291,6 +2528,16 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskPurgeFormSubmissions".
+ */
+export interface TaskPurgeFormSubmissions {
+  input?: unknown;
+  output: {
+    deleted?: number | null;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

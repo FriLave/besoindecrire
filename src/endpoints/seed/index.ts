@@ -6,6 +6,7 @@ import { fileURLToPath } from 'url'
 import { contactForm as contactFormData, contactFormTranslation } from './contact-form'
 import { contact as contactPageData } from './contact-page'
 import { home } from './home'
+import { legalPage, legalSettings, type LegalKind } from './legal-pages'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
@@ -14,6 +15,7 @@ import { post2 } from './post-2'
 import { post3 } from './post-3'
 import { preserveIds } from './preserve-ids'
 import { siteSettingsCopy } from './site-settings'
+import type { Page } from '@/payload-types'
 import { locales, type Locale } from '@/utilities/getLocalizedPath'
 
 const collections: CollectionSlug[] = [
@@ -74,7 +76,6 @@ const headerNavItems: Record<Locale, (contactPageId: number) => NavItem[]> = {
 
 const footerNavItems: Record<Locale, (contactPageId: number) => NavItem[]> = {
   fr: (contactPageId) => [
-    { link: { type: 'custom', label: 'Mentions légales', url: '#' } },
     {
       link: {
         type: 'reference',
@@ -84,7 +85,6 @@ const footerNavItems: Record<Locale, (contactPageId: number) => NavItem[]> = {
     },
   ],
   en: (contactPageId) => [
-    { link: { type: 'custom', label: 'Legal notice', url: '#' } },
     {
       link: {
         type: 'reference',
@@ -318,6 +318,19 @@ export const seed = async ({
     }),
   ])
 
+  payload.logger.info(`— Seeding legal pages (${locales[0]})...`)
+
+  // Sequential: parallel creates deadlock (Postgres 40P01).
+  const legalKinds: LegalKind[] = ['legalNotice', 'privacyPolicy', 'terms']
+  const legalDocs = {} as Record<LegalKind, Page>
+  for (const kind of legalKinds) {
+    legalDocs[kind] = await payload.create({
+      collection: 'pages',
+      depth: 0,
+      data: legalPage(kind, locales[0]),
+    })
+  }
+
   payload.logger.info(`— Seeding globals (${locales[0]})...`)
 
   const [headerDoc, footerDoc] = await Promise.all([
@@ -335,7 +348,15 @@ export const seed = async ({
     }),
     payload.updateGlobal({
       slug: 'site-settings',
-      data: siteSettingsCopy[locales[0]],
+      data: {
+        ...siteSettingsCopy[locales[0]],
+        ...legalSettings,
+        legalPages: {
+          legalNotice: legalDocs.legalNotice.id,
+          privacyPolicy: legalDocs.privacyPolicy.id,
+          terms: legalDocs.terms.id,
+        },
+      },
     }),
   ])
 
@@ -468,6 +489,17 @@ export const seed = async ({
         data: preserveIds(contactPage, contactPageData({ contactForm, locale })),
       }),
     ])
+
+    payload.logger.info(`— Translating legal pages into ${locale}...`)
+
+    for (const kind of legalKinds) {
+      await payload.update({
+        collection: 'pages',
+        id: legalDocs[kind].id,
+        locale,
+        data: preserveIds(legalDocs[kind], legalPage(kind, locale)),
+      })
+    }
 
     payload.logger.info(`— Translating globals into ${locale}...`)
 

@@ -13,6 +13,7 @@ import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
+import { privacyNoticeDefaults } from '@/i18n/legal'
 import { Page, Post } from '@/payload-types'
 import { SITE_NAME } from '@/client/site'
 import { getServerSideURL } from '@/utilities/getURL'
@@ -125,7 +126,20 @@ export const plugins: Plugin[] = [
     formOverrides: {
       access: { create: editorOrAbove, delete: editorOrAbove, update: editorOrAbove },
       fields: ({ defaultFields }) => {
-        return defaultFields.map((field) => {
+        const privacyNotice: Field = {
+          name: 'privacyNotice',
+          type: 'textarea',
+          localized: true,
+          label: { en: 'Privacy notice', fr: 'Mention RGPD' },
+          defaultValue: ({ locale }: { locale?: string }) => privacyNoticeDefaults[locale === 'en' ? 'en' : 'fr'],
+          admin: {
+            description: {
+              en: 'Small text shown under the submit button, with a link to the privacy policy. Keep it consistent with the retention period (3 years).',
+              fr: 'Petit texte affiché sous le bouton d\'envoi, avec un lien vers la politique de confidentialité. À garder cohérent avec la durée de conservation (3 ans).',
+            },
+          },
+        }
+        return [...defaultFields, privacyNotice].map((field) => {
           if ('name' in field && field.name === 'title') {
             return { ...field, localized: true }
           }

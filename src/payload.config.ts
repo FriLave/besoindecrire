@@ -19,6 +19,7 @@ import { SiteSettings } from './globals/SiteSettings/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
+import { purgeFormSubmissions } from './jobs/purgeFormSubmissions'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -98,6 +99,8 @@ export default buildConfig({
         return authHeader === `Bearer ${secret}`
       },
     },
-    tasks: [],
+    // Self-hosted: runs the queued purge. On serverless (Vercel), hit /api/payload-jobs/run with CRON_SECRET instead.
+    autoRun: [{ cron: '*/15 * * * *', queue: 'default' }],
+    tasks: [purgeFormSubmissions],
   },
 })

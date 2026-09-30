@@ -17,9 +17,6 @@ import { redirect } from 'next/navigation'
 
 import '../globals.css'
 import { getSiteUrl } from '@/utilities/getSiteUrl'
-import { isFeatureEnabled } from '@/utilities/features'
-import { JsonLd } from '@/components/JsonLd'
-import { organization, website } from '@/utilities/jsonLd'
 import { getImageURL } from '@/utilities/generateMeta'
 import { defaultLocale, getLocalizedPath, isLocale, locales } from '@/utilities/getLocalizedPath'
 
@@ -51,10 +48,6 @@ export default async function RootLayout({ children, params }: Args) {
 
   const locale = localeParam
 
-  const settings = await getCachedSiteSettings(locale)()
-  const siteName = settings?.siteName || SITE_NAME
-  const siteUrl = await getSiteUrl()
-  const hasSearch = await isFeatureEnabled('blog')
 
   return (
     <html
@@ -73,8 +66,6 @@ export default async function RootLayout({ children, params }: Args) {
         </noscript>
       </head>
       <body>
-        <JsonLd data={organization(settings, siteName, siteUrl)} />
-        <JsonLd data={website(siteName, siteUrl, locale, { search: hasSearch })} />
         <Providers>
           <AdminBar
             adminBarProps={{

@@ -6,6 +6,8 @@ import { modules } from '../../client/modules'
 import { Archive } from '../../blocks/ArchiveBlock/config'
 import { FAQ } from '../../blocks/FAQ/config'
 import { FeatureGrid } from '../../blocks/FeatureGrid/config'
+import { LegalNotice } from '../../blocks/LegalNotice/config'
+import { PrivacyPolicy } from '../../blocks/PrivacyPolicy/config'
 import { Gallery } from '../../blocks/Gallery/config'
 import { LogoCloud } from '../../blocks/LogoCloud/config'
 import { PricingTable } from '../../blocks/PricingTable/config'
@@ -94,6 +96,8 @@ export const Pages: CollectionConfig<'pages'> = {
                 PricingTable,
                 Gallery,
                 FAQ,
+                LegalNotice,
+                PrivacyPolicy,
                 ...(modules.blog ? [Archive] : []),
               ],
               required: true,

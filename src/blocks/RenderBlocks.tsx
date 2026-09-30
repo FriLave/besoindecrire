@@ -1,7 +1,8 @@
 import React, { Fragment } from 'react'
 
 import type { Page } from '@/payload-types'
-import type { Locale } from '@/utilities/getLocalizedPath'
+import { getCachedSiteSettings } from '@/utilities/getGlobals'
+import { getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
 import { isFeatureEnabled } from '@/utilities/features'
 import { stripDisabledPostLinks } from '@/utilities/stripDisabledPostLinks'
 
@@ -14,6 +15,8 @@ import { BlockSection } from '@/components/BlockSection'
 import { FAQBlock } from '@/blocks/FAQ/Component'
 import { FeatureGridBlock } from '@/blocks/FeatureGrid/Component'
 import { GalleryBlock } from '@/blocks/Gallery/Component'
+import { LegalNoticeBlock } from '@/blocks/LegalNotice/Component'
+import { PrivacyPolicyBlock } from '@/blocks/PrivacyPolicy/Component'
 import { LogoCloudBlock } from '@/blocks/LogoCloud/Component'
 import { PricingTableBlock } from '@/blocks/PricingTable/Component'
 import { StatsBlock } from '@/blocks/Stats/Component'
@@ -28,9 +31,11 @@ const blockComponents = {
   featureGrid: FeatureGridBlock,
   formBlock: FormBlock,
   gallery: GalleryBlock,
+  legalNotice: LegalNoticeBlock,
   logoCloud: LogoCloudBlock,
   mediaBlock: MediaBlock,
   pricingTable: PricingTableBlock,
+  privacyPolicy: PrivacyPolicyBlock,
   stats: StatsBlock,
   testimonials: TestimonialsBlock,
 }
@@ -44,6 +49,12 @@ export const RenderBlocks = async (props: {
   const blocks = (await stripDisabledPostLinks(props.blocks)).filter(
     (b) => blogEnabled || b.blockType !== 'archive',
   )
+
+  const privacy = blocks.some((b) => b.blockType === 'formBlock')
+    ? (await getCachedSiteSettings(locale)())?.legalPages?.privacyPolicy
+    : undefined
+  const privacyHref =
+    privacy && typeof privacy === 'object' ? getLocalizedPath(locale, privacy.slug) : undefined
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -65,7 +76,7 @@ export const RenderBlocks = async (props: {
                   paddingTop={block.paddingTop}
                 >
                   {/* @ts-expect-error there may be some mismatch between the expected types here */}
-                  <Block {...block} locale={locale} disableInnerContainer />
+                  <Block {...block} locale={locale} privacyHref={privacyHref} disableInnerContainer />
                 </BlockSection>
               )
             }

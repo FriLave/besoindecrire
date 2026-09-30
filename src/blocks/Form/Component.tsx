@@ -8,6 +8,7 @@ import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
 import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
+import Link from 'next/link'
 import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
 import { getUI } from '@/i18n/ui'
@@ -25,6 +26,8 @@ export const FormBlock: React.FC<
   {
     id?: string
     locale: Locale
+    /** Localized path of the privacy policy page, resolved server-side. */
+    privacyHref?: string
   } & FormBlockType
 > = (props) => {
   const {
@@ -33,8 +36,10 @@ export const FormBlock: React.FC<
     form: { id: formID, confirmationMessage, confirmationType, redirect, submitButtonLabel } = {},
     introContent,
     locale,
+    privacyHref,
   } = props
 
+  const privacyNotice = (formFromProps as { privacyNotice?: string | null }).privacyNotice
   const formMethods = useForm({
     defaultValues: formFromProps.fields,
   })
@@ -165,6 +170,19 @@ export const FormBlock: React.FC<
               <Button form={formID} type="submit" variant="default">
                 {submitButtonLabel}
               </Button>
+              {(privacyNotice || privacyHref) && (
+                <p className="mt-3 text-xs text-muted-foreground">
+                  {privacyNotice}
+                  {privacyHref && (
+                    <>
+                      {' '}
+                      <Link className="underline" href={privacyHref}>
+                        {ui.form.privacyLink}
+                      </Link>
+                    </>
+                  )}
+                </p>
+              )}
             </form>
           )}
         </FormProvider>

@@ -117,6 +117,193 @@ export const SiteSettings: GlobalConfig = {
           ],
         },
         {
+          label: { en: 'Legal', fr: 'Légal' },
+          description: {
+            en: 'Templates provided for guidance only, to be validated by the client. This is not legal advice.',
+            fr: 'Modèles fournis à titre indicatif, à faire valider par le client. Ne constitue pas un conseil juridique.',
+          },
+          fields: [
+            {
+              name: 'legal',
+              type: 'group',
+              label: { en: 'Publisher', fr: 'Éditeur du site' },
+              admin: {
+                description: {
+                  en: 'Facts used by the "Legal notice" and "Privacy policy" blocks. Enter them once here.',
+                  fr: 'Informations utilisées par les blocs « Mentions légales » et « Politique de confidentialité ». À saisir une seule fois ici.',
+                },
+              },
+              fields: [
+                {
+                  name: 'publisherType',
+                  type: 'select',
+                  defaultValue: 'company',
+                  required: true,
+                  label: { en: 'Publisher type', fr: "Type d'éditeur" },
+                  options: [
+                    { label: { en: 'Company', fr: 'Société' }, value: 'company' },
+                    { label: { en: 'Sole proprietor (EI)', fr: 'Entrepreneur individuel (EI)' }, value: 'ei' },
+                  ],
+                },
+                {
+                  name: 'companyName',
+                  type: 'text',
+                  label: { en: 'Company name / Full name (EI)', fr: 'Dénomination sociale / Nom et prénom (EI)' },
+                },
+                {
+                  type: 'row',
+                  admin: { condition: (_d, s) => s?.publisherType === 'company' },
+                  fields: [
+                    {
+                      name: 'legalForm',
+                      type: 'text',
+                      label: { en: 'Legal form', fr: 'Forme juridique' },
+                      admin: { description: { en: 'e.g. SAS, SARL', fr: 'ex. SAS, SARL' } },
+                    },
+                    {
+                      name: 'shareCapital',
+                      type: 'text',
+                      label: { en: 'Share capital', fr: 'Capital social' },
+                      admin: { description: { en: 'e.g. 10 000 €', fr: 'ex. 10 000 €' } },
+                    },
+                  ],
+                },
+                {
+                  name: 'address',
+                  type: 'textarea',
+                  label: { en: 'Registered office / Address', fr: 'Siège social / Adresse' },
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'phone', type: 'text', label: { en: 'Phone', fr: 'Téléphone' } },
+                    { name: 'email', type: 'email', label: { en: 'Email', fr: 'Email' } },
+                  ],
+                },
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'siren', type: 'text', label: { en: 'SIREN', fr: 'SIREN' } },
+                    {
+                      name: 'registry',
+                      type: 'text',
+                      label: { en: 'Registry (RCS / RNE) and city', fr: 'Registre (RCS / RNE) et ville' },
+                      admin: { description: { en: 'e.g. RCS Paris', fr: 'ex. RCS Paris' } },
+                    },
+                  ],
+                },
+                {
+                  name: 'vatExempt',
+                  type: 'checkbox',
+                  defaultValue: false,
+                  label: { en: 'VAT not applicable', fr: 'TVA non applicable' },
+                  admin: {
+                    description: {
+                      en: 'Displays "TVA non applicable, art. 293 B du CGI" (micro-enterprise franchise).',
+                      fr: 'Affiche « TVA non applicable, art. 293 B du CGI » (franchise en base).',
+                    },
+                  },
+                },
+                {
+                  name: 'vatNumber',
+                  type: 'text',
+                  label: { en: 'Intra-EU VAT number', fr: 'N° de TVA intracommunautaire' },
+                  admin: { condition: (_d, s) => !s?.vatExempt },
+                },
+                {
+                  name: 'publicationDirector',
+                  type: 'text',
+                  label: { en: 'Publication director', fr: 'Directeur de la publication' },
+                },
+              ],
+            },
+            {
+              name: 'host',
+              type: 'group',
+              label: { en: 'Hosting provider', fr: 'Hébergeur' },
+              fields: [
+                { name: 'name', type: 'text', label: { en: 'Name / company name', fr: 'Nom / raison sociale' } },
+                { name: 'address', type: 'textarea', label: { en: 'Address', fr: 'Adresse' } },
+                { name: 'phone', type: 'text', label: { en: 'Phone', fr: 'Téléphone' } },
+              ],
+            },
+            {
+              type: 'collapsible',
+              label: { en: 'Regulated profession (optional)', fr: 'Profession réglementée (optionnel)' },
+              admin: { initCollapsed: true },
+              fields: [
+                {
+                  name: 'regulatedProfession',
+                  type: 'group',
+                  label: false,
+                  fields: [
+                    {
+                      name: 'enabled',
+                      type: 'checkbox',
+                      defaultValue: false,
+                      label: { en: 'Regulated profession', fr: 'Profession réglementée' },
+                    },
+                    {
+                      type: 'row',
+                      admin: { condition: (_d, s) => Boolean(s?.regulatedProfession?.enabled) },
+                      fields: [
+                        { name: 'body', type: 'text', label: { en: 'Professional body', fr: 'Ordre / organisme' } },
+                        { name: 'title', type: 'text', label: { en: 'Professional title', fr: 'Titre professionnel' } },
+                        { name: 'country', type: 'text', label: { en: 'Country that granted the title', fr: "État d'octroi du titre" } },
+                      ],
+                    },
+                    {
+                      name: 'rulesUrl',
+                      type: 'text',
+                      label: { en: 'Professional rules (link)', fr: 'Règles professionnelles (lien)' },
+                      admin: { condition: (_d, s) => Boolean(s?.regulatedProfession?.enabled) },
+                    },
+                    {
+                      name: 'insurer',
+                      type: 'text',
+                      label: { en: 'Professional liability insurance', fr: 'Assurance responsabilité civile professionnelle' },
+                      admin: {
+                        condition: (_d, s) => Boolean(s?.regulatedProfession?.enabled),
+                        description: { en: 'Insurer name, address and coverage area.', fr: "Nom, adresse de l'assureur et couverture géographique." },
+                      },
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'dpo',
+              type: 'group',
+              label: { en: 'Data protection officer (optional)', fr: 'Délégué à la protection des données (optionnel)' },
+              fields: [
+                {
+                  type: 'row',
+                  fields: [
+                    { name: 'name', type: 'text', label: { en: 'Name', fr: 'Nom' } },
+                    { name: 'email', type: 'email', label: { en: 'Email', fr: 'Email' } },
+                  ],
+                },
+              ],
+            },
+            {
+              name: 'legalPages',
+              type: 'group',
+              label: { en: 'Legal pages', fr: 'Pages légales' },
+              admin: {
+                description: {
+                  en: 'Linked automatically in the footer and in the contact form notice.',
+                  fr: 'Liées automatiquement dans le pied de page et dans la mention du formulaire de contact.',
+                },
+              },
+              fields: [
+                { name: 'legalNotice', type: 'relationship', relationTo: 'pages', label: { en: 'Legal notice', fr: 'Mentions légales' } },
+                { name: 'privacyPolicy', type: 'relationship', relationTo: 'pages', label: { en: 'Privacy policy', fr: 'Politique de confidentialité' } },
+                { name: 'terms', type: 'relationship', relationTo: 'pages', label: { en: 'Terms of use', fr: "Conditions d'utilisation (CGU)" } },
+              ],
+            },
+          ],
+        },
+        {
           label: { en: 'Social networks', fr: 'Réseaux' },
           fields: [
             {

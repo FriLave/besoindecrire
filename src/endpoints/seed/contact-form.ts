@@ -3,6 +3,7 @@ import { RequiredDataFromCollectionSlug } from 'payload'
 import { SITE_NAME } from '@/client/site'
 import type { Locale } from '@/utilities/getLocalizedPath'
 
+import { privacyNoticeDefaults } from '@/i18n/legal'
 import { heading, paragraph, richText, text } from './lexical-helpers'
 
 type ContactFormCopy = {
@@ -110,6 +111,7 @@ export const contactForm = (locale: Locale): RequiredDataFromCollectionSlug<'for
       },
     ],
     fields: buildFields(c.fieldLabels),
+    privacyNotice: privacyNoticeDefaults[locale],
     redirect: undefined,
     submitButtonLabel: c.submitButtonLabel,
     title: c.title,
@@ -126,13 +128,14 @@ export const contactFormTranslation = (
   locale: Locale,
 ): Pick<
   RequiredDataFromCollectionSlug<'forms'>,
-  'confirmationMessage' | 'fields' | 'submitButtonLabel' | 'title'
+  'confirmationMessage' | 'fields' | 'privacyNotice' | 'submitButtonLabel' | 'title'
 > => {
   const c = copy[locale]
 
   return {
     confirmationMessage: richText([heading('h2', c.confirmationHeading)]),
     fields: buildFields(c.fieldLabels),
+    privacyNotice: privacyNoticeDefaults[locale],
     submitButtonLabel: c.submitButtonLabel,
     title: c.title,
   }

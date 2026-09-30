@@ -44,6 +44,7 @@ export type UIDictionary = {
     fieldRequired: string
     internalServerError: string
     loading: string
+    privacyLink: string
     requiredIndicator: string
     somethingWentWrong: string
   }
@@ -108,6 +109,7 @@ const dictionaries: Record<Locale, UIDictionary> = {
       fieldRequired: 'Ce champ est requis',
       internalServerError: 'Erreur interne du serveur',
       loading: 'Chargement, veuillez patienter...',
+      privacyLink: 'Politique de confidentialité',
       requiredIndicator: '(requis)',
       somethingWentWrong: "Une erreur s'est produite.",
     },
@@ -163,6 +165,7 @@ const dictionaries: Record<Locale, UIDictionary> = {
       fieldRequired: 'This field is required',
       internalServerError: 'Internal Server Error',
       loading: 'Loading, please wait...',
+      privacyLink: 'Privacy policy',
       requiredIndicator: '(required)',
       somethingWentWrong: 'Something went wrong.',
     },

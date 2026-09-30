@@ -80,3 +80,21 @@ pnpm test:e2e              # tests end-to-end (Playwright)
 
 Après toute modification d'une collection, d'un global ou d'un block, relancer
 `pnpm generate:types` (et une migration si le schéma change).
+
+## Conformité légale (France)
+
+Inclus, prêt à remplir :
+
+- Onglet **Réglages du site > Légal** : éditeur (société ou EI), hébergeur, profession réglementée et DPO (optionnels), et pages légales liées au pied de page.
+- Blocks `LegalNotice` (mentions légales, LCEN art. 1-1) et `PrivacyPolicy` (RGPD art. 13), rendus depuis ces réglages. Les textes juridiques sont des gabarits fixes (`src/i18n/legal.ts`) : **indicatifs, à faire valider par le client, ils ne constituent pas un conseil juridique**. Un champ « Contenu complémentaire » permet d'ajouter du texte.
+- Pages seedées (fr/en) : mentions légales, politique de confidentialité, CGU génériques, avec des données de démo factices (« Exemple SAS »).
+- Mention RGPD éditable sous le formulaire de contact, sans case à cocher (base légale : demande de l'utilisateur).
+- Tâche Payload `purgeFormSubmissions` : supprime les messages du formulaire de plus de 3 ans (durée CNIL pour les prospects). Elle est planifiée chaque jour à 3 h (`autoRun` en auto-hébergé ; sur Vercel, appeler `/api/payload-jobs/run` avec `CRON_SECRET`).
+
+À renseigner par le client : tout l'onglet Légal (SIREN, RCS/RNE, capital, directeur de publication, hébergeur...), relecture des textes, et remplacement des données de démo avant mise en ligne.
+
+**Pas de bannière cookies par défaut** : le site n'utilise que des traceurs exemptés (session admin, thème en stockage local). Dès qu'on ajoute GA, un pixel, un embed YouTube/Maps ou reCAPTCHA, ajouter un CMP (bouton « Refuser » au même niveau que « Accepter », choix conservé 6 mois) et mettre à jour la politique de confidentialité.
+
+Avec le module de paiement activé : CGV, médiateur de la consommation et mention de renonciation au droit de rétractation (C. conso L221-28) deviennent obligatoires.
+
+Sources : [CNIL — FAQ cookies et traceurs](https://www.cnil.fr/fr/cookies-et-autres-traceurs/regles/cookies/FAQ), [CNIL — mesure d'audience exemptée](https://www.cnil.fr/fr/cookies-solutions-pour-les-outils-de-mesure-daudience), [CNIL — durées de conservation](https://www.cnil.fr/fr/passer-laction/les-durees-de-conservation-des-donnees), [service-public — mentions obligatoires d'un site](https://entreprendre.service-public.fr/vosdroits/F31228).
