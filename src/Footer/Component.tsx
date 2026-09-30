@@ -1,5 +1,6 @@
 import { stripDisabledPostLinks } from '@/utilities/stripDisabledPostLinks'
 import { SITE_NAME } from '@/client/site'
+import { isFeatureEnabled } from '@/utilities/features'
 import { getCachedGlobal, getCachedSiteSettings } from '@/utilities/getGlobals'
 import { getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
 import Link from 'next/link'
@@ -16,7 +17,10 @@ export async function Footer({ locale }: { locale: Locale }) {
   const navItems = footerData?.navItems || []
   const settings = await getCachedSiteSettings(locale)()
   const siteName = settings?.siteName || SITE_NAME
-  const legalLinks = (['legalNotice', 'privacyPolicy', 'terms'] as const)
+  const kinds = ['legalNotice', 'privacyPolicy', 'terms', 'termsOfSale'] as const
+  const payments = await isFeatureEnabled('payments')
+  const legalLinks = kinds
+    .filter((k) => k !== 'termsOfSale' || payments)
     .map((k) => settings?.legalPages?.[k])
     .filter((p): p is Exclude<typeof p, number | null | undefined> => typeof p === 'object' && !!p)
 

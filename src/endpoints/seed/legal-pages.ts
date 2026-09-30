@@ -4,12 +4,13 @@ import type { Locale } from '@/utilities/getLocalizedPath'
 
 import { heading, paragraph, richText, text } from './lexical-helpers'
 
-export type LegalKind = 'legalNotice' | 'privacyPolicy' | 'terms'
+export type LegalKind = 'legalNotice' | 'privacyPolicy' | 'terms' | 'termsOfSale'
 
 export const legalSlugs: Record<LegalKind, Record<Locale, string>> = {
   legalNotice: { fr: 'mentions-legales', en: 'legal-notice' },
   privacyPolicy: { fr: 'politique-de-confidentialite', en: 'privacy-policy' },
   terms: { fr: 'cgu', en: 'terms' },
+  termsOfSale: { fr: 'cgv', en: 'terms-of-sale' },
 }
 
 const copy: Record<LegalKind, Record<Locale, { description: string; title: string }>> = {
@@ -33,6 +34,16 @@ const copy: Record<LegalKind, Record<Locale, { description: string; title: strin
       title: 'Privacy policy',
       description:
         'How your personal data is collected, used and protected, and how to exercise your rights.',
+    },
+  },
+  termsOfSale: {
+    fr: {
+      title: 'Conditions générales de vente',
+      description: 'Conditions générales de vente de nos contenus numériques téléchargeables.',
+    },
+    en: {
+      title: 'Terms of sale',
+      description: 'Terms of sale for our downloadable digital content.',
     },
   },
   terms: {
@@ -157,5 +168,14 @@ export const legalSettings = {
     name: 'Exemple Hébergeur',
     address: '2 avenue de l’Hébergement\n69000 Lyon',
     phone: '04 00 00 00 00',
+  },
+}
+
+/** Obviously fake demo mediator: replace with the client's real one (required for B2C sales). */
+export const mediatorSettings = {
+  mediator: {
+    name: 'Médiateur Exemple',
+    website: 'https://mediateur.example.com',
+    address: '3 place de la Médiation\n75000 Paris',
   },
 }

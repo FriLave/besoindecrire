@@ -350,6 +350,13 @@ type HomeArgs = {
   images: Media[]
   locale: Locale
   metaImage: Media
+  /** Set when the payments module is on: adds a paid download block before the CTA. */
+  paidDownloadId?: number
+}
+
+const paidCopy: Record<Locale, { heading: string; intro: string }> = {
+  fr: { heading: 'Notre guide pratique', intro: 'Téléchargez le guide au format PDF.' },
+  en: { heading: 'Our practical guide', intro: 'Download the guide as a PDF.' },
 }
 
 export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> = ({
@@ -357,6 +364,7 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
   images,
   locale,
   metaImage,
+  paidDownloadId,
 }) => {
   const c = copy[locale]
   const k = catalog[locale]
@@ -508,6 +516,17 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
         limit: 3,
         introContent: richText([heading('h2', c.archiveIntro)]),
       },
+      ...(paidDownloadId === undefined
+        ? []
+        : [
+            {
+              blockName: 'Paid download',
+              blockType: 'paidDownload' as const,
+              heading: paidCopy[locale].heading,
+              intro: paidCopy[locale].intro,
+              download: paidDownloadId,
+            },
+          ]),
       {
         blockName: 'CTA',
         blockType: 'cta',

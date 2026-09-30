@@ -22,6 +22,8 @@ import { PricingTableBlock } from '@/blocks/PricingTable/Component'
 import { StatsBlock } from '@/blocks/Stats/Component'
 import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
+import { PaidDownloadBlockComponent } from '@/blocks/PaidDownloadBlock/Component'
+import { TermsOfSaleBlock } from '@/blocks/TermsOfSale/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -34,17 +36,22 @@ const blockComponents = {
   legalNotice: LegalNoticeBlock,
   logoCloud: LogoCloudBlock,
   mediaBlock: MediaBlock,
+  paidDownload: PaidDownloadBlockComponent,
   pricingTable: PricingTableBlock,
   privacyPolicy: PrivacyPolicyBlock,
   stats: StatsBlock,
+  termsOfSale: TermsOfSaleBlock,
   testimonials: TestimonialsBlock,
 }
 
 export const RenderBlocks = async (props: { blocks: Page['layout'][0][]; locale: Locale }) => {
   const { locale } = props
   const blogEnabled = await isFeatureEnabled('blog')
+  const paymentsEnabled = await isFeatureEnabled('payments')
   const blocks = (await stripDisabledPostLinks(props.blocks)).filter(
-    (b) => blogEnabled || b.blockType !== 'archive',
+    (b) =>
+      (blogEnabled || b.blockType !== 'archive') &&
+      (paymentsEnabled || (b.blockType !== 'paidDownload' && b.blockType !== 'termsOfSale')),
   )
 
   const privacy = blocks.some((b) => b.blockType === 'formBlock')

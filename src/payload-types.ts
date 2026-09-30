@@ -229,6 +229,8 @@ export interface Page {
     | LegalNoticeBlock
     | PrivacyPolicyBlock
     | ArchiveBlock
+    | PaidDownloadBlock
+    | TermsOfSaleBlock
   )[];
   meta?: {
     title?: string | null;
@@ -1117,24 +1119,22 @@ export interface ArchiveBlock {
   blockType: 'archive';
 }
 /**
- * Files sold through paid downloads. Never publicly accessible.
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "private-files".
+ * via the `definition` "PaidDownloadBlock".
  */
-export interface PrivateFile {
-  id: number;
-  updatedAt: string;
-  createdAt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
+export interface PaidDownloadBlock {
+  /**
+   * Sells a downloadable file (PDF, guide...) with a buy button. Create the file and its price first in Paid downloads.
+   */
+  heading?: string | null;
+  intro?: string | null;
+  download: number | PaidDownload;
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'paidDownload';
 }
 /**
  * Files customers can buy once (PDF, guide...). Add them to a page with the paid download block.
@@ -1159,6 +1159,56 @@ export interface PaidDownload {
   slug: string;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * Files sold through paid downloads. Never publicly accessible.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "private-files".
+ */
+export interface PrivateFile {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TermsOfSaleBlock".
+ */
+export interface TermsOfSaleBlock {
+  /**
+   * Terms of sale template for digital downloads, filled from Site settings > Legal. Provided for guidance only: to be validated by the client (not legal advice). Use the field below for extra content.
+   */
+  additionalContent?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'termsOfSale';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1521,6 +1571,8 @@ export interface PagesSelect<T extends boolean = true> {
         legalNotice?: T | LegalNoticeBlockSelect<T>;
         privacyPolicy?: T | PrivacyPolicyBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
+        paidDownload?: T | PaidDownloadBlockSelect<T>;
+        termsOfSale?: T | TermsOfSaleBlockSelect<T>;
       };
   meta?:
     | T
@@ -1828,6 +1880,32 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
   categories?: T;
   limit?: T;
   selectedDocs?: T;
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PaidDownloadBlock_select".
+ */
+export interface PaidDownloadBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  download?: T;
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TermsOfSaleBlock_select".
+ */
+export interface TermsOfSaleBlockSelect<T extends boolean = true> {
+  additionalContent?: T;
   paddingTop?: T;
   paddingBottom?: T;
   background?: T;
@@ -2472,12 +2550,21 @@ export interface SiteSetting {
     email?: string | null;
   };
   /**
+   * Required for B2C sales (French Consumer Code L612-1). Shown in the terms of sale.
+   */
+  mediator?: {
+    name?: string | null;
+    website?: string | null;
+    address?: string | null;
+  };
+  /**
    * Linked automatically in the footer and in the contact form notice.
    */
   legalPages?: {
     legalNotice?: (number | null) | Page;
     privacyPolicy?: (number | null) | Page;
     terms?: (number | null) | Page;
+    termsOfSale?: (number | null) | Page;
   };
   /**
    * Official profiles, declared to search engines.
@@ -2620,12 +2707,20 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         name?: T;
         email?: T;
       };
+  mediator?:
+    | T
+    | {
+        name?: T;
+        website?: T;
+        address?: T;
+      };
   legalPages?:
     | T
     | {
         legalNotice?: T;
         privacyPolicy?: T;
         terms?: T;
+        termsOfSale?: T;
       };
   socials?:
     | T

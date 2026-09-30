@@ -6,7 +6,8 @@ import { fileURLToPath } from 'url'
 import { contactForm as contactFormData, contactFormTranslation } from './contact-form'
 import { contact as contactPageData } from './contact-page'
 import { home } from './home'
-import { legalPage, legalSettings, type LegalKind } from './legal-pages'
+import { legalPage, legalSettings, mediatorSettings, type LegalKind } from './legal-pages'
+import { demoPdf, paidDownload } from './paid-download'
 import { image1 } from './image-1'
 import { image2 } from './image-2'
 import { imageHero1 } from './image-hero-1'
@@ -16,6 +17,7 @@ import { post3 } from './post-3'
 import { preserveIds } from './preserve-ids'
 import { siteSettingsCopy } from './site-settings'
 import type { Page } from '@/payload-types'
+import { modules } from '@/client/modules'
 import { locales, type Locale } from '@/utilities/getLocalizedPath'
 
 const collections: CollectionSlug[] = [
@@ -133,6 +135,14 @@ export const seed = async ({
   // Sequential: parallel deletes of FK-linked tables (pages/media/forms...) deadlock (Postgres 40P01).
   for (const collection of collections) {
     await payload.db.deleteMany({ collection, req, where: {} })
+  }
+
+  if (modules.payments) {
+    // Purchases reference paid downloads, which reference private files (deleted via the
+    // Local API so the files on disk go too).
+    await payload.db.deleteMany({ collection: 'purchases', req, where: {} })
+    await payload.db.deleteMany({ collection: 'paid-downloads', req, where: {} })
+    await payload.delete({ collection: 'private-files', where: {}, depth: 0 })
   }
 
   for (const collection of collections) {
@@ -296,6 +306,30 @@ export const seed = async ({
     },
   })
 
+  let paidDownloadId: number | undefined
+  if (modules.payments) {
+    payload.logger.info(`— Seeding paid download (${locales[0]})...`)
+    const privateFile = await payload.create({
+      collection: 'private-files',
+      data: {},
+      file: demoPdf(),
+    })
+    const paid = await payload.create({
+      collection: 'paid-downloads',
+      depth: 0,
+      data: { ...paidDownload(locales[0]), file: privateFile.id },
+    })
+    paidDownloadId = paid.id
+    for (const locale of additionalLocales) {
+      await payload.update({
+        collection: 'paid-downloads',
+        id: paid.id,
+        locale,
+        data: paidDownload(locale),
+      })
+    }
+  }
+
   payload.logger.info(`— Seeding pages (${locales[0]})...`)
 
   const homeImages = [image1Doc, image2Doc, image3Doc, imageHomeDoc]
@@ -309,6 +343,7 @@ export const seed = async ({
         images: homeImages,
         locale: locales[0],
         metaImage: image2Doc,
+        paidDownloadId,
       }),
     }),
     payload.create({
@@ -321,8 +356,13 @@ export const seed = async ({
   payload.logger.info(`— Seeding legal pages (${locales[0]})...`)
 
   // Sequential: parallel creates deadlock (Postgres 40P01).
-  const legalKinds: LegalKind[] = ['legalNotice', 'privacyPolicy', 'terms']
-  const legalDocs = {} as Record<LegalKind, Page>
+  const legalKinds: LegalKind[] = [
+    'legalNotice',
+    'privacyPolicy',
+    'terms',
+    ...(modules.payments ? (['termsOfSale'] as const) : []),
+  ]
+  const legalDocs = {} as Partial<Record<LegalKind, Page>>
   for (const kind of legalKinds) {
     legalDocs[kind] = await payload.create({
       collection: 'pages',
@@ -351,10 +391,12 @@ export const seed = async ({
       data: {
         ...siteSettingsCopy[locales[0]],
         ...legalSettings,
+        ...(modules.payments ? mediatorSettings : {}),
         legalPages: {
-          legalNotice: legalDocs.legalNotice.id,
-          privacyPolicy: legalDocs.privacyPolicy.id,
-          terms: legalDocs.terms.id,
+          legalNotice: legalDocs.legalNotice?.id,
+          privacyPolicy: legalDocs.privacyPolicy?.id,
+          terms: legalDocs.terms?.id,
+          ...(modules.payments ? { termsOfSale: legalDocs.termsOfSale?.id } : {}),
         },
       },
     }),
@@ -479,7 +521,13 @@ export const seed = async ({
         locale,
         data: preserveIds(
           homePage,
-          home({ heroImage: imageHomeDoc, images: homeImages, locale, metaImage: image2Doc }),
+          home({
+            heroImage: imageHomeDoc,
+            images: homeImages,
+            locale,
+            metaImage: image2Doc,
+            paidDownloadId,
+          }),
         ),
       }),
       payload.update({
@@ -493,11 +541,12 @@ export const seed = async ({
     payload.logger.info(`— Translating legal pages into ${locale}...`)
 
     for (const kind of legalKinds) {
+      const doc = legalDocs[kind]!
       await payload.update({
         collection: 'pages',
-        id: legalDocs[kind].id,
+        id: doc.id,
         locale,
-        data: preserveIds(legalDocs[kind], legalPage(kind, locale)),
+        data: preserveIds(doc, legalPage(kind, locale)),
       })
     }
 
@@ -527,12 +576,13 @@ export const seed = async ({
     ])
   }
 
-  payload.logger.info(`— Enabling blog feature flag...`)
+  payload.logger.info(`— Enabling feature flags...`)
 
   await payload.updateGlobal({
     slug: 'feature-flags',
     data: {
       blog: true,
+      ...(modules.payments ? { payments: true } : {}),
     },
     context: {
       disableRevalidate: true,

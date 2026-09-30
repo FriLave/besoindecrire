@@ -8,6 +8,8 @@ import { FAQ } from '../../blocks/FAQ/config'
 import { FeatureGrid } from '../../blocks/FeatureGrid/config'
 import { LegalNotice } from '../../blocks/LegalNotice/config'
 import { PrivacyPolicy } from '../../blocks/PrivacyPolicy/config'
+import { PaidDownloadBlock } from '../../blocks/PaidDownloadBlock/config'
+import { TermsOfSale } from '../../blocks/TermsOfSale/config'
 import { Gallery } from '../../blocks/Gallery/config'
 import { LogoCloud } from '../../blocks/LogoCloud/config'
 import { PricingTable } from '../../blocks/PricingTable/config'
@@ -103,6 +105,7 @@ export const Pages: CollectionConfig<'pages'> = {
                 LegalNotice,
                 PrivacyPolicy,
                 ...(modules.blog ? [Archive] : []),
+                ...(modules.payments ? [PaidDownloadBlock, TermsOfSale] : []),
               ],
               required: true,
               admin: {

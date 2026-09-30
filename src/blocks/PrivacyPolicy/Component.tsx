@@ -7,6 +7,7 @@ import type { Locale } from '@/utilities/getLocalizedPath'
 import { LegalSection, LegalWrapper, MissingWarning } from '@/components/LegalSection'
 import RichText from '@/components/RichText'
 import { getLegal } from '@/i18n/legal'
+import { isFeatureEnabled } from '@/utilities/features'
 import { getCachedSiteSettings } from '@/utilities/getGlobals'
 
 export const PrivacyPolicyBlock: React.FC<Props & { locale: Locale }> = async ({
@@ -14,6 +15,7 @@ export const PrivacyPolicyBlock: React.FC<Props & { locale: Locale }> = async ({
   locale,
 }) => {
   const settings = await getCachedSiteSettings(locale)()
+  const payments = await isFeatureEnabled('payments')
   const { isEnabled: draft } = await draftMode()
   const legal = getLegal(locale)
   const t = legal.privacy
@@ -41,6 +43,13 @@ export const PrivacyPolicyBlock: React.FC<Props & { locale: Locale }> = async ({
       <LegalSection title={t.legalBasis}>
         <p>{t.legalBasisText}</p>
       </LegalSection>
+      {payments && (
+        <LegalSection title={legal.purchases.title}>
+          <p>{legal.purchases.text}</p>
+          <p>{legal.purchases.processor}</p>
+          <p>{legal.purchases.retention}</p>
+        </LegalSection>
+      )}
       <LegalSection title={t.recipients}>
         <p>{t.recipientsText(settings?.host?.name ?? undefined)}</p>
       </LegalSection>

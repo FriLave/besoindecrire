@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
 import { adminOrAbove } from '@/access/roles'
+import { modules } from '@/client/modules'
 import { revalidateSiteSettings } from './hooks/revalidateSiteSettings'
 
 const mediaField = (
@@ -331,6 +332,34 @@ export const SiteSettings: GlobalConfig = {
                 },
               ],
             },
+            ...(modules.payments
+              ? [
+                  {
+                    name: 'mediator',
+                    type: 'group' as const,
+                    label: { en: 'Consumer mediator', fr: 'Médiateur de la consommation' },
+                    admin: {
+                      description: {
+                        en: 'Required for B2C sales (French Consumer Code L612-1). Shown in the terms of sale.',
+                        fr: 'Obligatoire pour la vente B2C (C. conso L612-1). Affiché dans les CGV.',
+                      },
+                    },
+                    fields: [
+                      { name: 'name', type: 'text' as const, label: { en: 'Name', fr: 'Nom' } },
+                      {
+                        name: 'website',
+                        type: 'text' as const,
+                        label: { en: 'Website (URL)', fr: 'Site web (URL)' },
+                      },
+                      {
+                        name: 'address',
+                        type: 'textarea' as const,
+                        label: { en: 'Address', fr: 'Adresse' },
+                      },
+                    ],
+                  },
+                ]
+              : []),
             {
               name: 'legalPages',
               type: 'group',
@@ -360,6 +389,16 @@ export const SiteSettings: GlobalConfig = {
                   relationTo: 'pages',
                   label: { en: 'Terms of use', fr: "Conditions d'utilisation (CGU)" },
                 },
+                ...(modules.payments
+                  ? [
+                      {
+                        name: 'termsOfSale',
+                        type: 'relationship' as const,
+                        relationTo: 'pages' as const,
+                        label: { en: 'Terms of sale', fr: 'Conditions générales de vente (CGV)' },
+                      },
+                    ]
+                  : []),
               ],
             },
           ],

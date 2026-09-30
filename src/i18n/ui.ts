@@ -48,6 +48,27 @@ export type UIDictionary = {
     requiredIndicator: string
     somethingWentWrong: string
   }
+  payments: {
+    taxIncluded: string
+    email: string
+    waiver: string
+    termsLink: string
+    buy: string
+    buying: string
+    errorEmail: string
+    errorGeneric: string
+    resendPrompt: string
+    resendCta: string
+    resendSubmit: string
+    resendSent: string
+    successTitle: string
+    successChecking: string
+    successReady: string
+    successDownload: string
+    successPending: string
+    successMissing: string
+    backHome: string
+  }
   localeSwitcher: {
     /** aria-label / visible copy: "Switch to <language>". */
     switchTo: (targetLanguageLabel: string) => string
@@ -113,6 +134,30 @@ const dictionaries: Record<Locale, UIDictionary> = {
       requiredIndicator: '(requis)',
       somethingWentWrong: "Une erreur s'est produite.",
     },
+    payments: {
+      taxIncluded: 'TTC',
+      email: 'Votre adresse email',
+      waiver:
+        'Je demande l’accès immédiat au contenu numérique et je renonce expressément à mon droit de rétractation.',
+      termsLink: 'Conditions générales de vente',
+      buy: 'Acheter',
+      buying: 'Redirection vers le paiement...',
+      errorEmail: 'Veuillez saisir une adresse email valide.',
+      errorGeneric: 'Le paiement n’a pas pu être lancé. Veuillez réessayer.',
+      resendPrompt: 'Vous avez déjà acheté ?',
+      resendCta: 'Recevoir à nouveau le lien',
+      resendSubmit: 'Envoyer le lien',
+      resendSent:
+        'Si un achat correspond à cette adresse, un email avec le lien de téléchargement vient d’être envoyé.',
+      successTitle: 'Merci pour votre achat',
+      successChecking: 'Confirmation du paiement en cours...',
+      successReady: 'Votre paiement est confirmé. Votre contenu est prêt.',
+      successDownload: 'Télécharger',
+      successPending:
+        'Votre lien de téléchargement arrive par email. Pensez à vérifier vos courriers indésirables.',
+      successMissing: 'Aucun achat à afficher.',
+      backHome: 'Retour à l’accueil',
+    },
     localeSwitcher: {
       switchTo: (targetLanguageLabel) => `Passer en ${targetLanguageLabel}`,
     },
@@ -168,6 +213,30 @@ const dictionaries: Record<Locale, UIDictionary> = {
       privacyLink: 'Privacy policy',
       requiredIndicator: '(required)',
       somethingWentWrong: 'Something went wrong.',
+    },
+    payments: {
+      taxIncluded: 'incl. VAT',
+      email: 'Your email address',
+      waiver:
+        'I request immediate access to the digital content and I expressly waive my right of withdrawal.',
+      termsLink: 'Terms of sale',
+      buy: 'Buy',
+      buying: 'Redirecting to payment...',
+      errorEmail: 'Please enter a valid email address.',
+      errorGeneric: 'Payment could not be started. Please try again.',
+      resendPrompt: 'Already bought it?',
+      resendCta: 'Get the link again',
+      resendSubmit: 'Send the link',
+      resendSent:
+        'If a purchase matches this address, an email with the download link has just been sent.',
+      successTitle: 'Thank you for your purchase',
+      successChecking: 'Confirming your payment...',
+      successReady: 'Your payment is confirmed. Your content is ready.',
+      successDownload: 'Download',
+      successPending:
+        'Your download link is on its way by email. Remember to check your spam folder.',
+      successMissing: 'No purchase to show.',
+      backHome: 'Back to home',
     },
     localeSwitcher: {
       switchTo: (targetLanguageLabel) => `Switch to ${targetLanguageLabel}`,
