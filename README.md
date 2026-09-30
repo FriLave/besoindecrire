@@ -87,6 +87,31 @@ Prérequis :
 
 `vercel.json` déclenche chaque jour à 3 h `GET /api/payload-jobs/run?queue=maintenance` : cet endpoint planifie les tâches dues (`handleSchedules`) puis exécute la queue. Sur Vercel, `autoRun` et `instrumentation.ts` sont désactivés (pas de process long). L'accès est accepté avec `CRON_SECRET` uniquement quand `VERCEL` est défini. Les plans Hobby limitent les crons à une exécution par jour.
 
+### Sauvegardes
+
+Le service `backup` de `docker-compose.prod.yml` (image `postgres:16-alpine` + `rclone`) lance `pg_dump -Fc` chaque jour à 2 h UTC (`BACKUP_CRON`, avant la purge de 3 h). Variables : voir `.env.example`.
+
+- **Mode local** (défaut) : dumps `payload-<horodatage UTC>.dump` dans le volume `backups`. Sans copie hors de la machine, ce mode ne protège pas d'une perte du serveur : copier le volume ailleurs.
+- **Mode S3** : si `BACKUP_S3_BUCKET` est défini (+ `BACKUP_S3_ENDPOINT`, `BACKUP_S3_REGION`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_S3_PREFIX` optionnel), le dump est envoyé vers le bucket (tout stockage compatible S3) et la copie locale supprimée.
+- **Rétention** : `BACKUP_RETENTION_DAYS` (30 par défaut), appliquée au volume local ou au bucket à chaque sauvegarde.
+- Sauvegarde immédiate : `docker compose -f docker-compose.prod.yml run --rm backup backup.sh`.
+- Les médias (`media`, `private-files`) ne sont pas inclus : les sauvegarder séparément (snapshot des volumes), ou passer en stockage S3.
+
+**Restauration** (destructive : `--clean` remplace les objets de la base cible) :
+
+```bash
+# lister les dumps locaux
+docker compose -f docker-compose.prod.yml run --rm backup ls /backups
+# depuis le volume (ou depuis le bucket : donner le nom de l'objet, sans préfixe)
+docker compose -f docker-compose.prod.yml run --rm backup restore.sh /backups/payload-20260101T020000Z.dump
+```
+
+Ajouter `--yes` pour ne pas demander de confirmation. Arrêter `app` avant de restaurer en production. Pour restaurer dans une autre base, surcharger `DATABASE_URL` (`run --rm -e DATABASE_URL=postgres://payload:<mdp>@postgres:5432/restored backup restore.sh ...`, après `create database restored`).
+
+**Test de restauration à chaque livraison** : lancer une sauvegarde, la restaurer dans une base vide (`restored`, voir ci-dessus), comparer `select count(*) from pages` entre les deux bases, puis supprimer la base jetable.
+
+**Vercel** : le service compose ne s'applique pas. S'appuyer sur les sauvegardes du Postgres managé (Neon ou Supabase : restauration à un instant donné, PITR) et vérifier la durée de rétention du plan choisi.
+
 ### Checklist de mise en production
 
 - [ ] `NEXT_PUBLIC_SERVER_URL` et domaine canonique (`siteUrl` dans les réglages du site) corrects, en https.
@@ -95,7 +120,7 @@ Prérequis :
 - [ ] Module paiement : `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, webhook Stripe vers `https://<domaine>/api/webhooks/stripe`.
 - [ ] Vercel : `CRON_SECRET` défini.
 - [ ] Secrets (`PAYLOAD_SECRET`, `PREVIEW_SECRET`) générés aléatoirement, mot de passe Postgres changé.
-- [ ] Sauvegardes de la base et des volumes en place (à venir).
+- [ ] Sauvegardes en place et restauration testée (voir « Sauvegardes »).
 - [ ] Données de démo retirées, textes légaux relus.
 
 ## Zone client
@@ -104,6 +129,21 @@ Prérequis :
 pour donner son identité à un nouveau projet (nom du site, description par défaut, etc.) :
 le reste du code (`src/collections`, `src/blocks`, `src/utilities`...) est du code amont
 partagé, à ne pas modifier pour une simple personnalisation client.
+
+### Nouveau client : `pnpm client:init`
+
+```bash
+pnpm client:init          # interactif : nom, description, couleur de marque (#hex ou oklch), blog ?, paiement ?, domaine de prod
+pnpm client:init --yes    # garde les valeurs actuelles (idempotent)
+pnpm client:init --force  # régénère aussi PAYLOAD_SECRET / PREVIEW_SECRET dans un .env existant
+```
+
+Réécrit `src/client/site.ts`, les couleurs `--brand` / `--brand-foreground` (clair et sombre) de
+`src/client/theme.css`, `src/client/modules.ts` et le `name` de `package.json`. Crée `.env`
+depuis `.env.example` avec des secrets aléatoires s'il n'existe pas. Ensuite : `docker compose up -d`,
+`pnpm dev`, `/admin/create-first-user`, éventuellement `pnpm seed:local` (destructif), puis
+renseigner les réglages du site (`siteUrl`, onglet Légal). Changer les modules ne demande pas de
+`pnpm generate:types` : les types couvrent tous les modules.
 
 ## Scripts utiles
 

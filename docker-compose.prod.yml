@@ -31,9 +31,22 @@ services:
       retries: 10
     restart: unless-stopped
 
-  # backup: added by Lot 4 (pg_dump to S3 or a local volume).
+  # Daily pg_dump (BACKUP_CRON, default 02:00 UTC) to the `backups` volume, or to S3 if BACKUP_S3_BUCKET is set.
+  # One-off: `docker compose -f docker-compose.prod.yml run --rm backup backup.sh`
+  backup:
+    build: scripts/backup
+    env_file: ${ENV_FILE:-.env}
+    environment:
+      DATABASE_URL: postgres://payload:${POSTGRES_PASSWORD:-payload}@postgres:5432/payload
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - backups:/backups
+    restart: unless-stopped
 
 volumes:
   media:
   private-files:
   postgres-data:
+  backups:
