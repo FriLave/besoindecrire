@@ -4,7 +4,7 @@ import { retentionCutoff } from '@/utilities/retention'
 
 export const purgeFormSubmissions: TaskConfig<'purgeFormSubmissions'> = {
   slug: 'purgeFormSubmissions',
-  schedule: [{ cron: '0 3 * * *', queue: 'default' }],
+  schedule: [{ cron: '0 3 * * *', queue: 'maintenance' }],
   handler: async ({ req }) => {
     const res = await req.payload.delete({
       collection: 'form-submissions',

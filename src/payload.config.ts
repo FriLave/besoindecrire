@@ -86,21 +86,12 @@ export default buildConfig({
   jobs: {
     access: {
       run: ({ req }: { req: PayloadRequest }): boolean => {
-        // Allow logged in users to execute this endpoint (default)
-        if (req.user) return true
-
-        const secret = process.env.CRON_SECRET
-        if (!secret) return false
-
-        // If there is no logged in user, then check
-        // for the Vercel Cron secret to be present as an
-        // Authorization header:
-        const authHeader = req.headers.get('authorization')
-        return authHeader === `Bearer ${secret}`
+        // Logged-in users only; purge runs on Payload's built-in cron (autoRun).
+        return Boolean(req.user)
       },
     },
-    // Self-hosted: runs the queued purge. On serverless (Vercel), hit /api/payload-jobs/run with CRON_SECRET instead.
-    autoRun: [{ cron: '*/15 * * * *', queue: 'default' }],
+    // Needs a long-running Node process. Same queue as the task schedule: autoRun enqueues due schedules, then runs them.
+    autoRun: [{ cron: '*/15 * * * *', queue: 'maintenance', limit: 10 }],
     tasks: [purgeFormSubmissions],
   },
 })

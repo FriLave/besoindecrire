@@ -44,8 +44,8 @@ describe('purgeFormSubmissions + media alt', () => {
     })
     created.push(oldSub.id, recentSub.id)
 
-    await payload.jobs.queue({ task: 'purgeFormSubmissions', input: {} })
-    await payload.jobs.run()
+    await payload.jobs.queue({ task: 'purgeFormSubmissions', input: {}, queue: 'maintenance' })
+    await payload.jobs.run({ queue: 'maintenance' })
 
     const left = await payload.find({
       collection: 'form-submissions',

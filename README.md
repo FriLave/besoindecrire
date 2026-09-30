@@ -89,7 +89,7 @@ Inclus, prêt à remplir :
 - Blocks `LegalNotice` (mentions légales, LCEN art. 1-1) et `PrivacyPolicy` (RGPD art. 13), rendus depuis ces réglages. Les textes juridiques sont des gabarits fixes (`src/i18n/legal.ts`) : **indicatifs, à faire valider par le client, ils ne constituent pas un conseil juridique**. Un champ « Contenu complémentaire » permet d'ajouter du texte.
 - Pages seedées (fr/en) : mentions légales, politique de confidentialité, CGU génériques, avec des données de démo factices (« Exemple SAS »).
 - Mention RGPD éditable sous le formulaire de contact, sans case à cocher (base légale : demande de l'utilisateur).
-- Tâche Payload `purgeFormSubmissions` : supprime les messages du formulaire de plus de 3 ans (durée CNIL pour les prospects). Elle est planifiée chaque jour à 3 h (`autoRun` en auto-hébergé ; sur Vercel, appeler `/api/payload-jobs/run` avec `CRON_SECRET`).
+- Tâche Payload `purgeFormSubmissions` : supprime les messages du formulaire de plus de 3 ans (durée CNIL pour les prospects). Elle est planifiée chaque jour à 3 h (queue `maintenance`) par le cron intégré de Payload (`autoRun`), qui demande un process Node long-vivant (`pnpm start` / Docker) : limite connue en serverless.
 
 À renseigner par le client : tout l'onglet Légal (SIREN, RCS/RNE, capital, directeur de publication, hébergeur...), relecture des textes, et remplacement des données de démo avant mise en ligne.
 
