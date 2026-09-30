@@ -82,7 +82,7 @@ docker compose -f docker-compose.prod.yml up --build -d
 Prérequis :
 
 - Postgres managé (Neon, Supabase...) dans `DATABASE_URL`.
-- **Stockage S3 obligatoire** (pas encore implémenté, cf. migrations/S3) : le disque de Vercel n'est pas persistant, donc `public/media` et `private-files/` (le téléchargement payant lit le disque local) ne fonctionnent pas en l'état.
+- **Stockage distant obligatoire** : le disque de Vercel n'est pas persistant. Voir « Stockage des fichiers » (Vercel Blob ou S3/R2 pour les médias, S3/R2 pour les PDF payants).
 - Variables d'env du projet, dont `CRON_SECRET` (Vercel l'envoie en `Authorization: Bearer`).
 
 `vercel.json` déclenche chaque jour à 3 h `GET /api/payload-jobs/run?queue=maintenance` : cet endpoint planifie les tâches dues (`handleSchedules`) puis exécute la queue. Sur Vercel, `autoRun` et `instrumentation.ts` sont désactivés (pas de process long). L'accès est accepté avec `CRON_SECRET` uniquement quand `VERCEL` est défini. Les plans Hobby limitent les crons à une exécution par jour.
@@ -95,7 +95,7 @@ Le service `backup` de `docker-compose.prod.yml` (image `postgres:16-alpine` + `
 - **Mode S3** : si `BACKUP_S3_BUCKET` est défini (+ `BACKUP_S3_ENDPOINT`, `BACKUP_S3_REGION`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_S3_PREFIX` optionnel), le dump est envoyé vers le bucket (tout stockage compatible S3) et la copie locale supprimée.
 - **Rétention** : `BACKUP_RETENTION_DAYS` (30 par défaut), appliquée au volume local ou au bucket à chaque sauvegarde.
 - Sauvegarde immédiate : `docker compose -f docker-compose.prod.yml run --rm backup backup.sh`.
-- Les médias (`media`, `private-files`) ne sont pas inclus : les sauvegarder séparément (snapshot des volumes), ou passer en stockage S3.
+- Les médias (`media`, `private-files`) ne sont pas inclus : les sauvegarder séparément (snapshot des volumes, volume `garage-data` si Garage), ou passer en stockage S3 avec versioning/réplication chez le fournisseur.
 
 **Restauration** (destructive : `--clean` remplace les objets de la base cible) :
 
@@ -122,6 +122,43 @@ Ajouter `--yes` pour ne pas demander de confirmation. Arrêter `app` avant de re
 - [ ] Secrets (`PAYLOAD_SECRET`, `PREVIEW_SECRET`) générés aléatoirement, mot de passe Postgres changé.
 - [ ] Sauvegardes en place et restauration testée (voir « Sauvegardes »).
 - [ ] Données de démo retirées, textes légaux relus.
+
+## Stockage des fichiers
+
+`STORAGE_DRIVER` choisit où vont les médias (`media`) et les PDF payants (`private-files`). Code : `src/storage/`.
+
+| Driver           | Usage                                       | Variables                                                                                                                                 |
+| ---------------- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `local` (défaut) | disque : `public/media` et `private-files/` | aucune                                                                                                                                    |
+| `s3`             | AWS, R2, Scaleway, OVH, Garage, MinIO       | `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_REGION`, `S3_ENDPOINT` (hors AWS), `S3_FORCE_PATH_STYLE=true` (Garage/MinIO) |
+| `vercel-blob`    | médias uniquement                           | `BLOB_READ_WRITE_TOKEN`                                                                                                                   |
+
+- `STORAGE_DRIVER_PRIVATE` (défaut : `STORAGE_DRIVER`) permet un driver différent pour les PDF payants.
+- **Vercel Blob ne gère que des blobs publics** (`access: 'public'` seulement dans `@payloadcms/storage-vercel-blob` 3.90) : une URL non devinable mais publique ferait fuiter les PDF payants. Avec le module paiement, `STORAGE_DRIVER=vercel-blob` exige donc `STORAGE_DRIVER_PRIVATE=s3`, sinon l'app refuse de démarrer.
+- **Médias (publics)** : si `S3_PUBLIC_URL` (CDN, domaine public R2) est défini, les URLs pointent directement vers lui (plus rapide, `next/image` l'autorise automatiquement). Sinon, ils passent par Payload (`/api/media/file/...`).
+- **PDF payants** : jamais d'URL directe. Bucket privé, lecture uniquement via Payload (accès admin) ou `/api/downloads/:token` (lien signé). `S3_PRIVATE_BUCKET` optionnel : par défaut même bucket, sous le préfixe `private-files/`.
+- Le schéma de base est identique quel que soit le driver (champs cachés `prefix` et `_objectKey`) : changer de driver ne demande pas de migration.
+
+### Garage en local
+
+```bash
+docker compose up -d garage && pnpm storage:init
+```
+
+Le script (idempotent) configure Garage (layout, clé, buckets `media` et `private-files`) et affiche les lignes à coller dans `.env` (`STORAGE_DRIVER=s3`...). Sans cela, `.env` reste en `local`. En local, ne pas définir `S3_PUBLIC_URL` : Next.js refuse de charger des images depuis une adresse loopback.
+
+### Recettes Vercel
+
+- Vercel Blob (médias) + S3/R2 (PDF payants) : `STORAGE_DRIVER=vercel-blob`, `BLOB_READ_WRITE_TOKEN`, `STORAGE_DRIVER_PRIVATE=s3` + `S3_*`.
+- S3/R2 pour tout : `STORAGE_DRIVER=s3` + `S3_*` (+ `S3_PUBLIC_URL` pour servir les médias en direct).
+
+### Docker auto-hébergé
+
+`docker compose -f docker-compose.prod.yml --profile storage up -d` ajoute Garage (volumes `garage-meta`, `garage-data`). Sans profil : volumes disque (`local`) ou S3 externe. Le stockage n'est pas dans `pg_dump` : sauvegarder le volume `garage-data`, ou s'appuyer sur le versioning/la réplication du fournisseur S3. Initialiser les buckets comme en local (`docker compose -f docker-compose.prod.yml exec garage /garage ...`, voir `scripts/storage/garage-init.sh`) et changer `rpc_secret` dans `docker/garage/garage.toml`.
+
+### Migrer des fichiers existants vers S3
+
+Copier les dossiers en gardant les noms de fichiers : `rclone sync public/media s3:media` et `rclone sync private-files s3:private-files` (ou `aws s3 sync`). Avec `S3_PRIVATE_BUCKET` absent, cibler `s3:<bucket>/private-files`.
 
 ## Zone client
 
@@ -153,6 +190,7 @@ pnpm build                # build de production (Next.js)
 pnpm start                # démarre le serveur en production
 pnpm generate:types        # régénère les types TypeScript depuis la config Payload
 pnpm generate:importmap    # régénère l'import map des composants admin custom
+pnpm storage:init          # Garage local : buckets + clé, affiche les variables S3
 pnpm payload migrate       # applique les migrations de base de données
 pnpm payload migrate:create # crée une nouvelle migration
 pnpm test:int              # tests d'intégration (Vitest)

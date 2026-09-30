@@ -13,6 +13,7 @@ import { revalidateRedirects } from '@/hooks/revalidateRedirects'
 import type { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
+import { buildStoragePlugins } from '@/storage'
 import { privacyNoticeDefaults } from '@/i18n/legal'
 import type { Page, Post } from '@/payload-types'
 import { SITE_NAME } from '@/client/site'
@@ -66,6 +67,7 @@ const localizeFormFieldLabels = (fields: Field[]): Field[] =>
   })
 
 export const plugins: Plugin[] = [
+  ...buildStoragePlugins(process.env, { payments: modules.payments }),
   redirectsPlugin({
     collections: modules.blog ? ['pages', 'posts'] : ['pages'],
     overrides: {

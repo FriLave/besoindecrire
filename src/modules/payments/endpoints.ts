@@ -180,20 +180,35 @@ export const download: PayloadHandler = gated(async (req) => {
         })
         .catch(() => null)
     : null
-  // ponytail: local disk only; with an S3 adapter, read via the storage adapter/signed URL instead.
   if (!file?.filename || path.basename(file.filename) !== file.filename)
     return json({ error: 'File not found' }, 404)
 
+  const headers = {
+    'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(file.filename)}`,
+    'Cache-Control': 'private, no-store',
+  }
+
+  // Remote storage (S3...): the storage plugin registers a read handler on the collection.
+  const handlers = payload.collections['private-files'].config.upload.handlers ?? []
+  for (const handler of handlers) {
+    const res = await handler(req, {
+      doc: file,
+      headers: new Headers(headers),
+      params: { collection: 'private-files', filename: file.filename },
+    })
+    if (res instanceof Response) return res.ok ? res : json({ error: 'File not found' }, 404)
+  }
+
+  // Local disk (no storage plugin).
   const full = path.join(privateFilesDir, file.filename)
   const size = (await stat(full).catch(() => null))?.size
   if (size === undefined) return json({ error: 'File not found' }, 404)
 
   return new Response(Readable.toWeb(createReadStream(full)) as ReadableStream, {
     headers: {
+      ...headers,
       'Content-Type': file.mimeType || 'application/octet-stream',
       'Content-Length': String(size),
-      'Content-Disposition': `attachment; filename*=UTF-8''${encodeURIComponent(file.filename)}`,
-      'Cache-Control': 'private, no-store',
     },
   })
 })

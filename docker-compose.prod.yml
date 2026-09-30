@@ -45,7 +45,23 @@ services:
       - backups:/backups
     restart: unless-stopped
 
+  # Self-hosted S3-compatible storage (opt-in): `docker compose -f docker-compose.prod.yml --profile storage up -d`,
+  # then STORAGE_DRIVER=s3 and S3_ENDPOINT=http://garage:3900 (see README "Stockage des fichiers").
+  # Not reachable from outside; put a reverse proxy on :3902 only if you want S3_PUBLIC_URL.
+  garage:
+    profiles: [storage]
+    image: dxflrs/garage:v2.2.0
+    environment:
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET:?set GARAGE_RPC_SECRET (openssl rand -hex 32)}
+    volumes:
+      - ./docker/garage/garage.toml:/etc/garage.toml:ro
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+    restart: unless-stopped
+
 volumes:
+  garage-meta:
+  garage-data:
   media:
   private-files:
   postgres-data:
