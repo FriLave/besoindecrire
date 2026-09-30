@@ -40,7 +40,7 @@ les conventions de code.
    (première inscription, `/admin/create-first-user`).
 
 5. Optionnel : peupler la base avec du contenu de démonstration. En développement
-   uniquement (l'endpoint est désactivé en production), une fois connecté à l'admin :
+   uniquement (l'endpoint est désactivé en production), une fois connecté à l'admin avec un compte superadmin :
 
    ```bash
    curl -X POST http://localhost:3000/next/seed \
