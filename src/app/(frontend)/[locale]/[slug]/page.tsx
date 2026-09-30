@@ -10,8 +10,12 @@ import { homeStatic } from '@/endpoints/seed/home-static'
 
 import { RenderBlocks } from '@/blocks/RenderBlocks'
 import { RenderHero } from '@/heros/RenderHero'
+import { JsonLd } from '@/components/JsonLd'
+import { getUI } from '@/i18n/ui'
+import { getSiteUrl } from '@/utilities/getSiteUrl'
+import { breadcrumbs } from '@/utilities/jsonLd'
 import { generateMeta } from '@/utilities/generateMeta'
-import { isLocale, locales, type Locale, type LocalizedValue } from '@/utilities/getLocalizedPath'
+import { getLocalizedPath, isLocale, locales, type Locale, type LocalizedValue } from '@/utilities/getLocalizedPath'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import type { AlternateLocaleLink } from '@/providers/AlternateLocale'
@@ -99,8 +103,18 @@ export default async function Page({ params: paramsPromise }: Args) {
   }
   const alternateLink: AlternateLocaleLink = { locale: otherLocale, slug: alternateSlug }
 
+  const siteUrl = await getSiteUrl()
+
   return (
     <article className="pt-16 pb-24">
+      {decodedSlug !== 'home' && (
+        <JsonLd
+          data={breadcrumbs([
+            { name: getUI(locale).breadcrumb.home, url: siteUrl + getLocalizedPath(locale, 'home') },
+            { name: page.title, url: siteUrl + getLocalizedPath(locale, decodedSlug) },
+          ])}
+        />
+      )}
       <PageClient alternateLink={alternateLink} />
       {/* Allows redirects for valid pages too */}
       <PayloadRedirects disableNotFound locale={locale} url={url} />

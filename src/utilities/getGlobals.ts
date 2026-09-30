@@ -36,12 +36,8 @@ export const getCachedGlobal = <T extends Global>(slug: T, locale: Locale, depth
   })
 
 /**
- * Convenience cached getter for the `site-settings` global, following the
- * same pattern used by `getCachedGlobal('header', ...)` / `('footer', ...)`
- * in `src/Header/Component.tsx` / `src/Footer/Component.tsx`.
- *
- * Not yet wired into any consumer: `src/client/site.ts`'s `SITE_NAME` /
- * `SITE_DESCRIPTION` remain the build-time fallback until a later
- * routing/SEO pass rewires callers to read from this global instead.
+ * Cached getter for the `site-settings` global (depth 1: logo, favicon and
+ * OG image are populated media docs). `SITE_NAME` / `SITE_DESCRIPTION` in
+ * `src/client/site.ts` remain the fallback while the global is empty.
  */
-export const getCachedSiteSettings = (locale: Locale) => getCachedGlobal('site-settings', locale, 0)
+export const getCachedSiteSettings = (locale: Locale) => getCachedGlobal('site-settings', locale, 1)

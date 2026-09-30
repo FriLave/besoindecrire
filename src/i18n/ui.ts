@@ -25,6 +25,9 @@ export type UIDictionary = {
     categoriesPlural: string
     categoriesSingular: string
   }
+  breadcrumb: {
+    home: string
+  }
   blog: {
     author: string
     /** Range label, e.g. "Showing 1 - 12 of 30 posts". */
@@ -82,6 +85,7 @@ const dictionaries: Record<Locale, UIDictionary> = {
       categoriesPlural: 'Catégories',
       categoriesSingular: 'Catégorie',
     },
+    breadcrumb: { home: 'Accueil' },
     blog: {
       author: 'Auteur',
       range: (start, end, total) =>
@@ -136,6 +140,7 @@ const dictionaries: Record<Locale, UIDictionary> = {
       categoriesPlural: 'Categories',
       categoriesSingular: 'Category',
     },
+    breadcrumb: { home: 'Home' },
     blog: {
       author: 'Author',
       range: (start, end, total) =>

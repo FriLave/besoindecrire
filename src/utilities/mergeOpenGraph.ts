@@ -45,6 +45,5 @@ export const mergeOpenGraph = (
   return {
     ...defaultOpenGraph,
     ...og,
-    images: og?.images,
   }
 }

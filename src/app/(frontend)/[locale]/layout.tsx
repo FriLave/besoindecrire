@@ -16,7 +16,11 @@ import { draftMode } from 'next/headers'
 import { redirect } from 'next/navigation'
 
 import '../globals.css'
-import { getServerSideURL } from '@/utilities/getURL'
+import { getSiteUrl } from '@/utilities/getSiteUrl'
+import { isFeatureEnabled } from '@/utilities/features'
+import { JsonLd } from '@/components/JsonLd'
+import { organization, website } from '@/utilities/jsonLd'
+import { getImageURL } from '@/utilities/generateMeta'
 import { defaultLocale, getLocalizedPath, isLocale, locales } from '@/utilities/getLocalizedPath'
 
 export function generateStaticParams() {
@@ -47,6 +51,11 @@ export default async function RootLayout({ children, params }: Args) {
 
   const locale = localeParam
 
+  const settings = await getCachedSiteSettings(locale)()
+  const siteName = settings?.siteName || SITE_NAME
+  const siteUrl = await getSiteUrl()
+  const hasSearch = await isFeatureEnabled('blog')
+
   return (
     <html
       className={cn(GeistSans.variable, GeistMono.variable)}
@@ -62,9 +71,10 @@ export default async function RootLayout({ children, params }: Args) {
         <noscript>
           <style>{`html { opacity: initial; }`}</style>
         </noscript>
-        <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
       <body>
+        <JsonLd data={organization(settings, siteName, siteUrl)} />
+        <JsonLd data={website(siteName, siteUrl, locale, { search: hasSearch })} />
         <Providers>
           <AdminBar
             adminBarProps={{
@@ -89,12 +99,24 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
   const siteSettings = await getCachedSiteSettings(locale)()
   const siteName = siteSettings?.siteName || SITE_NAME
   const siteDescription = siteSettings?.siteDescription || SITE_DESCRIPTION
+  const siteUrl = await getSiteUrl()
+  const ogImage = getImageURL(siteSettings?.defaultOgImage, siteUrl)
+  const favicon = siteSettings?.favicon
+  const faviconUrl = typeof favicon === 'object' && favicon?.url ? favicon.url : '/favicon.svg'
 
   return {
-    metadataBase: new URL(getServerSideURL()),
-    openGraph: mergeOpenGraph(undefined, { locale, siteName, siteDescription }),
+    metadataBase: new URL(siteUrl),
+    icons: { icon: [{ url: faviconUrl, ...(faviconUrl.endsWith('.svg') ? { type: 'image/svg+xml' } : {}) }] },
+    openGraph: mergeOpenGraph(
+      { images: ogImage ? [{ url: ogImage }] : undefined },
+      { locale, siteName, siteDescription },
+    ),
     twitter: {
       card: 'summary_large_image',
+      title: siteName,
+      description: siteDescription,
+      images: ogImage ? [ogImage] : undefined,
     },
+    ...(siteSettings?.noIndex ? { robots: { index: false, follow: false } } : {}),
   }
 }

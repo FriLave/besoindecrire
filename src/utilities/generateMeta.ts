@@ -4,19 +4,19 @@ import type { Media, Page, Post, Config } from '../payload-types'
 
 import { SITE_DESCRIPTION, SITE_NAME } from '@/client/site'
 import { mergeOpenGraph } from './mergeOpenGraph'
-import { getServerSideURL } from './getURL'
+import { getSiteUrl } from './getSiteUrl'
 import { getCachedSiteSettings } from './getGlobals'
 import { defaultLocale, getLocalizedPath, locales, type Locale, type LocalizedValue } from './getLocalizedPath'
 
-const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
-  if (!image || typeof image !== 'object' || !('url' in image)) {
+export const getImageURL = (
+  image: Media | Config['db']['defaultIDType'] | null | undefined,
+  siteUrl: string,
+) => {
+  if (!image || typeof image !== 'object' || !('url' in image) || !image.url) {
     return undefined
   }
 
-  const serverUrl = getServerSideURL()
-  const ogUrl = image.sizes?.og?.url
-
-  return ogUrl ? serverUrl + ogUrl : serverUrl + image.url
+  return siteUrl + (image.sizes?.og?.url || image.url)
 }
 
 export const generateMeta = async (args: {
@@ -40,10 +40,10 @@ export const generateMeta = async (args: {
 }): Promise<Metadata> => {
   const { doc, locale, slug, localizedSlugs, collection = 'pages' } = args
 
-  const serverUrl = getServerSideURL()
-  const ogImage = getImageURL(doc?.meta?.image)
-
+  const serverUrl = await getSiteUrl()
   const siteSettings = await getCachedSiteSettings(locale)()
+  const ogImage =
+    getImageURL(doc?.meta?.image, serverUrl) ?? getImageURL(siteSettings?.defaultOgImage, serverUrl)
   const siteName = siteSettings?.siteName || SITE_NAME
   const siteDescription = siteSettings?.siteDescription || SITE_DESCRIPTION
 
@@ -60,27 +60,26 @@ export const generateMeta = async (args: {
   // x-default always points at the default-locale (fr) URL.
   languages['x-default'] = `${serverUrl}${getLocalizedPath(defaultLocale, slugFor(defaultLocale), collection)}`
 
+  const description = doc?.meta?.description || siteDescription
+  const images = ogImage ? [{ url: ogImage }] : undefined
+
   return {
-    description: doc?.meta?.description,
+    description,
+    ...(siteSettings?.noIndex ? { robots: { index: false, follow: false } } : {}),
     alternates: {
       canonical: canonicalUrl,
       languages,
     },
     openGraph: mergeOpenGraph(
       {
-        description: doc?.meta?.description || '',
-        images: ogImage
-          ? [
-              {
-                url: ogImage,
-              },
-            ]
-          : undefined,
+        description,
+        images,
         title,
         url: canonicalUrl,
       },
       { locale, siteName, siteDescription },
     ),
     title,
+    twitter: { card: 'summary_large_image', title, description, images: ogImage ? [ogImage] : undefined },
   }
 }

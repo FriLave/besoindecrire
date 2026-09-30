@@ -1,6 +1,6 @@
 import type { GlobalAfterChangeHook } from 'payload'
 
-import { revalidateTag } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 import { locales } from '@/utilities/getLocalizedPath'
 
@@ -14,6 +14,8 @@ export const revalidateSiteSettings: GlobalAfterChangeHook = ({
     for (const locale of locales) {
       revalidateTag(`global_site-settings_${locale}`, 'max')
     }
+    // Logo, favicon, OG image and JSON-LD are site-wide.
+    revalidatePath('/', 'layout')
   }
 
   return doc

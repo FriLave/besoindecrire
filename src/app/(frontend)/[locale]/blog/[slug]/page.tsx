@@ -11,9 +11,15 @@ import RichText from '@/components/RichText'
 
 import { modules } from '@/client/modules'
 import { PostHero } from '@/heros/PostHero'
+import { JsonLd } from '@/components/JsonLd'
+import { getUI } from '@/i18n/ui'
+import { getCachedSiteSettings } from '@/utilities/getGlobals'
+import { getSiteUrl } from '@/utilities/getSiteUrl'
+import { article, breadcrumbs } from '@/utilities/jsonLd'
+import { SITE_NAME } from '@/client/site'
 import { generateMeta } from '@/utilities/generateMeta'
 import { isFeatureEnabled } from '@/utilities/features'
-import { isLocale, locales, type Locale, type LocalizedValue } from '@/utilities/getLocalizedPath'
+import { getLocalizedPath, isLocale, locales, type Locale, type LocalizedValue } from '@/utilities/getLocalizedPath'
 import PageClient from '@/components/BlogArchive/PageClient'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import type { AlternateLocaleLink } from '@/providers/AlternateLocale'
@@ -69,8 +75,25 @@ export default async function Post({ params: paramsPromise }: Args) {
     slug: alternateSlug,
   }
 
+  const ui = getUI(locale)
+  const siteUrl = await getSiteUrl()
+  const settings = await getCachedSiteSettings(locale)()
+  const postUrl = siteUrl + getLocalizedPath(locale, decodedSlug, 'posts')
+  const logo = settings?.logo
+  const logoUrl = typeof logo === 'object' && logo?.url ? siteUrl + logo.url : undefined
+
   return (
     <article className="pt-16 pb-16">
+      <JsonLd
+        data={breadcrumbs([
+          { name: ui.breadcrumb.home, url: siteUrl + getLocalizedPath(locale, 'home') },
+          { name: ui.blog.title, url: siteUrl + getLocalizedPath(locale, '', 'posts') },
+          { name: post.title, url: postUrl },
+        ])}
+      />
+      <JsonLd
+        data={article(post, postUrl, locale, settings?.siteName || SITE_NAME, siteUrl, logoUrl)}
+      />
       <PageClient alternateLink={alternateLink} headerTheme="dark" />
 
       {/* Allows redirects for valid pages too */}

@@ -280,7 +280,7 @@ export interface Post {
  */
 export interface Media {
   id: number;
-  alt?: string | null;
+  alt: string;
   caption?: {
     root: {
       type: string;
@@ -1689,7 +1689,7 @@ export interface Footer {
   createdAt?: string | null;
 }
 /**
- * General site identity settings (name, description) shown across the public site.
+ * General site identity settings (name, description, logo, SEO, social networks) shown across the public site.
  *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "site-settings".
@@ -1698,6 +1698,36 @@ export interface SiteSetting {
   id: number;
   siteName: string;
   siteDescription?: string | null;
+  /**
+   * Shown in the header and footer. If empty, the site name is displayed as text.
+   */
+  logo?: (number | null) | Media;
+  /**
+   * Small icon shown in browser tabs (PNG or SVG, square).
+   */
+  favicon?: (number | null) | Media;
+  /**
+   * Public domain of the site, e.g. https://www.example.com (no trailing slash). Used for canonical URLs, sitemap and social previews. Falls back to the NEXT_PUBLIC_SERVER_URL environment variable when empty.
+   */
+  siteUrl?: string | null;
+  /**
+   * Used on social networks when a page has no image of its own (recommended 1200×630).
+   */
+  defaultOgImage?: (number | null) | Media;
+  /**
+   * Tick on staging/preproduction sites: robots.txt then forbids crawling and pages are marked noindex. Untick before going live.
+   */
+  noIndex?: boolean | null;
+  /**
+   * Official profiles, declared to search engines.
+   */
+  socials?:
+    | {
+        platform: 'facebook' | 'instagram' | 'linkedin' | 'x' | 'youtube' | 'tiktok';
+        url: string;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -1766,6 +1796,18 @@ export interface FooterSelect<T extends boolean = true> {
 export interface SiteSettingsSelect<T extends boolean = true> {
   siteName?: T;
   siteDescription?: T;
+  logo?: T;
+  favicon?: T;
+  siteUrl?: T;
+  defaultOgImage?: T;
+  noIndex?: T;
+  socials?:
+    | T
+    | {
+        platform?: T;
+        url?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

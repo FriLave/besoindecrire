@@ -11,10 +11,10 @@ export const ContentBlock: React.FC<ContentBlockProps & { locale: Locale }> = (p
   const { columns, locale } = props
 
   const colsSpanClasses = {
-    full: '12',
-    half: '6',
-    oneThird: '4',
-    twoThirds: '8',
+    full: 'lg:col-span-12',
+    half: 'lg:col-span-6',
+    oneThird: 'lg:col-span-4',
+    twoThirds: 'lg:col-span-8',
   }
 
   return (
@@ -27,7 +27,7 @@ export const ContentBlock: React.FC<ContentBlockProps & { locale: Locale }> = (p
 
             return (
               <div
-                className={cn(`col-span-4 lg:col-span-${colsSpanClasses[size!]}`, {
+                className={cn('col-span-4', colsSpanClasses[size!], {
                   'md:col-span-2': size !== 'full',
                 })}
                 key={index}
