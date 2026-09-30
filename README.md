@@ -50,6 +50,12 @@ les conventions de code.
    Attention : cette opération est destructive, elle vide les collections avant de les
    repeupler.
 
+## CI
+
+`.github/workflows/ci.yml` (push et PR) : `quality` (`pnpm check`), `test` (Postgres 16, `test:int`, seed, build, `test:e2e`, rapport Playwright en artefact si échec) et `lighthouse` (build de prod seedé, `lhci autorun` selon `lighthouserc.json` : SEO/accessibilité/bonnes pratiques bloquants, performance en avertissement). Dependabot regroupe `payload`/`@payloadcms/*` et `next`.
+
+`pnpm seed:local` peuple la base de démo via la Local API (sans serveur, sans passer par `/next/seed`, qui reste désactivé en production). Destructif.
+
 ## Zone client
 
 `src/client/` est la **zone appartenant au client fork**. C'est le seul endroit à éditer

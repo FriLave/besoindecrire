@@ -206,7 +206,7 @@ export const post1: (args: PostArgs) => RequiredDataFromCollectionSlug<'posts'> 
             direction: 'ltr',
             format: '',
             indent: 0,
-            tag: 'h4',
+            tag: 'h3',
             version: 1,
           },
           {

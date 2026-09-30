@@ -337,6 +337,7 @@ export const seed = async ({
   const [homePage, contactPage] = await Promise.all([
     payload.create({
       collection: 'pages',
+      context: { disableRevalidate: true },
       depth: 0,
       data: home({
         heroImage: imageHomeDoc,
@@ -348,6 +349,7 @@ export const seed = async ({
     }),
     payload.create({
       collection: 'pages',
+      context: { disableRevalidate: true },
       depth: 0,
       data: contactPageData({ contactForm, locale: locales[0] }),
     }),
@@ -366,6 +368,7 @@ export const seed = async ({
   for (const kind of legalKinds) {
     legalDocs[kind] = await payload.create({
       collection: 'pages',
+      context: { disableRevalidate: true },
       depth: 0,
       data: legalPage(kind, locales[0]),
     })
@@ -376,18 +379,21 @@ export const seed = async ({
   const [headerDoc, footerDoc] = await Promise.all([
     payload.updateGlobal({
       slug: 'header',
+      context: { disableRevalidate: true },
       data: {
         navItems: headerNavItems[locales[0]](contactPage.id),
       },
     }),
     payload.updateGlobal({
       slug: 'footer',
+      context: { disableRevalidate: true },
       data: {
         navItems: footerNavItems[locales[0]](contactPage.id),
       },
     }),
     payload.updateGlobal({
       slug: 'site-settings',
+      context: { disableRevalidate: true },
       data: {
         ...siteSettingsCopy[locales[0]],
         ...legalSettings,
@@ -517,6 +523,7 @@ export const seed = async ({
     await Promise.all([
       payload.update({
         collection: 'pages',
+        context: { disableRevalidate: true },
         id: homePage.id,
         locale,
         data: preserveIds(
@@ -532,6 +539,7 @@ export const seed = async ({
       }),
       payload.update({
         collection: 'pages',
+        context: { disableRevalidate: true },
         id: contactPage.id,
         locale,
         data: preserveIds(contactPage, contactPageData({ contactForm, locale })),
@@ -544,6 +552,7 @@ export const seed = async ({
       const doc = legalDocs[kind]!
       await payload.update({
         collection: 'pages',
+        context: { disableRevalidate: true },
         id: doc.id,
         locale,
         data: preserveIds(doc, legalPage(kind, locale)),
@@ -556,6 +565,7 @@ export const seed = async ({
     await Promise.all([
       payload.updateGlobal({
         slug: 'header',
+        context: { disableRevalidate: true },
         locale,
         data: preserveIds(headerDoc, {
           navItems: headerNavItems[locale](contactPage.id),
@@ -563,6 +573,7 @@ export const seed = async ({
       }),
       payload.updateGlobal({
         slug: 'footer',
+        context: { disableRevalidate: true },
         locale,
         data: preserveIds(footerDoc, {
           navItems: footerNavItems[locale](contactPage.id),
@@ -570,6 +581,7 @@ export const seed = async ({
       }),
       payload.updateGlobal({
         slug: 'site-settings',
+        context: { disableRevalidate: true },
         locale,
         data: siteSettingsCopy[locale],
       }),
