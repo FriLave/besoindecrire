@@ -44,7 +44,11 @@ export async function Footer({ locale }: { locale: Locale }) {
         {legalLinks.length > 0 && (
           <nav className="flex flex-col gap-2 md:flex-row md:gap-4">
             {legalLinks.map((p) => (
-              <Link className="underline-offset-4 hover:underline" href={getLocalizedPath(locale, p.slug)} key={p.id}>
+              <Link
+                className="underline-offset-4 hover:underline"
+                href={getLocalizedPath(locale, p.slug)}
+                key={p.id}
+              >
                 {p.title}
               </Link>
             ))}

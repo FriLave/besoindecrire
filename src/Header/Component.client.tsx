@@ -2,7 +2,7 @@
 import { useHeaderTheme } from '@/providers/HeaderTheme'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useSyncExternalStore } from 'react'
 
 import type { Locale } from '@/utilities/getLocalizedPath'
 
@@ -15,6 +15,8 @@ interface HeaderClientProps {
   locale: Locale
 }
 
+const noopSubscribe = () => () => {}
+
 export const HeaderClient: React.FC<HeaderClientProps> = ({ children, locale, logo }) => {
   /* Storing the value in a useState to avoid hydration errors */
   const [theme, setTheme] = useState<string | null>(null)
@@ -26,17 +28,18 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ children, locale, lo
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname])
 
-  useEffect(() => {
-    if (headerTheme && headerTheme !== theme) setTheme(headerTheme)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [headerTheme])
+  // Only adopt headerTheme after hydration (it is read from the DOM on the client).
+  const hydrated = useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false,
+  )
+  if (hydrated && headerTheme && headerTheme !== theme) setTheme(headerTheme)
 
   return (
     <header className="container relative z-20   " {...(theme ? { 'data-theme': theme } : {})}>
       <div className="py-8 flex justify-between">
-        <Link href={getLocalizedPath(locale, 'home')}>
-          {logo}
-        </Link>
+        <Link href={getLocalizedPath(locale, 'home')}>{logo}</Link>
         {children}
       </div>
     </header>

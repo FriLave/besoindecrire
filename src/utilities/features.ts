@@ -8,7 +8,10 @@ import { getCachedGlobal } from './getGlobals'
 // FeatureFlags hook revalidates `global_feature-flags_<locale>` for every locale.
 export const isFeatureEnabled = async (key: ModuleKey): Promise<boolean> => {
   if (!modules[key]) return false
-  const flags = (await getCachedGlobal('feature-flags', defaultLocale)()) as unknown as Record<string, unknown>
+  const flags = (await getCachedGlobal('feature-flags', defaultLocale)()) as unknown as Record<
+    string,
+    unknown
+  >
   return Boolean(flags?.[key])
 }
 

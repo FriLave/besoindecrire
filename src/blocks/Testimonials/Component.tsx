@@ -25,7 +25,9 @@ export const TestimonialsBlock: React.FC<Props> = ({ heading, intro, items }) =>
                 )}
                 <span>
                   <span className="block font-semibold">{item.author}</span>
-                  {item.role && <span className="block text-sm text-muted-foreground">{item.role}</span>}
+                  {item.role && (
+                    <span className="block text-sm text-muted-foreground">{item.role}</span>
+                  )}
                 </span>
               </figcaption>
             </figure>

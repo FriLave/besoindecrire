@@ -32,7 +32,9 @@ export const GalleryBlock: React.FC<Props> = ({ columns, heading, images, intro 
                 size={sizes[c]}
               />
               {item.caption && (
-                <figcaption className="mt-2 text-sm text-muted-foreground">{item.caption}</figcaption>
+                <figcaption className="mt-2 text-sm text-muted-foreground">
+                  {item.caption}
+                </figcaption>
               )}
             </figure>
           </li>

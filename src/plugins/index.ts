@@ -3,18 +3,18 @@ import { nestedDocsPlugin } from '@payloadcms/plugin-nested-docs'
 import { redirectsPlugin } from '@payloadcms/plugin-redirects'
 import { seoPlugin } from '@payloadcms/plugin-seo'
 import { searchPlugin } from '@payloadcms/plugin-search'
-import { Block, Field, Plugin } from 'payload'
+import type { Block, Field, Plugin } from 'payload'
 import { editorOrAbove } from '@/access/roles'
 import { whenBlog } from '@/access/blogEnabled'
 import { modules } from '@/client/modules'
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { revalidateRedirects } from '@/hooks/revalidateRedirects'
-import { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
+import type { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { privacyNoticeDefaults } from '@/i18n/legal'
-import { Page, Post } from '@/payload-types'
+import type { Page, Post } from '@/payload-types'
 import { SITE_NAME } from '@/client/site'
 import { getServerSideURL } from '@/utilities/getURL'
 import { getCachedSiteSettings } from '@/utilities/getGlobals'
@@ -131,11 +131,12 @@ export const plugins: Plugin[] = [
           type: 'textarea',
           localized: true,
           label: { en: 'Privacy notice', fr: 'Mention RGPD' },
-          defaultValue: ({ locale }: { locale?: string }) => privacyNoticeDefaults[locale === 'en' ? 'en' : 'fr'],
+          defaultValue: ({ locale }: { locale?: string }) =>
+            privacyNoticeDefaults[locale === 'en' ? 'en' : 'fr'],
           admin: {
             description: {
               en: 'Small text shown under the submit button, with a link to the privacy policy. Keep it consistent with the retention period (3 years).',
-              fr: 'Petit texte affiché sous le bouton d\'envoi, avec un lien vers la politique de confidentialité. À garder cohérent avec la durée de conservation (3 ans).',
+              fr: "Petit texte affiché sous le bouton d'envoi, avec un lien vers la politique de confidentialité. À garder cohérent avec la durée de conservation (3 ans).",
             },
           },
         }

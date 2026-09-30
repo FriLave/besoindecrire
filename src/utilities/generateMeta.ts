@@ -6,7 +6,13 @@ import { SITE_DESCRIPTION, SITE_NAME } from '@/client/site'
 import { mergeOpenGraph } from './mergeOpenGraph'
 import { getSiteUrl } from './getSiteUrl'
 import { getCachedSiteSettings } from './getGlobals'
-import { defaultLocale, getLocalizedPath, locales, type Locale, type LocalizedValue } from './getLocalizedPath'
+import {
+  defaultLocale,
+  getLocalizedPath,
+  locales,
+  type Locale,
+  type LocalizedValue,
+} from './getLocalizedPath'
 
 export const getImageURL = (
   image: Media | Config['db']['defaultIDType'] | null | undefined,
@@ -55,10 +61,12 @@ export const generateMeta = async (args: {
 
   const languages: Record<string, string> = {}
   for (const targetLocale of locales) {
-    languages[targetLocale] = `${serverUrl}${getLocalizedPath(targetLocale, slugFor(targetLocale), collection)}`
+    languages[targetLocale] =
+      `${serverUrl}${getLocalizedPath(targetLocale, slugFor(targetLocale), collection)}`
   }
   // x-default always points at the default-locale (fr) URL.
-  languages['x-default'] = `${serverUrl}${getLocalizedPath(defaultLocale, slugFor(defaultLocale), collection)}`
+  languages['x-default'] =
+    `${serverUrl}${getLocalizedPath(defaultLocale, slugFor(defaultLocale), collection)}`
 
   const description = doc?.meta?.description || siteDescription
   const images = ogImage ? [{ url: ogImage }] : undefined
@@ -80,6 +88,11 @@ export const generateMeta = async (args: {
       { locale, siteName, siteDescription },
     ),
     title,
-    twitter: { card: 'summary_large_image', title, description, images: ogImage ? [ogImage] : undefined },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+    },
   }
 }

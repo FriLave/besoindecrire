@@ -1,6 +1,7 @@
 import { defineConfig, globalIgnores } from 'eslint/config'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTs from 'eslint-config-next/typescript'
+import tseslint from 'typescript-eslint'
 
 const eslintConfig = defineConfig([
   ...nextVitals,
@@ -9,9 +10,9 @@ const eslintConfig = defineConfig([
     rules: {
       '@typescript-eslint/ban-ts-comment': 'warn',
       '@typescript-eslint/no-empty-object-type': 'warn',
-      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': [
-        'warn',
+        'error',
         {
           vars: 'all',
           args: 'after-used',
@@ -22,15 +23,30 @@ const eslintConfig = defineConfig([
           caughtErrorsIgnorePattern: '^(_|ignore)',
         },
       ],
+      eqeqeq: ['error', 'smart'],
+      'no-console': ['error', { allow: ['warn', 'error'] }],
     },
   },
   {
-    // eslint-plugin-react-hooks v7 (React Compiler) rules flag legacy template patterns
-    // (theme init from localStorage, link refs); kept visible as warnings.
+    // Typed linting (type-aware rules) on app code and tests.
+    files: ['src/**/*.{ts,tsx}', 'tests/**/*.{ts,tsx}'],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
+    },
     rules: {
-      'react-hooks/set-state-in-effect': 'warn',
-      'react-hooks/refs': 'warn',
-      'react-hooks/static-components': 'warn',
+      '@typescript-eslint/no-floating-promises': 'error',
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: { attributes: false } },
+      ],
+      '@typescript-eslint/await-thenable': 'error',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports', fixStyle: 'separate-type-imports' },
+      ],
+      '@typescript-eslint/switch-exhaustiveness-check': 'error',
     },
   },
   globalIgnores([

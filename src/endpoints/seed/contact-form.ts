@@ -1,4 +1,4 @@
-import { RequiredDataFromCollectionSlug } from 'payload'
+import type { RequiredDataFromCollectionSlug } from 'payload'
 
 import { SITE_NAME } from '@/client/site'
 import type { Locale } from '@/utilities/getLocalizedPath'

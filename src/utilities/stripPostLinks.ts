@@ -19,7 +19,9 @@ const isLexicalPostLink = (n: unknown): n is Obj & { children?: unknown[] } => {
 export function stripPostLinks<T>(node: T): T {
   if (Array.isArray(node)) {
     return node.flatMap((child) =>
-      isLexicalPostLink(child) ? (stripPostLinks(child.children ?? []) as unknown[]) : [stripPostLinks(child)],
+      isLexicalPostLink(child)
+        ? stripPostLinks<unknown[]>(child.children ?? [])
+        : [stripPostLinks(child)],
     ) as T
   }
   if (isObj(node)) {
@@ -28,7 +30,11 @@ export function stripPostLinks<T>(node: T): T {
     return Object.fromEntries(
       Object.entries(node).map(([key, value]) => [
         key,
-        isPostLink && key === 'reference' ? null : isPostLink && key === 'type' ? 'custom' : stripPostLinks(value),
+        isPostLink && key === 'reference'
+          ? null
+          : isPostLink && key === 'type'
+            ? 'custom'
+            : stripPostLinks(value),
       ]),
     ) as T
   }

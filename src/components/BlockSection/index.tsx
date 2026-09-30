@@ -19,7 +19,9 @@ export const BlockSection: React.FC<{
   paddingBottom?: Spacing
   paddingTop?: Spacing
 }> = ({ background, children, paddingBottom, paddingTop }) => (
-  <section className={cn(pt[paddingTop || 'md'], pb[paddingBottom || 'md'], bg[background || 'none'])}>
+  <section
+    className={cn(pt[paddingTop || 'md'], pb[paddingBottom || 'md'], bg[background || 'none'])}
+  >
     {children}
   </section>
 )

@@ -1,13 +1,6 @@
-import { test, expect, Page } from '@playwright/test'
+import { test, expect } from '@playwright/test'
 
 test.describe('Frontend', () => {
-  let page: Page
-
-  test.beforeAll(async ({ browser }) => {
-    const context = await browser.newContext()
-    page = await context.newPage()
-  })
-
   test('can load the French homepage (default, unprefixed)', async ({ page }) => {
     await page.goto('http://localhost:3000')
     await expect(page).toHaveTitle(/Site Vitrine/)
@@ -57,9 +50,7 @@ test.describe('Frontend', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr')
   })
 
-  test('French and English contact pages are served at their localized slugs', async ({
-    page,
-  }) => {
+  test('French and English contact pages are served at their localized slugs', async ({ page }) => {
     await page.goto('http://localhost:3000/contact')
     await expect(page).toHaveTitle(/Contact/)
     await expect(page.locator('html')).toHaveAttribute('lang', 'fr')
@@ -73,11 +64,15 @@ test.describe('Frontend', () => {
 
   test('header and footer nav labels are translated per locale', async ({ page }) => {
     await page.goto('http://localhost:3000')
-    await expect(page.locator('header').getByRole('link', { name: 'Contact', exact: true })).toBeVisible()
+    await expect(
+      page.locator('header').getByRole('link', { name: 'Contact', exact: true }),
+    ).toBeVisible()
     await expect(page.locator('footer').getByText('Mentions légales')).toBeVisible()
 
     await page.goto('http://localhost:3000/en')
-    await expect(page.locator('header').getByRole('link', { name: 'Contact us', exact: true })).toBeVisible()
+    await expect(
+      page.locator('header').getByRole('link', { name: 'Contact us', exact: true }),
+    ).toBeVisible()
     await expect(page.locator('footer').getByText('Legal notice')).toBeVisible()
   })
 

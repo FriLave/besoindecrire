@@ -18,8 +18,7 @@ export const Checkbox: React.FC<
     errors: Partial<FieldErrorsImpl>
     register: UseFormRegister<FieldValues>
   }
-> = ({ locale,
-  name, defaultValue, errors, label, register, required, width }) => {
+> = ({ locale, name, defaultValue, errors, label, register, required, width }) => {
   const ui = getUI(locale)
   const props = register(name, { required: required })
   const { setValue } = useFormContext()

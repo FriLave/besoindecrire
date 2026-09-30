@@ -48,7 +48,6 @@ export default async function RootLayout({ children, params }: Args) {
 
   const locale = localeParam
 
-
   return (
     <html
       className={cn(GeistSans.variable, GeistMono.variable)}
@@ -97,7 +96,11 @@ export async function generateMetadata({ params }: Args): Promise<Metadata> {
 
   return {
     metadataBase: new URL(siteUrl),
-    icons: { icon: [{ url: faviconUrl, ...(faviconUrl.endsWith('.svg') ? { type: 'image/svg+xml' } : {}) }] },
+    icons: {
+      icon: [
+        { url: faviconUrl, ...(faviconUrl.endsWith('.svg') ? { type: 'image/svg+xml' } : {}) },
+      ],
+    },
     openGraph: mergeOpenGraph(
       { images: ogImage ? [{ url: ogImage }] : undefined },
       { locale, siteName, siteDescription },

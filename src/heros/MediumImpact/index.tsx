@@ -16,7 +16,9 @@ export const MediumImpactHero: React.FC<Page['hero'] & { locale: Locale }> = ({
   return (
     <div className="">
       <div className="container mb-8">
-        {richText && <RichText className="mb-6" data={richText} enableGutter={false} locale={locale} />}
+        {richText && (
+          <RichText className="mb-6" data={richText} enableGutter={false} locale={locale} />
+        )}
 
         {Array.isArray(links) && links.length > 0 && (
           <ul className="flex gap-4">

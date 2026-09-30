@@ -17,8 +17,7 @@ export const Textarea: React.FC<
     register: UseFormRegister<FieldValues>
     rows?: number
   }
-> = ({ locale,
-  name, defaultValue, errors, label, register, required, rows = 3, width }) => {
+> = ({ locale, name, defaultValue, errors, label, register, required, rows = 3, width }) => {
   const ui = getUI(locale)
   return (
     <Width width={width}>

@@ -19,7 +19,13 @@ import { article, breadcrumbs } from '@/utilities/jsonLd'
 import { SITE_NAME } from '@/client/site'
 import { generateMeta } from '@/utilities/generateMeta'
 import { isFeatureEnabled } from '@/utilities/features'
-import { getLocalizedPath, isLocale, locales, type Locale, type LocalizedValue } from '@/utilities/getLocalizedPath'
+import {
+  getLocalizedPath,
+  isLocale,
+  locales,
+  type Locale,
+  type LocalizedValue,
+} from '@/utilities/getLocalizedPath'
 import PageClient from '@/components/BlogArchive/PageClient'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import type { AlternateLocaleLink } from '@/providers/AlternateLocale'

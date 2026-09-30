@@ -43,7 +43,9 @@ test.describe('Blog feature flag', () => {
     await setBlog(request, false)
     await expect.poll(status(request, '/blog')).toBe(404)
     await expect
-      .poll(async () => (await (await request.get(`${base}/posts-sitemap.xml`)).text()).includes('<url>'))
+      .poll(async () =>
+        (await (await request.get(`${base}/posts-sitemap.xml`)).text()).includes('<url>'),
+      )
       .toBe(false)
     expect((await request.get(`${base}/`)).status()).toBe(200)
   })

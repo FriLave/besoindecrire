@@ -15,7 +15,15 @@ export const ArchiveBlock: React.FC<
     locale: Locale
   }
 > = async (props) => {
-  const { id, locale, categories, introContent, limit: limitFromProps, populateBy, selectedDocs } = props
+  const {
+    id,
+    locale,
+    categories,
+    introContent,
+    limit: limitFromProps,
+    populateBy,
+    selectedDocs,
+  } = props
 
   if (!(await isFeatureEnabled('blog'))) return null
 
@@ -62,7 +70,12 @@ export const ArchiveBlock: React.FC<
     <div id={`block-${id}`}>
       {introContent && (
         <div className="container mb-16">
-          <RichText className="ms-0 max-w-[48rem]" data={introContent} enableGutter={false} locale={locale} />
+          <RichText
+            className="ms-0 max-w-[48rem]"
+            data={introContent}
+            enableGutter={false}
+            locale={locale}
+          />
         </div>
       )}
       <CollectionArchive locale={locale} posts={posts} />

@@ -7,34 +7,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import React, { useState } from 'react'
+import React, { useSyncExternalStore } from 'react'
 
 import type { Theme } from '../types'
 import type { Locale } from '@/utilities/getLocalizedPath'
 
 import { useTheme } from '..'
-import { themeLocalStorageKey } from '../shared'
+import { subscribeTheme, themeLocalStorageKey } from '../shared'
 import { getUI } from '@/i18n/ui'
+
+const getSnapshot = () => window.localStorage.getItem(themeLocalStorageKey) ?? 'auto'
+const getServerSnapshot = () => ''
 
 export const ThemeSelector: React.FC<{ locale: Locale }> = ({ locale }) => {
   const { setTheme } = useTheme()
-  const [value, setValue] = useState('')
+  const value = useSyncExternalStore(subscribeTheme, getSnapshot, getServerSnapshot)
   const ui = getUI(locale)
 
   const onThemeChange = (themeToSet: Theme & 'auto') => {
-    if (themeToSet === 'auto') {
-      setTheme(null)
-      setValue('auto')
-    } else {
-      setTheme(themeToSet)
-      setValue(themeToSet)
-    }
+    setTheme(themeToSet === 'auto' ? null : themeToSet)
   }
-
-  React.useEffect(() => {
-    const preference = window.localStorage.getItem(themeLocalStorageKey)
-    setValue(preference ?? 'auto')
-  }, [])
 
   return (
     <Select onValueChange={onThemeChange} value={value}>

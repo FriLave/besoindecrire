@@ -16,7 +16,8 @@ export const PaidDownloads: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['title', 'price', 'updatedAt'],
-    description: 'Files customers can buy once (PDF, guide...). Add them to a page with the paid download block.',
+    description:
+      'Files customers can buy once (PDF, guide...). Add them to a page with the paid download block.',
     useAsTitle: 'title',
   },
   fields: [

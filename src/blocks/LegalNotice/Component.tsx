@@ -56,7 +56,13 @@ export const LegalNoticeBlock: React.FC<Props & { locale: Locale }> = async ({
       </LegalSection>
       {host?.name && (
         <LegalSection title={t.host}>
-          <Facts items={[[t.hostName, host.name], [t.address, host.address], [t.phone, host.phone]]} />
+          <Facts
+            items={[
+              [t.hostName, host.name],
+              [t.address, host.address],
+              [t.phone, host.phone],
+            ]}
+          />
         </LegalSection>
       )}
       {rp?.enabled && (

@@ -34,7 +34,8 @@ export const checkout: PayloadHandler = gated(async (req) => {
   const b = await readBody(req)
   if (!b) return json({ error: 'Invalid body' }, 400)
   const { paidDownloadId, email, locale, waiverAccepted, waiverText } = b
-  if (typeof email !== 'string' || !EMAIL_RE.test(email)) return json({ error: 'Invalid email' }, 400)
+  if (typeof email !== 'string' || !EMAIL_RE.test(email))
+    return json({ error: 'Invalid email' }, 400)
   if (waiverAccepted !== true || typeof waiverText !== 'string' || !waiverText.trim())
     return json({ error: 'Withdrawal waiver must be accepted' }, 400)
   if (!isLocale(locale)) return json({ error: 'Invalid locale' }, 400)
@@ -43,7 +44,13 @@ export const checkout: PayloadHandler = gated(async (req) => {
 
   const { payload } = req
   const doc = await payload
-    .findByID({ collection: 'paid-downloads', id: paidDownloadId, locale, depth: 0, overrideAccess: true })
+    .findByID({
+      collection: 'paid-downloads',
+      id: paidDownloadId,
+      locale,
+      depth: 0,
+      overrideAccess: true,
+    })
     .catch(() => null)
   if (!doc) return json({ error: 'Product not found' }, 404)
 
@@ -152,18 +159,30 @@ export const download: PayloadHandler = gated(async (req) => {
   const purchase = await payload
     .findByID({ collection: 'purchases', id, depth: 0, overrideAccess: true })
     .catch(() => null)
-  if (!purchase || purchase.status !== 'paid') return json({ error: 'Invalid or expired link' }, 403)
+  if (!purchase || purchase.status !== 'paid')
+    return json({ error: 'Invalid or expired link' }, 403)
 
   const dl = await payload
-    .findByID({ collection: 'paid-downloads', id: purchase.paidDownload as number | string, depth: 0, overrideAccess: true })
+    .findByID({
+      collection: 'paid-downloads',
+      id: purchase.paidDownload as number | string,
+      depth: 0,
+      overrideAccess: true,
+    })
     .catch(() => null)
   const file = dl
     ? await payload
-        .findByID({ collection: 'private-files', id: dl.file as number | string, depth: 0, overrideAccess: true })
+        .findByID({
+          collection: 'private-files',
+          id: dl.file as number | string,
+          depth: 0,
+          overrideAccess: true,
+        })
         .catch(() => null)
     : null
   // ponytail: local disk only; with an S3 adapter, read via the storage adapter/signed URL instead.
-  if (!file?.filename || path.basename(file.filename) !== file.filename) return json({ error: 'File not found' }, 404)
+  if (!file?.filename || path.basename(file.filename) !== file.filename)
+    return json({ error: 'File not found' }, 404)
 
   const full = path.join(privateFilesDir, file.filename)
   const size = (await stat(full).catch(() => null))?.size
@@ -194,34 +213,44 @@ const allowed = (key: string, now = Date.now()) => {
 export const resend: PayloadHandler = gated(async (req) => {
   const same = () => json({ ok: true })
   const b = await readBody(req)
-  if (!b || typeof b.email !== 'string' || !EMAIL_RE.test(b.email)) return json({ error: 'Invalid email' }, 400)
+  if (!b || typeof b.email !== 'string' || !EMAIL_RE.test(b.email))
+    return json({ error: 'Invalid email' }, 400)
   const { paidDownloadId } = b
-  if (typeof paidDownloadId !== 'string' && typeof paidDownloadId !== 'number') return json({ error: 'Invalid paidDownloadId' }, 400)
+  if (typeof paidDownloadId !== 'string' && typeof paidDownloadId !== 'number')
+    return json({ error: 'Invalid paidDownloadId' }, 400)
 
   const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown'
   const email = b.email.toLowerCase()
   if (!allowed(`${ip}|${email}`)) return same()
 
   const { payload } = req
-  const { docs } = await payload.find({
-    collection: 'purchases',
-    where: {
-      and: [
-        { email: { equals: email } },
-        { paidDownload: { equals: paidDownloadId } },
-        { status: { equals: 'paid' } },
-      ],
-    },
-    sort: '-createdAt',
-    limit: 1,
-    depth: 0,
-    overrideAccess: true,
-  }).catch(() => ({ docs: [] }))
+  const { docs } = await payload
+    .find({
+      collection: 'purchases',
+      where: {
+        and: [
+          { email: { equals: email } },
+          { paidDownload: { equals: paidDownloadId } },
+          { status: { equals: 'paid' } },
+        ],
+      },
+      sort: '-createdAt',
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+    })
+    .catch(() => ({ docs: [] }))
   const purchase = docs[0]
   if (purchase) {
     const locale = isLocale(b.locale) ? b.locale : purchase.locale === 'en' ? 'en' : 'fr'
     try {
-      const dl = await payload.findByID({ collection: 'paid-downloads', id: paidDownloadId, locale, depth: 0, overrideAccess: true })
+      const dl = await payload.findByID({
+        collection: 'paid-downloads',
+        id: paidDownloadId,
+        locale,
+        depth: 0,
+        overrideAccess: true,
+      })
       await sendDownloadEmail(payload, { ...purchase, locale }, dl.title)
     } catch (err) {
       payload.logger.error({ err, msg: 'Failed to resend download email' })

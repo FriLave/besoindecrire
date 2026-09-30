@@ -71,6 +71,13 @@ pnpm test:int              # tests d'intégration (Vitest)
 pnpm test:e2e              # tests end-to-end (Playwright)
 ```
 
+## Qualité de code
+
+- `pnpm check` = `tsc --noEmit` + ESLint + Prettier (`format:check`). À lancer avant chaque livraison.
+- Politique **zéro warning** : `pnpm lint` échoue au moindre warning (`--max-warnings 0`). Règles typées (promesses, `any`, imports de types, exhaustivité des `switch`) sur `src/` et `tests/`.
+- `pnpm format` reformate le projet ; `pnpm lint:fix` applique les corrections automatiques.
+- Hook pre-commit (`simple-git-hooks` + `lint-staged`, installé par `pnpm install` via `prepare`) : ESLint `--fix` + Prettier sur les fichiers indexés.
+
 ## Stack
 
 - Payload CMS (config TypeScript) + admin

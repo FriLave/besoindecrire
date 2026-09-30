@@ -60,7 +60,7 @@ export const SiteSettings: GlobalConfig = {
               { en: 'Favicon', fr: 'Favicon' },
               {
                 en: 'Small icon shown in browser tabs (PNG or SVG, square).',
-                fr: "Petite icône affichée dans les onglets du navigateur (PNG ou SVG, carrée).",
+                fr: 'Petite icône affichée dans les onglets du navigateur (PNG ou SVG, carrée).',
               },
               ['image/png', 'image/svg+xml'],
             ),
@@ -106,7 +106,10 @@ export const SiteSettings: GlobalConfig = {
               name: 'noIndex',
               type: 'checkbox',
               defaultValue: false,
-              label: { en: 'Block search engines (staging)', fr: 'Bloquer les moteurs de recherche (préprod)' },
+              label: {
+                en: 'Block search engines (staging)',
+                fr: 'Bloquer les moteurs de recherche (préprod)',
+              },
               admin: {
                 description: {
                   en: 'Tick on staging/preproduction sites: robots.txt then forbids crawling and pages are marked noindex. Untick before going live.',
@@ -142,13 +145,19 @@ export const SiteSettings: GlobalConfig = {
                   label: { en: 'Publisher type', fr: "Type d'éditeur" },
                   options: [
                     { label: { en: 'Company', fr: 'Société' }, value: 'company' },
-                    { label: { en: 'Sole proprietor (EI)', fr: 'Entrepreneur individuel (EI)' }, value: 'ei' },
+                    {
+                      label: { en: 'Sole proprietor (EI)', fr: 'Entrepreneur individuel (EI)' },
+                      value: 'ei',
+                    },
                   ],
                 },
                 {
                   name: 'companyName',
                   type: 'text',
-                  label: { en: 'Company name / Full name (EI)', fr: 'Dénomination sociale / Nom et prénom (EI)' },
+                  label: {
+                    en: 'Company name / Full name (EI)',
+                    fr: 'Dénomination sociale / Nom et prénom (EI)',
+                  },
                 },
                 {
                   type: 'row',
@@ -187,7 +196,10 @@ export const SiteSettings: GlobalConfig = {
                     {
                       name: 'registry',
                       type: 'text',
-                      label: { en: 'Registry (RCS / RNE) and city', fr: 'Registre (RCS / RNE) et ville' },
+                      label: {
+                        en: 'Registry (RCS / RNE) and city',
+                        fr: 'Registre (RCS / RNE) et ville',
+                      },
                       admin: { description: { en: 'e.g. RCS Paris', fr: 'ex. RCS Paris' } },
                     },
                   ],
@@ -222,14 +234,21 @@ export const SiteSettings: GlobalConfig = {
               type: 'group',
               label: { en: 'Hosting provider', fr: 'Hébergeur' },
               fields: [
-                { name: 'name', type: 'text', label: { en: 'Name / company name', fr: 'Nom / raison sociale' } },
+                {
+                  name: 'name',
+                  type: 'text',
+                  label: { en: 'Name / company name', fr: 'Nom / raison sociale' },
+                },
                 { name: 'address', type: 'textarea', label: { en: 'Address', fr: 'Adresse' } },
                 { name: 'phone', type: 'text', label: { en: 'Phone', fr: 'Téléphone' } },
               ],
             },
             {
               type: 'collapsible',
-              label: { en: 'Regulated profession (optional)', fr: 'Profession réglementée (optionnel)' },
+              label: {
+                en: 'Regulated profession (optional)',
+                fr: 'Profession réglementée (optionnel)',
+              },
               admin: { initCollapsed: true },
               fields: [
                 {
@@ -247,24 +266,48 @@ export const SiteSettings: GlobalConfig = {
                       type: 'row',
                       admin: { condition: (_d, s) => Boolean(s?.regulatedProfession?.enabled) },
                       fields: [
-                        { name: 'body', type: 'text', label: { en: 'Professional body', fr: 'Ordre / organisme' } },
-                        { name: 'title', type: 'text', label: { en: 'Professional title', fr: 'Titre professionnel' } },
-                        { name: 'country', type: 'text', label: { en: 'Country that granted the title', fr: "État d'octroi du titre" } },
+                        {
+                          name: 'body',
+                          type: 'text',
+                          label: { en: 'Professional body', fr: 'Ordre / organisme' },
+                        },
+                        {
+                          name: 'title',
+                          type: 'text',
+                          label: { en: 'Professional title', fr: 'Titre professionnel' },
+                        },
+                        {
+                          name: 'country',
+                          type: 'text',
+                          label: {
+                            en: 'Country that granted the title',
+                            fr: "État d'octroi du titre",
+                          },
+                        },
                       ],
                     },
                     {
                       name: 'rulesUrl',
                       type: 'text',
-                      label: { en: 'Professional rules (link)', fr: 'Règles professionnelles (lien)' },
+                      label: {
+                        en: 'Professional rules (link)',
+                        fr: 'Règles professionnelles (lien)',
+                      },
                       admin: { condition: (_d, s) => Boolean(s?.regulatedProfession?.enabled) },
                     },
                     {
                       name: 'insurer',
                       type: 'text',
-                      label: { en: 'Professional liability insurance', fr: 'Assurance responsabilité civile professionnelle' },
+                      label: {
+                        en: 'Professional liability insurance',
+                        fr: 'Assurance responsabilité civile professionnelle',
+                      },
                       admin: {
                         condition: (_d, s) => Boolean(s?.regulatedProfession?.enabled),
-                        description: { en: 'Insurer name, address and coverage area.', fr: "Nom, adresse de l'assureur et couverture géographique." },
+                        description: {
+                          en: 'Insurer name, address and coverage area.',
+                          fr: "Nom, adresse de l'assureur et couverture géographique.",
+                        },
                       },
                     },
                   ],
@@ -274,7 +317,10 @@ export const SiteSettings: GlobalConfig = {
             {
               name: 'dpo',
               type: 'group',
-              label: { en: 'Data protection officer (optional)', fr: 'Délégué à la protection des données (optionnel)' },
+              label: {
+                en: 'Data protection officer (optional)',
+                fr: 'Délégué à la protection des données (optionnel)',
+              },
               fields: [
                 {
                   type: 'row',
@@ -296,9 +342,24 @@ export const SiteSettings: GlobalConfig = {
                 },
               },
               fields: [
-                { name: 'legalNotice', type: 'relationship', relationTo: 'pages', label: { en: 'Legal notice', fr: 'Mentions légales' } },
-                { name: 'privacyPolicy', type: 'relationship', relationTo: 'pages', label: { en: 'Privacy policy', fr: 'Politique de confidentialité' } },
-                { name: 'terms', type: 'relationship', relationTo: 'pages', label: { en: 'Terms of use', fr: "Conditions d'utilisation (CGU)" } },
+                {
+                  name: 'legalNotice',
+                  type: 'relationship',
+                  relationTo: 'pages',
+                  label: { en: 'Legal notice', fr: 'Mentions légales' },
+                },
+                {
+                  name: 'privacyPolicy',
+                  type: 'relationship',
+                  relationTo: 'pages',
+                  label: { en: 'Privacy policy', fr: 'Politique de confidentialité' },
+                },
+                {
+                  name: 'terms',
+                  type: 'relationship',
+                  relationTo: 'pages',
+                  label: { en: 'Terms of use', fr: "Conditions d'utilisation (CGU)" },
+                },
               ],
             },
           ],

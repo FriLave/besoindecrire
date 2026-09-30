@@ -8,7 +8,9 @@ import React from 'react'
 export async function Header({ locale }: { locale: Locale }) {
   const headerData = await getCachedGlobal('header', locale, 1)()
 
-  return <HeaderClient locale={locale} logo={<Logo locale={locale} priority />}>
+  return (
+    <HeaderClient locale={locale} logo={<Logo locale={locale} priority />}>
       <HeaderNav data={headerData} locale={locale} />
     </HeaderClient>
+  )
 }

@@ -18,7 +18,11 @@ import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { populateAuthors } from './hooks/populateAuthors'
-import { revalidateDelete, revalidatePost, revalidatePostBeforeDelete } from './hooks/revalidatePost'
+import {
+  revalidateDelete,
+  revalidatePost,
+  revalidatePostBeforeDelete,
+} from './hooks/revalidatePost'
 
 import {
   MetaDescriptionField,

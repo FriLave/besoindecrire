@@ -18,7 +18,13 @@ import { getCachedSiteSettings } from '@/utilities/getGlobals'
 import { isFeatureEnabled } from '@/utilities/features'
 import { SITE_NAME } from '@/client/site'
 import { generateMeta } from '@/utilities/generateMeta'
-import { getLocalizedPath, isLocale, locales, type Locale, type LocalizedValue } from '@/utilities/getLocalizedPath'
+import {
+  getLocalizedPath,
+  isLocale,
+  locales,
+  type Locale,
+  type LocalizedValue,
+} from '@/utilities/getLocalizedPath'
 import PageClient from './page.client'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
 import type { AlternateLocaleLink } from '@/providers/AlternateLocale'
@@ -126,7 +132,10 @@ export default async function Page({ params: paramsPromise }: Args) {
       {decodedSlug !== 'home' && (
         <JsonLd
           data={breadcrumbs([
-            { name: getUI(locale).breadcrumb.home, url: siteUrl + getLocalizedPath(locale, 'home') },
+            {
+              name: getUI(locale).breadcrumb.home,
+              url: siteUrl + getLocalizedPath(locale, 'home'),
+            },
             { name: page.title, url: siteUrl + getLocalizedPath(locale, decodedSlug) },
           ])}
         />

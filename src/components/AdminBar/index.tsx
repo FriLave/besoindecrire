@@ -36,7 +36,6 @@ export const AdminBar: React.FC<{
       singular: ui.adminBar.categoriesSingular,
     },
   }
-  const Title: React.FC = () => <span>{ui.adminBar.dashboard}</span>
   const segments = useSelectedLayoutSegments()
   const [show, setShow] = useState(false)
   // The public URL segment for posts is `/blog`, not the collection slug.
@@ -72,10 +71,10 @@ export const AdminBar: React.FC<{
             plural: collectionLabels[collection]?.plural || ui.adminBar.pagesPlural,
             singular: collectionLabels[collection]?.singular || ui.adminBar.pagesSingular,
           }}
-          logo={<Title />}
+          logo={<span>{ui.adminBar.dashboard}</span>}
           onAuthChange={onAuthChange}
           onPreviewExit={() => {
-            fetch('/next/exit-preview').then(() => {
+            void fetch('/next/exit-preview').then(() => {
               router.push('/')
               router.refresh()
             })

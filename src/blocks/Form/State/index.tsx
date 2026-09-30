@@ -24,8 +24,7 @@ export const State: React.FC<
     control: Control
     errors: Partial<FieldErrorsImpl>
   }
-> = ({ locale,
-  name, control, errors, label, required, width }) => {
+> = ({ locale, name, control, errors, label, required, width }) => {
   const ui = getUI(locale)
   return (
     <Width width={width}>

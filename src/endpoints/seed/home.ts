@@ -468,7 +468,7 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
         heading: k.logos.heading,
         background: 'muted',
         logos: k.logos.names.map((name, i) => ({
-          logo: images[i]!.id,
+          logo: images[i].id,
           name,
           url: 'https://example.com',
         })),
@@ -489,7 +489,7 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
         blockType: 'gallery',
         heading: k.gallery.heading,
         columns: '2',
-        images: k.gallery.captions.map((caption, i) => ({ image: images[i]!.id, caption })),
+        images: k.gallery.captions.map((caption, i) => ({ image: images[i].id, caption })),
       },
       {
         blockType: 'faq',

@@ -12,3 +12,17 @@
 **/docs/**
 tsconfig.json
 
+.next
+pnpm-lock.yaml
+skills-lock.json
+playwright-report
+test-results
+tsconfig.tsbuildinfo
+.remember
+.claude
+.agents
+private-files
+src/payload-generated-schema.ts
+src/app/(payload)/admin/importMap.js
+src/migrations
+CLAUDE.md

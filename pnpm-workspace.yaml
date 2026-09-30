@@ -2,6 +2,7 @@ allowBuilds:
   sharp: true
   esbuild: true
   unrs-resolver: true
+  simple-git-hooks: true
 minimumReleaseAgeExclude:
   - '@payloadcms/admin-bar@3.90.1'
   - '@payloadcms/db-postgres@3.90.1'

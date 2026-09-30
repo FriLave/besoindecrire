@@ -20,7 +20,10 @@ export const PageRange: React.FC<{
   return (
     <div className={[className, 'font-semibold'].filter(Boolean).join(' ')}>
       {!totalDocs && ui.blog.noResults}
-      {totalDocs !== undefined && totalDocs > 0 && start <= totalDocs && ui.blog.range(start, end, totalDocs)}
+      {totalDocs !== undefined &&
+        totalDocs > 0 &&
+        start <= totalDocs &&
+        ui.blog.range(start, end, totalDocs)}
     </div>
   )
 }

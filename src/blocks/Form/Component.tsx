@@ -120,7 +120,14 @@ export const FormBlock: React.FC<
 
       void submitForm()
     },
-    [router, formID, redirect, confirmationType],
+    [
+      router,
+      formID,
+      redirect,
+      confirmationType,
+      ui.form.internalServerError,
+      ui.form.somethingWentWrong,
+    ],
   )
 
   return (

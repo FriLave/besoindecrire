@@ -1,7 +1,8 @@
 import { cn } from '@/utilities/ui'
 import React from 'react'
 
-import { Card, CardPostData } from '@/components/Card'
+import type { CardPostData } from '@/components/Card'
+import { Card } from '@/components/Card'
 import type { Locale } from '@/utilities/getLocalizedPath'
 
 export type Props = {
@@ -20,7 +21,13 @@ export const CollectionArchive: React.FC<Props> = (props) => {
             if (typeof result === 'object' && result !== null) {
               return (
                 <div className="col-span-4" key={index}>
-                  <Card className="h-full" doc={result} locale={locale} relationTo="posts" showCategories />
+                  <Card
+                    className="h-full"
+                    doc={result}
+                    locale={locale}
+                    relationTo="posts"
+                    showCategories
+                  />
                 </div>
               )
             }

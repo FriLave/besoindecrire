@@ -40,10 +40,7 @@ const blockComponents = {
   testimonials: TestimonialsBlock,
 }
 
-export const RenderBlocks = async (props: {
-  blocks: Page['layout'][0][]
-  locale: Locale
-}) => {
+export const RenderBlocks = async (props: { blocks: Page['layout'][0][]; locale: Locale }) => {
   const { locale } = props
   const blogEnabled = await isFeatureEnabled('blog')
   const blocks = (await stripDisabledPostLinks(props.blocks)).filter(
@@ -65,7 +62,9 @@ export const RenderBlocks = async (props: {
           const { blockType } = block
 
           if (blockType && blockType in blockComponents) {
-            const Block = blockComponents[blockType]
+            // Loose typing: block prop types differ per block, the spread is validated by each config.
+            const Block = blockComponents[blockType] as
+              React.ComponentType<Record<string, unknown>> | undefined
 
             if (Block) {
               return (
@@ -75,8 +74,12 @@ export const RenderBlocks = async (props: {
                   paddingBottom={block.paddingBottom}
                   paddingTop={block.paddingTop}
                 >
-                  {/* @ts-expect-error there may be some mismatch between the expected types here */}
-                  <Block {...block} locale={locale} privacyHref={privacyHref} disableInnerContainer />
+                  <Block
+                    {...block}
+                    locale={locale}
+                    privacyHref={privacyHref}
+                    disableInnerContainer
+                  />
                 </BlockSection>
               )
             }

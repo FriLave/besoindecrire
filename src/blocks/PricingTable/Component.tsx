@@ -6,7 +6,14 @@ import type { Locale } from '@/utilities/getLocalizedPath'
 
 import { BlockHeader } from '@/components/BlockHeader'
 import { CMSLink } from '@/components/Link'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
 import { cn } from '@/utilities/ui'
 
 export const PricingTableBlock: React.FC<Props & { locale: Locale }> = ({
@@ -43,7 +50,11 @@ export const PricingTableBlock: React.FC<Props & { locale: Locale }> = ({
           </CardContent>
           {plan.link && (
             <CardFooter>
-              <CMSLink {...plan.link} appearance={plan.highlighted ? 'default' : 'outline'} locale={locale} />
+              <CMSLink
+                {...plan.link}
+                appearance={plan.highlighted ? 'default' : 'outline'}
+                locale={locale}
+              />
             </CardFooter>
           )}
         </Card>

@@ -29,7 +29,9 @@ export const PrivacyPolicyBlock: React.FC<Props & { locale: Locale }> = async ({
     <LegalWrapper>
       {draft && <MissingWarning label={legal.missing} missing={missing} />}
       <LegalSection title={t.controller}>
-        {l?.companyName && <p>{t.controllerText(l.companyName, l.address ?? undefined, l.email ?? undefined)}</p>}
+        {l?.companyName && (
+          <p>{t.controllerText(l.companyName, l.address ?? undefined, l.email ?? undefined)}</p>
+        )}
         {dpo?.name && <p>{t.dpo(dpo.name, dpo.email ?? undefined)}</p>}
       </LegalSection>
       <LegalSection title={t.purposes}>

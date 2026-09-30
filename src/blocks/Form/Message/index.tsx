@@ -2,7 +2,7 @@ import RichText from '@/components/RichText'
 import React from 'react'
 
 import { Width } from '../Width'
-import { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+import type { DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import type { Locale } from '@/utilities/getLocalizedPath'
 
 export const Message: React.FC<{ locale: Locale; message: DefaultTypedEditorState }> = ({

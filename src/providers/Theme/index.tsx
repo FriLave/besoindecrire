@@ -1,11 +1,16 @@
 'use client'
 
-import React, { createContext, useCallback, use, useEffect, useState } from 'react'
+import React, { createContext, useCallback, use, useEffect, useSyncExternalStore } from 'react'
 
 import type { Theme, ThemeContextType } from './types'
 
-import canUseDOM from '@/utilities/canUseDOM'
-import { defaultTheme, getImplicitPreference, themeLocalStorageKey } from './shared'
+import {
+  defaultTheme,
+  getImplicitPreference,
+  notifyThemeChange,
+  subscribeTheme,
+  themeLocalStorageKey,
+} from './shared'
 import { themeIsValid } from './types'
 
 const initialContext: ThemeContextType = {
@@ -15,22 +20,23 @@ const initialContext: ThemeContextType = {
 
 const ThemeContext = createContext(initialContext)
 
+const getSnapshot = () => document.documentElement.getAttribute('data-theme') as Theme | null
+const getServerSnapshot = () => undefined
+
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setThemeState] = useState<Theme | undefined>(
-    canUseDOM ? (document.documentElement.getAttribute('data-theme') as Theme) : undefined,
-  )
+  // The `data-theme` attribute on <html> is the source of truth (also set by /theme-init.js).
+  const theme = useSyncExternalStore(subscribeTheme, getSnapshot, getServerSnapshot) || undefined
 
   const setTheme = useCallback((themeToSet: Theme | null) => {
     if (themeToSet === null) {
       window.localStorage.removeItem(themeLocalStorageKey)
       const implicitPreference = getImplicitPreference()
       document.documentElement.setAttribute('data-theme', implicitPreference || '')
-      if (implicitPreference) setThemeState(implicitPreference)
     } else {
-      setThemeState(themeToSet)
       window.localStorage.setItem(themeLocalStorageKey, themeToSet)
       document.documentElement.setAttribute('data-theme', themeToSet)
     }
+    notifyThemeChange()
   }, [])
 
   useEffect(() => {
@@ -48,7 +54,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     document.documentElement.setAttribute('data-theme', themeToSet)
-    setThemeState(themeToSet)
+    notifyThemeChange()
   }, [])
 
   return <ThemeContext value={{ setTheme, theme }}>{children}</ThemeContext>

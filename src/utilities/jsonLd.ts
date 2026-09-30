@@ -13,7 +13,11 @@ const mediaUrl = (media: unknown, siteUrl: string): string | undefined => {
   return url ? siteUrl + url : undefined
 }
 
-export const organization = (settings: SiteSetting | null, siteName: string, siteUrl: string): JsonLdObject => ({
+export const organization = (
+  settings: SiteSetting | null,
+  siteName: string,
+  siteUrl: string,
+): JsonLdObject => ({
   '@context': ctx,
   '@type': 'Organization',
   name: siteName,
@@ -72,7 +76,9 @@ export const article = (
   dateModified: post.updatedAt,
   inLanguage: locale,
   mainEntityOfPage: url,
-  author: post.populatedAuthors?.filter((a) => a.name).map((a) => ({ '@type': 'Person', name: a.name })),
+  author: post.populatedAuthors
+    ?.filter((a) => a.name)
+    .map((a) => ({ '@type': 'Person', name: a.name })),
   image: mediaUrl(post.meta?.image, siteUrl) ?? mediaUrl(post.heroImage, siteUrl),
   publisher: {
     '@type': 'Organization',

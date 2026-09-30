@@ -13,8 +13,7 @@ const updateOrDelete: Access = ({ req: { user } }) => {
   return self
 }
 
-const deleteAccess: Access = (args) =>
-  adminOrAbove(args) ? updateOrDelete(args) : false
+const deleteAccess: Access = (args) => (adminOrAbove(args) ? updateOrDelete(args) : false)
 
 const enforceRole: CollectionBeforeChangeHook = async ({ data, operation, originalDoc, req }) => {
   if (operation === 'create') {

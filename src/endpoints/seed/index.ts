@@ -206,8 +206,8 @@ export const seed = async ({
         collection: 'categories',
         depth: 0,
         data: {
-          title: cat[locales[0] as Locale],
-          slug: cat[locales[0] as Locale].toLowerCase().replace(/\s+/g, '-'),
+          title: cat[locales[0]],
+          slug: cat[locales[0]].toLowerCase().replace(/\s+/g, '-'),
         },
       }),
     ),

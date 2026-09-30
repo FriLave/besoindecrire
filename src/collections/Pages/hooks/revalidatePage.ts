@@ -8,7 +8,12 @@ import type {
 import { revalidatePath, revalidateTag } from 'next/cache'
 
 import type { Page } from '../../../payload-types'
-import { getLocalizedPath, locales, type Locale, type LocalizedValue } from '@/utilities/getLocalizedPath'
+import {
+  getLocalizedPath,
+  locales,
+  type Locale,
+  type LocalizedValue,
+} from '@/utilities/getLocalizedPath'
 
 /**
  * Looks up a page's slug in every locale in one query. `afterChange`/
@@ -38,7 +43,11 @@ async function getLocalizedSlugs(
   return (doc?.slug as unknown as LocalizedValue<string | null | undefined>) ?? {}
 }
 
-export const revalidatePage: CollectionAfterChangeHook<Page> = async ({ doc, previousDoc, req }) => {
+export const revalidatePage: CollectionAfterChangeHook<Page> = async ({
+  doc,
+  previousDoc,
+  req,
+}) => {
   const { payload, context, locale: reqLocale } = req
 
   if (context.disableRevalidate) {
@@ -124,8 +133,7 @@ export const revalidateDelete: CollectionAfterDeleteHook<Page> = ({
   }
 
   const localizedSlugs = context.localizedSlugsBeforeDelete as
-    | LocalizedValue<string | null | undefined>
-    | undefined
+    LocalizedValue<string | null | undefined> | undefined
 
   if (!localizedSlugs) {
     return

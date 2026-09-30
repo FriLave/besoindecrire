@@ -26,7 +26,8 @@ export const urlsetResponse = (
     const slugs = doc.slug as LocalizedValue<string | null | undefined>
     const urls: Partial<Record<Locale, string>> = {}
     for (const locale of locales) {
-      if (slugs?.[locale]) urls[locale] = siteUrl + getLocalizedPath(locale, slugs[locale], collection)
+      if (slugs?.[locale])
+        urls[locale] = siteUrl + getLocalizedPath(locale, slugs[locale], collection)
     }
     const available = locales.filter((l) => urls[l])
     const alternates = available

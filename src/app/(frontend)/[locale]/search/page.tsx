@@ -4,7 +4,7 @@ import { getPayload } from 'payload'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
-import { CardPostData } from '@/components/Card'
+import type { CardPostData } from '@/components/Card'
 import { CollectionArchive } from '@/components/CollectionArchive'
 import { getUI } from '@/i18n/ui'
 import { Search } from '@/search/Component'

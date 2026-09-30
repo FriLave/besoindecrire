@@ -1,5 +1,5 @@
 import type { Form } from '@/payload-types'
-import { RequiredDataFromCollectionSlug } from 'payload'
+import type { RequiredDataFromCollectionSlug } from 'payload'
 import type { Locale } from '@/utilities/getLocalizedPath'
 
 import { heading, richText } from './lexical-helpers'

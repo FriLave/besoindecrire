@@ -99,15 +99,16 @@ const dictionaries: Record<Locale, LegalDictionary> = {
       controller: 'Responsable du traitement',
       controllerText: (name, address, email) =>
         `Le responsable du traitement des données personnelles collectées sur ce site est ${name}${address ? `, ${address.replace(/\s*\n\s*/g, ', ')}` : ''}${email ? `. Contact : ${email}` : ''}.`,
-      dpo: (name, email) => `Délégué à la protection des données (DPO) : ${name}${email ? ` (${email})` : ''}.`,
+      dpo: (name, email) =>
+        `Délégué à la protection des données (DPO) : ${name}${email ? ` (${email})` : ''}.`,
       purposes: 'Finalités du traitement',
       purposesText:
         'Les données saisies dans le formulaire de contact (par exemple nom, adresse email, téléphone, message) sont utilisées uniquement pour répondre à votre demande.',
       mandatory:
-        "Les champs signalés comme obligatoires sont nécessaires au traitement de votre demande ; sans eux, nous ne pourrons pas y répondre.",
+        'Les champs signalés comme obligatoires sont nécessaires au traitement de votre demande ; sans eux, nous ne pourrons pas y répondre.',
       legalBasis: 'Base légale',
       legalBasisText:
-        "Le traitement repose sur les mesures précontractuelles prises à votre demande et sur notre intérêt légitime à répondre aux sollicitations reçues (art. 6.1.b et 6.1.f du RGPD).",
+        'Le traitement repose sur les mesures précontractuelles prises à votre demande et sur notre intérêt légitime à répondre aux sollicitations reçues (art. 6.1.b et 6.1.f du RGPD).',
       recipients: 'Destinataires des données',
       recipientsText: (host) =>
         `Vos données sont destinées à notre équipe interne. Elles peuvent être traitées par nos sous-traitants techniques, notamment notre hébergeur${host ? ` (${host})` : ''}, dans la limite nécessaire à leur mission. Elles ne sont ni vendues ni cédées.`,
@@ -116,7 +117,8 @@ const dictionaries: Record<Locale, LegalDictionary> = {
       retention: 'Durée de conservation',
       retentionText: `Les données de contact sont conservées ${RETENTION_YEARS} ans à compter du dernier échange, puis supprimées.`,
       rights: 'Vos droits',
-      rightsIntro: "Conformément au RGPD et à la loi Informatique et Libertés, vous disposez des droits suivants :",
+      rightsIntro:
+        'Conformément au RGPD et à la loi Informatique et Libertés, vous disposez des droits suivants :',
       rightsList: [
         "droit d'accès",
         'droit de rectification',
@@ -129,7 +131,7 @@ const dictionaries: Record<Locale, LegalDictionary> = {
         `Pour exercer ces droits, écrivez-nous${email ? ` à ${email}` : ' aux coordonnées indiquées ci-dessus'}. Nous vous répondrons dans un délai d'un mois.`,
       complaint: 'Réclamation',
       complaintText:
-        "Si vous estimez, après nous avoir contactés, que vos droits ne sont pas respectés, vous pouvez introduire une réclamation auprès de la CNIL (www.cnil.fr).",
+        'Si vous estimez, après nous avoir contactés, que vos droits ne sont pas respectés, vous pouvez introduire une réclamation auprès de la CNIL (www.cnil.fr).',
       cookies: 'Cookies et traceurs',
       cookiesText:
         "Ce site n'utilise que des traceurs strictement nécessaires à son fonctionnement, exemptés de consentement :",
@@ -192,7 +194,8 @@ const dictionaries: Record<Locale, LegalDictionary> = {
       retention: 'Retention period',
       retentionText: `Contact data is kept for ${RETENTION_YEARS} years from the last exchange, then deleted.`,
       rights: 'Your rights',
-      rightsIntro: 'Under the GDPR and the French Data Protection Act, you have the following rights:',
+      rightsIntro:
+        'Under the GDPR and the French Data Protection Act, you have the following rights:',
       rightsList: [
         'right of access',
         'right to rectification',

@@ -23,8 +23,7 @@ export const Select: React.FC<
     control: Control
     errors: Partial<FieldErrorsImpl>
   }
-> = ({ locale,
-  name, control, errors, label, options, required, width, defaultValue }) => {
+> = ({ locale, name, control, errors, label, options, required, width, defaultValue }) => {
   const ui = getUI(locale)
   return (
     <Width width={width}>

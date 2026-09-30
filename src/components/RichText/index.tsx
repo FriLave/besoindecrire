@@ -1,17 +1,15 @@
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
-import {
+import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedLinkNode,
-  type DefaultTypedEditorState,
 } from '@payloadcms/richtext-lexical'
-import {
-  JSXConvertersFunction,
-  LinkJSXConverter,
-  RichText as ConvertRichText,
-} from '@payloadcms/richtext-lexical/react'
+import { type DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
+import type { JSXConvertersFunction } from '@payloadcms/richtext-lexical/react'
+import { LinkJSXConverter, RichText as ConvertRichText } from '@payloadcms/richtext-lexical/react'
 
-import { CodeBlock, CodeBlockProps } from '@/blocks/Code/Component'
+import type { CodeBlockProps } from '@/blocks/Code/Component'
+import { CodeBlock } from '@/blocks/Code/Component'
 import { BannerBlock } from '@/blocks/Banner/Component'
 
 import type {
@@ -44,7 +42,9 @@ const getJsxConverters =
     ...defaultConverters,
     ...LinkJSXConverter({ internalDocToHref: internalDocToHref(locale) }),
     blocks: {
-      banner: ({ node }) => <BannerBlock className="col-start-2 mb-4" {...node.fields} locale={locale} />,
+      banner: ({ node }) => (
+        <BannerBlock className="col-start-2 mb-4" {...node.fields} locale={locale} />
+      ),
       code: ({ node }) => <CodeBlock className="col-start-2" {...node.fields} />,
       mediaBlock: ({ node }) => (
         <MediaBlock

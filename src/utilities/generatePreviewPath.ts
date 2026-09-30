@@ -1,14 +1,12 @@
-import { PreviewSearchParams } from '@/app/(frontend)/next/preview/route'
-import { PayloadRequest, CollectionSlug } from 'payload'
+import type { PreviewSearchParams } from '@/app/(frontend)/next/preview/route'
+import type { PayloadRequest, CollectionSlug } from 'payload'
 import { defaultLocale, getLocalizedPath, type Locale } from './getLocalizedPath'
 
-const collectionPrefixMap: Partial<Record<CollectionSlug, string>> = {
-  pages: '',
-  posts: '/blog', // path segment lives in getLocalizedPath; this map only types the accepted collections
-}
+// The `/blog` path segment lives in getLocalizedPath; this only types the accepted collections.
+type PreviewCollection = Extract<CollectionSlug, 'pages' | 'posts'>
 
 type Props = {
-  collection: keyof typeof collectionPrefixMap
+  collection: PreviewCollection
   slug: string
   req: PayloadRequest
 }
@@ -27,7 +25,11 @@ export const generatePreviewPath = ({ collection, slug, req }: Props) => {
 
   // `getLocalizedPath` handles the locale prefix, `home` -> `/` or `/en`, and
   // the `/blog` segment for posts (locale prefix goes BEFORE `/blog`).
-  const localizedPath = getLocalizedPath(locale, encodedSlug, collection === 'posts' ? 'posts' : 'pages')
+  const localizedPath = getLocalizedPath(
+    locale,
+    encodedSlug,
+    collection === 'posts' ? 'posts' : 'pages',
+  )
 
   const encodedParams = new URLSearchParams({
     path: localizedPath,

@@ -16,8 +16,7 @@ export const Text: React.FC<
     errors: Partial<FieldErrorsImpl>
     register: UseFormRegister<FieldValues>
   }
-> = ({ locale,
-  name, defaultValue, errors, label, register, required, width }) => {
+> = ({ locale, name, defaultValue, errors, label, register, required, width }) => {
   const ui = getUI(locale)
   return (
     <Width width={width}>

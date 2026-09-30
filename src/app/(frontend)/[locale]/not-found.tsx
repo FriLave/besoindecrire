@@ -3,7 +3,12 @@ import React from 'react'
 
 import { Button } from '@/components/ui/button'
 import { getUI } from '@/i18n/ui'
-import { defaultLocale, getLocalizedPath, isLocale, type Locale } from '@/utilities/getLocalizedPath'
+import {
+  defaultLocale,
+  getLocalizedPath,
+  isLocale,
+  type Locale,
+} from '@/utilities/getLocalizedPath'
 
 type Args = {
   params: Promise<{ locale?: string }>

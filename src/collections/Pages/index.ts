@@ -22,7 +22,11 @@ import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { slugify } from '../../utilities/slugify'
-import { revalidateDelete, revalidatePage, revalidatePageBeforeDelete } from './hooks/revalidatePage'
+import {
+  revalidateDelete,
+  revalidatePage,
+  revalidatePageBeforeDelete,
+} from './hooks/revalidatePage'
 
 import {
   MetaDescriptionField,
