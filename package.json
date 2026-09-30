@@ -23,6 +23,7 @@
   "dependencies": {
     "@payloadcms/admin-bar": "3.90.1",
     "@payloadcms/db-postgres": "3.90.1",
+    "@payloadcms/email-nodemailer": "3.90.1",
     "@payloadcms/live-preview-react": "3.90.1",
     "@payloadcms/next": "3.90.1",
     "@payloadcms/plugin-form-builder": "3.90.1",
@@ -52,6 +53,7 @@
     "react-dom": "19.2.6",
     "react-hook-form": "7.71.1",
     "sharp": "0.35.4",
+    "stripe": "^22.6.2",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {

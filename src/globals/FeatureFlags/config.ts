@@ -25,6 +25,16 @@ export const FeatureFlags: GlobalConfig = {
           },
         ]
       : []),
+    ...(modules.payments
+      ? [
+          {
+            name: 'payments',
+            type: 'checkbox' as const,
+            defaultValue: false,
+            label: 'Payments (paid downloads)',
+          },
+        ]
+      : []),
   ],
   hooks: {
     afterChange: [revalidateFeatureFlags],

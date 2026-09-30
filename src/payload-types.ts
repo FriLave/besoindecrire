@@ -72,6 +72,9 @@ export interface Config {
     users: User;
     posts: Post;
     categories: Category;
+    'private-files': PrivateFile;
+    'paid-downloads': PaidDownload;
+    purchases: Purchase;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -94,6 +97,9 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
+    'private-files': PrivateFilesSelect<false> | PrivateFilesSelect<true>;
+    'paid-downloads': PaidDownloadsSelect<false> | PaidDownloadsSelect<true>;
+    purchases: PurchasesSelect<false> | PurchasesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -1111,6 +1117,73 @@ export interface ArchiveBlock {
   blockType: 'archive';
 }
 /**
+ * Files sold through paid downloads. Never publicly accessible.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "private-files".
+ */
+export interface PrivateFile {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * Files customers can buy once (PDF, guide...). Add them to a page with the paid download block.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "paid-downloads".
+ */
+export interface PaidDownload {
+  id: number;
+  title: string;
+  description?: string | null;
+  /**
+   * En centimes TTC (ex: 990 = 9,90 EUR).
+   */
+  price: number;
+  currency: 'eur';
+  file: number | PrivateFile;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "purchases".
+ */
+export interface Purchase {
+  id: number;
+  email: string;
+  paidDownload: number | PaidDownload;
+  stripeSessionId?: string | null;
+  status: 'pending' | 'paid';
+  /**
+   * Cents
+   */
+  amount?: number | null;
+  currency?: string | null;
+  locale?: ('fr' | 'en') | null;
+  withdrawalWaiver?: {
+    acceptedAt?: string | null;
+    text?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
@@ -1328,6 +1401,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'categories';
         value: number | Category;
+      } | null)
+    | ({
+        relationTo: 'private-files';
+        value: number | PrivateFile;
+      } | null)
+    | ({
+        relationTo: 'paid-downloads';
+        value: number | PaidDownload;
+      } | null)
+    | ({
+        relationTo: 'purchases';
+        value: number | Purchase;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1921,6 +2006,59 @@ export interface CategoriesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "private-files_select".
+ */
+export interface PrivateFilesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "paid-downloads_select".
+ */
+export interface PaidDownloadsSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  price?: T;
+  currency?: T;
+  file?: T;
+  generateSlug?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "purchases_select".
+ */
+export interface PurchasesSelect<T extends boolean = true> {
+  email?: T;
+  paidDownload?: T;
+  stripeSessionId?: T;
+  status?: T;
+  amount?: T;
+  currency?: T;
+  locale?: T;
+  withdrawalWaiver?:
+    | T
+    | {
+        acceptedAt?: T;
+        text?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects_select".
  */
 export interface RedirectsSelect<T extends boolean = true> {
@@ -2363,6 +2501,7 @@ export interface SiteSetting {
 export interface FeatureFlag {
   id: number;
   blog?: boolean | null;
+  payments?: boolean | null;
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2505,6 +2644,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
  */
 export interface FeatureFlagsSelect<T extends boolean = true> {
   blog?: T;
+  payments?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

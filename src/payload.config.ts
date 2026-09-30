@@ -11,6 +11,11 @@ import { modules } from './client/modules'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Categories } from './collections/Categories'
+import { PaidDownloads } from './collections/PaidDownloads'
+import { PrivateFiles } from './collections/PrivateFiles'
+import { Purchases } from './collections/Purchases'
+import { paymentsEndpoints } from './modules/payments/endpoints'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
@@ -60,7 +65,30 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
     },
   }),
-  collections: [Pages, Media, Users, ...(modules.blog ? [Posts, Categories] : [])],
+  collections: [
+    Pages,
+    Media,
+    Users,
+    ...(modules.blog ? [Posts, Categories] : []),
+    ...(modules.payments ? [PrivateFiles, PaidDownloads, Purchases] : []),
+  ],
+  endpoints: modules.payments ? paymentsEndpoints : [],
+  // No SMTP_HOST: Payload falls back to logging emails to the console (dev).
+  ...(process.env.SMTP_HOST
+    ? {
+        email: nodemailerAdapter({
+          defaultFromAddress: process.env.EMAIL_FROM_ADDRESS || 'noreply@example.com',
+          defaultFromName: process.env.EMAIL_FROM_NAME || 'Website',
+          transportOptions: {
+            host: process.env.SMTP_HOST,
+            port: Number(process.env.SMTP_PORT || 587),
+            auth: process.env.SMTP_USER
+              ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+              : undefined,
+          },
+        }),
+      }
+    : {}),
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, SiteSettings, FeatureFlags],
   // Allows each admin user to pick their own interface language from their

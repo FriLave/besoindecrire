@@ -5,6 +5,8 @@ declare global {
       DATABASE_URL: string
       NEXT_PUBLIC_SERVER_URL: string
       VERCEL_PROJECT_PRODUCTION_URL: string
+      STRIPE_SECRET_KEY?: string
+      STRIPE_WEBHOOK_SECRET?: string
     }
   }
 }
