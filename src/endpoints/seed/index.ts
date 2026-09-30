@@ -53,7 +53,13 @@ type NavItem = {
 
 const headerNavItems: Record<Locale, (contactPageId: number) => NavItem[]> = {
   fr: (contactPageId) => [
-    { link: { type: 'reference', label: 'Contact', reference: { relationTo: 'pages', value: contactPageId } } },
+    {
+      link: {
+        type: 'reference',
+        label: 'Contact',
+        reference: { relationTo: 'pages', value: contactPageId },
+      },
+    },
   ],
   en: (contactPageId) => [
     {
@@ -69,7 +75,13 @@ const headerNavItems: Record<Locale, (contactPageId: number) => NavItem[]> = {
 const footerNavItems: Record<Locale, (contactPageId: number) => NavItem[]> = {
   fr: (contactPageId) => [
     { link: { type: 'custom', label: 'Mentions légales', url: '#' } },
-    { link: { type: 'reference', label: 'Contact', reference: { relationTo: 'pages', value: contactPageId } } },
+    {
+      link: {
+        type: 'reference',
+        label: 'Contact',
+        reference: { relationTo: 'pages', value: contactPageId },
+      },
+    },
   ],
   en: (contactPageId) => [
     { link: { type: 'custom', label: 'Legal notice', url: '#' } },
@@ -118,15 +130,16 @@ export const seed = async ({
     ),
   )
 
-  await Promise.all(
-    collections.map((collection) => payload.db.deleteMany({ collection, req, where: {} })),
-  )
+  // Sequential: parallel deletes of FK-linked tables (pages/media/forms...) deadlock (Postgres 40P01).
+  for (const collection of collections) {
+    await payload.db.deleteMany({ collection, req, where: {} })
+  }
 
-  await Promise.all(
-    collections
-      .filter((collection) => Boolean(payload.collections[collection].config.versions))
-      .map((collection) => payload.db.deleteVersions({ collection, req, where: {} })),
-  )
+  for (const collection of collections) {
+    if (payload.collections[collection].config.versions) {
+      await payload.db.deleteVersions({ collection, req, where: {} })
+    }
+  }
 
   payload.logger.info(`— Seeding demo author...`)
 
@@ -285,11 +298,18 @@ export const seed = async ({
 
   payload.logger.info(`— Seeding pages (${locales[0]})...`)
 
+  const homeImages = [image1Doc, image2Doc, image3Doc, imageHomeDoc]
+
   const [homePage, contactPage] = await Promise.all([
     payload.create({
       collection: 'pages',
       depth: 0,
-      data: home({ heroImage: imageHomeDoc, locale: locales[0], metaImage: image2Doc }),
+      data: home({
+        heroImage: imageHomeDoc,
+        images: homeImages,
+        locale: locales[0],
+        metaImage: image2Doc,
+      }),
     }),
     payload.create({
       collection: 'pages',
@@ -438,7 +458,7 @@ export const seed = async ({
         locale,
         data: preserveIds(
           homePage,
-          home({ heroImage: imageHomeDoc, locale, metaImage: image2Doc }),
+          home({ heroImage: imageHomeDoc, images: homeImages, locale, metaImage: image2Doc }),
         ),
       }),
       payload.update({

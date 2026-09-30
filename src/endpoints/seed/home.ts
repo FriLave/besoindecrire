@@ -128,18 +128,238 @@ const copy: Record<Locale, HomeCopy> = {
   },
 }
 
+type CatalogCopy = {
+  faq: { heading: string; intro: string; items: { a: string; q: string }[] }
+  features: {
+    heading: string
+    intro: string
+    items: { text: string; title: string }[]
+    more: string
+  }
+  gallery: { captions: string[]; heading: string }
+  logos: { heading: string; names: string[] }
+  pricing: {
+    cta: string
+    heading: string
+    intro: string
+    period: string
+    plans: { description: string; features: string[]; name: string; price: string }[]
+  }
+  stats: { items: { label: string; value: string }[] }
+  testimonials: {
+    heading: string
+    items: { author: string; quote: string; role: string }[]
+  }
+}
+
+const catalog: Record<Locale, CatalogCopy> = {
+  fr: {
+    faq: {
+      heading: 'Questions fréquentes',
+      intro: 'Les réponses aux questions que l’on nous pose le plus souvent.',
+      items: [
+        {
+          q: 'Puis-je modifier mon site moi-même ?',
+          a: 'Oui. Tous les textes, images et sections se modifient depuis l’espace d’administration, sans écrire de code.',
+        },
+        {
+          q: 'Le site est-il bien référencé ?',
+          a: 'Chaque page dispose de ses balises SEO, d’un plan de site et de données structurées, pour un référencement soigné dès le départ.',
+        },
+        {
+          q: 'Combien de temps faut-il pour mettre le site en ligne ?',
+          a: 'Comptez quelques semaines selon le nombre de pages et le contenu à fournir.',
+        },
+      ],
+    },
+    features: {
+      heading: 'Pourquoi nous choisir',
+      intro: 'Tout ce qu’il faut pour un site qui vous ressemble et qui travaille pour vous.',
+      more: 'En savoir plus',
+      items: [
+        { title: 'Rapide', text: 'Des pages légères qui s’affichent instantanément.' },
+        { title: 'Sécurisé', text: 'Une base saine, mise à jour et sauvegardée régulièrement.' },
+        {
+          title: 'Simple à gérer',
+          text: 'Un espace d’administration clair, pensé pour les non-techniciens.',
+        },
+      ],
+    },
+    gallery: {
+      heading: 'Galerie',
+      captions: ['Un projet récent', 'En coulisses', 'Notre équipe au travail', 'Résultat final'],
+    },
+    logos: {
+      heading: 'Ils nous font confiance',
+      names: ['Partenaire un', 'Partenaire deux', 'Partenaire trois'],
+    },
+    pricing: {
+      cta: 'Choisir cette offre',
+      heading: 'Nos offres',
+      intro: 'Des tarifs clairs, sans surprise.',
+      period: '/ mois',
+      plans: [
+        {
+          name: 'Essentiel',
+          price: '49 €',
+          description: 'Pour démarrer.',
+          features: ['Jusqu’à 5 pages', 'Formulaire de contact', 'Assistance par email'],
+        },
+        {
+          name: 'Pro',
+          price: '99 €',
+          description: 'Pour les activités en croissance.',
+          features: ['Pages illimitées', 'Blog intégré', 'Assistance prioritaire'],
+        },
+        {
+          name: 'Sur mesure',
+          price: '199 €',
+          description: 'Pour les besoins spécifiques.',
+          features: [
+            'Fonctionnalités dédiées',
+            'Accompagnement personnalisé',
+            'Hébergement inclus',
+          ],
+        },
+      ],
+    },
+    stats: {
+      items: [
+        { value: '120+', label: 'Sites livrés' },
+        { value: '98 %', label: 'Clients satisfaits' },
+        { value: '10 ans', label: 'd’expérience' },
+        { value: '24 h', label: 'Délai de réponse' },
+      ],
+    },
+    testimonials: {
+      heading: 'Ce que disent nos clients',
+      items: [
+        {
+          quote:
+            'Un site rapide et surtout très simple à mettre à jour. Je ne dépends plus de personne.',
+          author: 'Claire Martin',
+          role: 'Gérante, Atelier Martin',
+        },
+        {
+          quote:
+            'Notre trafic a nettement progressé depuis la refonte. Le référencement est irréprochable.',
+          author: 'Thomas Lefèvre',
+          role: 'Directeur, Lefèvre Conseil',
+        },
+        {
+          quote: 'Une équipe à l’écoute, des délais tenus et un résultat à la hauteur.',
+          author: 'Sophie Durand',
+          role: 'Fondatrice, Studio Durand',
+        },
+      ],
+    },
+  },
+  en: {
+    faq: {
+      heading: 'Frequently asked questions',
+      intro: 'Answers to the questions we hear the most.',
+      items: [
+        {
+          q: 'Can I edit my site myself?',
+          a: 'Yes. All texts, images and sections are edited from the admin area, without writing any code.',
+        },
+        {
+          q: 'Is the site search-engine friendly?',
+          a: 'Every page has its SEO tags, a sitemap and structured data, for solid search visibility from day one.',
+        },
+        {
+          q: 'How long does it take to go live?',
+          a: 'Allow a few weeks depending on the number of pages and the content to provide.',
+        },
+      ],
+    },
+    features: {
+      heading: 'Why choose us',
+      intro: 'Everything you need for a site that looks like you and works for you.',
+      more: 'Learn more',
+      items: [
+        { title: 'Fast', text: 'Lightweight pages that load instantly.' },
+        { title: 'Secure', text: 'A healthy foundation, regularly updated and backed up.' },
+        { title: 'Easy to manage', text: 'A clear admin area designed for non-technical users.' },
+      ],
+    },
+    gallery: {
+      heading: 'Gallery',
+      captions: ['A recent project', 'Behind the scenes', 'Our team at work', 'Final result'],
+    },
+    logos: { heading: 'They trust us', names: ['Partner one', 'Partner two', 'Partner three'] },
+    pricing: {
+      cta: 'Choose this plan',
+      heading: 'Our plans',
+      intro: 'Clear pricing, no surprises.',
+      period: '/ month',
+      plans: [
+        {
+          name: 'Essential',
+          price: '$49',
+          description: 'To get started.',
+          features: ['Up to 5 pages', 'Contact form', 'Email support'],
+        },
+        {
+          name: 'Pro',
+          price: '$99',
+          description: 'For growing businesses.',
+          features: ['Unlimited pages', 'Built-in blog', 'Priority support'],
+        },
+        {
+          name: 'Custom',
+          price: '$199',
+          description: 'For specific needs.',
+          features: ['Dedicated features', 'Personal guidance', 'Hosting included'],
+        },
+      ],
+    },
+    stats: {
+      items: [
+        { value: '120+', label: 'Sites delivered' },
+        { value: '98%', label: 'Happy clients' },
+        { value: '10 yrs', label: 'of experience' },
+        { value: '24 h', label: 'Response time' },
+      ],
+    },
+    testimonials: {
+      heading: 'What our clients say',
+      items: [
+        {
+          quote: 'A fast site and, above all, very easy to update. I no longer depend on anyone.',
+          author: 'Claire Martin',
+          role: 'Manager, Atelier Martin',
+        },
+        {
+          quote: 'Our traffic has clearly grown since the redesign. The SEO is impeccable.',
+          author: 'Thomas Lefèvre',
+          role: 'Director, Lefèvre Consulting',
+        },
+        {
+          quote: 'An attentive team, deadlines met and a result that lives up to expectations.',
+          author: 'Sophie Durand',
+          role: 'Founder, Studio Durand',
+        },
+      ],
+    },
+  },
+}
+
 type HomeArgs = {
   heroImage: Media
+  images: Media[]
   locale: Locale
   metaImage: Media
 }
 
 export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> = ({
   heroImage,
+  images,
   locale,
   metaImage,
 }) => {
   const c = copy[locale]
+  const k = catalog[locale]
   const contactHref = getLocalizedPath(locale, contactSlugs[locale])
 
   return {
@@ -160,14 +380,29 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
       media: heroImage.id,
       richText: richText([
         heading('h1', c.hero.heading),
-        paragraph([
-          text(c.hero.para1),
-          link(c.hero.linkLabel, contactHref),
-          text(c.hero.para2),
-        ]),
+        paragraph([text(c.hero.para1), link(c.hero.linkLabel, contactHref), text(c.hero.para2)]),
       ]),
     },
     layout: [
+      {
+        blockType: 'featureGrid',
+        heading: k.features.heading,
+        intro: k.features.intro,
+        columns: '3',
+        items: k.features.items.map((item, i) => ({
+          ...item,
+          icon: (['zap', 'shield', 'settings'] as const)[i],
+          enableLink: i === 0,
+          ...(i === 0
+            ? { link: { type: 'custom' as const, label: k.features.more, url: contactHref } }
+            : {}),
+        })),
+      },
+      {
+        blockType: 'stats',
+        background: 'muted',
+        items: k.stats.items,
+      },
       {
         blockName: 'Content Block',
         blockType: 'content',
@@ -224,12 +459,46 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
         media: metaImage.id,
       },
       {
-        blockName: 'CTA',
-        blockType: 'cta',
-        richText: richText([
-          heading('h3', c.cta.heading),
-          paragraph([text(c.cta.para1), link(c.cta.linkLabel, contactHref), text(c.cta.para2)]),
-        ]),
+        blockType: 'testimonials',
+        heading: k.testimonials.heading,
+        items: k.testimonials.items.map((item, i) => ({ ...item, photo: images[i]?.id })),
+      },
+      {
+        blockType: 'logoCloud',
+        heading: k.logos.heading,
+        background: 'muted',
+        logos: k.logos.names.map((name, i) => ({
+          logo: images[i]!.id,
+          name,
+          url: 'https://example.com',
+        })),
+      },
+      {
+        blockType: 'pricingTable',
+        heading: k.pricing.heading,
+        intro: k.pricing.intro,
+        plans: k.pricing.plans.map((plan, i) => ({
+          ...plan,
+          period: k.pricing.period,
+          features: plan.features.map((feature) => ({ feature })),
+          highlighted: i === 1,
+          link: { type: 'custom' as const, label: k.pricing.cta, url: contactHref },
+        })),
+      },
+      {
+        blockType: 'gallery',
+        heading: k.gallery.heading,
+        columns: '2',
+        images: k.gallery.captions.map((caption, i) => ({ image: images[i]!.id, caption })),
+      },
+      {
+        blockType: 'faq',
+        heading: k.faq.heading,
+        intro: k.faq.intro,
+        items: k.faq.items.map(({ a, q }) => ({
+          question: q,
+          answer: richText([paragraph([text(a)])]),
+        })),
       },
       {
         blockName: 'Latest Posts',
@@ -237,8 +506,15 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
         populateBy: 'collection',
         relationTo: 'posts',
         limit: 3,
-        introContent: richText([
-          heading('h2', c.archiveIntro),
+        introContent: richText([heading('h2', c.archiveIntro)]),
+      },
+      {
+        blockName: 'CTA',
+        blockType: 'cta',
+        background: 'brand',
+        richText: richText([
+          heading('h3', c.cta.heading),
+          paragraph([text(c.cta.para1), link(c.cta.linkLabel, contactHref), text(c.cta.para2)]),
         ]),
       },
     ],

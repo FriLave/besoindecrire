@@ -7,6 +7,7 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
+import { blockSettings } from '../../fields/blockSettings'
 import { linkGroup } from '../../fields/linkGroup'
 
 export const CallToAction: Block = {
@@ -35,9 +36,10 @@ export const CallToAction: Block = {
         maxRows: 2,
       },
     }),
+    blockSettings(),
   ],
   labels: {
-    plural: 'Calls to Action',
-    singular: 'Call to Action',
+    plural: { en: 'Calls to Action', fr: 'Appels à l’action' },
+    singular: { en: 'Call to Action', fr: 'Appel à l’action' },
   },
 }

@@ -1,5 +1,7 @@
 import type { Block } from 'payload'
 
+import { blockSettings } from '../../fields/blockSettings'
+
 export const MediaBlock: Block = {
   slug: 'mediaBlock',
   interfaceName: 'MediaBlock',
@@ -10,5 +12,10 @@ export const MediaBlock: Block = {
       relationTo: 'media',
       required: true,
     },
+    blockSettings(),
   ],
+  labels: {
+    plural: { en: 'Media blocks', fr: 'Blocs média' },
+    singular: { en: 'Media', fr: 'Média' },
+  },
 }

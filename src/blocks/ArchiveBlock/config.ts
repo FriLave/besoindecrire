@@ -7,6 +7,8 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
+import { blockSettings } from '../../fields/blockSettings'
+
 export const Archive: Block = {
   slug: 'archive',
   interfaceName: 'ArchiveBlock',
@@ -25,6 +27,7 @@ export const Archive: Block = {
         },
       }),
       label: 'Intro Content',
+      localized: true,
     },
     {
       name: 'populateBy',
@@ -86,9 +89,10 @@ export const Archive: Block = {
       label: 'Selection',
       relationTo: ['posts'],
     },
+    blockSettings(),
   ],
   labels: {
-    plural: 'Archives',
-    singular: 'Archive',
+    plural: { en: 'Archives', fr: 'Archives' },
+    singular: { en: 'Archive', fr: 'Archive' },
   },
 }

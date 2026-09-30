@@ -205,7 +205,20 @@ export interface Page {
       | null;
     media?: (number | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | FormBlock | ArchiveBlock)[];
+  layout: (
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | FormBlock
+    | FeatureGridBlock
+    | StatsBlock
+    | TestimonialsBlock
+    | LogoCloudBlock
+    | PricingTableBlock
+    | GalleryBlock
+    | FAQBlock
+    | ArchiveBlock
+  )[];
   meta?: {
     title?: string | null;
     /**
@@ -489,6 +502,9 @@ export interface CallToActionBlock {
         id?: string | null;
       }[]
     | null;
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'cta';
@@ -539,6 +555,9 @@ export interface ContentBlock {
         id?: string | null;
       }[]
     | null;
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -549,6 +568,9 @@ export interface ContentBlock {
  */
 export interface MediaBlock {
   media: number | Media;
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaBlock';
@@ -575,6 +597,9 @@ export interface FormBlock {
     };
     [k: string]: unknown;
   } | null;
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'formBlock';
@@ -746,6 +771,241 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureGridBlock".
+ */
+export interface FeatureGridBlock {
+  /**
+   * A grid of features or services, each with an icon, a title and a short text.
+   */
+  heading?: string | null;
+  intro?: string | null;
+  columns?: ('2' | '3' | '4') | null;
+  items: {
+    icon?:
+      | (
+          | 'clock'
+          | 'globe'
+          | 'heart'
+          | 'lightbulb'
+          | 'mail'
+          | 'rocket'
+          | 'search'
+          | 'settings'
+          | 'shield'
+          | 'sparkles'
+          | 'star'
+          | 'users'
+          | 'wrench'
+          | 'zap'
+        )
+      | null;
+    title: string;
+    text?: string | null;
+    enableLink?: boolean | null;
+    link?: {
+      type?: ('reference' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: number | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: number | Post;
+          } | null);
+      url?: string | null;
+      label: string;
+    };
+    id?: string | null;
+  }[];
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'featureGrid';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBlock".
+ */
+export interface StatsBlock {
+  /**
+   * Key figures, each with a value and a label.
+   */
+  heading?: string | null;
+  intro?: string | null;
+  items: {
+    value: string;
+    label: string;
+    id?: string | null;
+  }[];
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'stats';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock".
+ */
+export interface TestimonialsBlock {
+  /**
+   * Customer quotes with author, role and an optional photo.
+   */
+  heading?: string | null;
+  intro?: string | null;
+  items: {
+    quote: string;
+    author: string;
+    role?: string | null;
+    photo?: (number | null) | Media;
+    id?: string | null;
+  }[];
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testimonials';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LogoCloudBlock".
+ */
+export interface LogoCloudBlock {
+  /**
+   * A row of partner or client logos, each optionally linking to a website.
+   */
+  heading?: string | null;
+  intro?: string | null;
+  logos: {
+    logo: number | Media;
+    name: string;
+    url?: string | null;
+    id?: string | null;
+  }[];
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'logoCloud';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingTableBlock".
+ */
+export interface PricingTableBlock {
+  /**
+   * Side-by-side plans with price, included features and a call to action. One plan can be highlighted.
+   */
+  heading?: string | null;
+  intro?: string | null;
+  plans: {
+    name: string;
+    price: string;
+    period?: string | null;
+    description?: string | null;
+    features?:
+      | {
+          feature: string;
+          id?: string | null;
+        }[]
+      | null;
+    highlighted?: boolean | null;
+    link: {
+      type?: ('reference' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: number | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: number | Post;
+          } | null);
+      url?: string | null;
+      label: string;
+      /**
+       * Choose how the link should be rendered.
+       */
+      appearance?: ('default' | 'outline') | null;
+    };
+    id?: string | null;
+  }[];
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'pricingTable';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GalleryBlock".
+ */
+export interface GalleryBlock {
+  /**
+   * An image grid with optional captions.
+   */
+  heading?: string | null;
+  intro?: string | null;
+  columns?: ('2' | '3' | '4') | null;
+  images: {
+    image: number | Media;
+    caption?: string | null;
+    id?: string | null;
+  }[];
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gallery';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FAQBlock".
+ */
+export interface FAQBlock {
+  /**
+   * Frequently asked questions as an accordion. Also improves search results (FAQ rich snippet).
+   */
+  heading?: string | null;
+  intro?: string | null;
+  items: {
+    question: string;
+    answer: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    };
+    id?: string | null;
+  }[];
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'faq';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "ArchiveBlock".
  */
 export interface ArchiveBlock {
@@ -774,6 +1034,9 @@ export interface ArchiveBlock {
         value: number | Post;
       }[]
     | null;
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
@@ -1085,6 +1348,13 @@ export interface PagesSelect<T extends boolean = true> {
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        featureGrid?: T | FeatureGridBlockSelect<T>;
+        stats?: T | StatsBlockSelect<T>;
+        testimonials?: T | TestimonialsBlockSelect<T>;
+        logoCloud?: T | LogoCloudBlockSelect<T>;
+        pricingTable?: T | PricingTableBlockSelect<T>;
+        gallery?: T | GalleryBlockSelect<T>;
+        faq?: T | FAQBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
       };
   meta?:
@@ -1122,6 +1392,9 @@ export interface CallToActionBlockSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
   id?: T;
   blockName?: T;
 }
@@ -1148,6 +1421,9 @@ export interface ContentBlockSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
   id?: T;
   blockName?: T;
 }
@@ -1157,6 +1433,9 @@ export interface ContentBlockSelect<T extends boolean = true> {
  */
 export interface MediaBlockSelect<T extends boolean = true> {
   media?: T;
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
   id?: T;
   blockName?: T;
 }
@@ -1168,6 +1447,184 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FeatureGridBlock_select".
+ */
+export interface FeatureGridBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  columns?: T;
+  items?:
+    | T
+    | {
+        icon?: T;
+        title?: T;
+        text?: T;
+        enableLink?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+            };
+        id?: T;
+      };
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "StatsBlock_select".
+ */
+export interface StatsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  items?:
+    | T
+    | {
+        value?: T;
+        label?: T;
+        id?: T;
+      };
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestimonialsBlock_select".
+ */
+export interface TestimonialsBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  items?:
+    | T
+    | {
+        quote?: T;
+        author?: T;
+        role?: T;
+        photo?: T;
+        id?: T;
+      };
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LogoCloudBlock_select".
+ */
+export interface LogoCloudBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  logos?:
+    | T
+    | {
+        logo?: T;
+        name?: T;
+        url?: T;
+        id?: T;
+      };
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "PricingTableBlock_select".
+ */
+export interface PricingTableBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  plans?:
+    | T
+    | {
+        name?: T;
+        price?: T;
+        period?: T;
+        description?: T;
+        features?:
+          | T
+          | {
+              feature?: T;
+              id?: T;
+            };
+        highlighted?: T;
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+              appearance?: T;
+            };
+        id?: T;
+      };
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GalleryBlock_select".
+ */
+export interface GalleryBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  columns?: T;
+  images?:
+    | T
+    | {
+        image?: T;
+        caption?: T;
+        id?: T;
+      };
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FAQBlock_select".
+ */
+export interface FAQBlockSelect<T extends boolean = true> {
+  heading?: T;
+  intro?: T;
+  items?:
+    | T
+    | {
+        question?: T;
+        answer?: T;
+        id?: T;
+      };
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
   id?: T;
   blockName?: T;
 }
@@ -1182,6 +1639,9 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
   categories?: T;
   limit?: T;
   selectedDocs?: T;
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
   id?: T;
   blockName?: T;
 }

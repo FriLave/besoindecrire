@@ -4,6 +4,13 @@ import { editorOrAbove } from '../../access/roles'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { modules } from '../../client/modules'
 import { Archive } from '../../blocks/ArchiveBlock/config'
+import { FAQ } from '../../blocks/FAQ/config'
+import { FeatureGrid } from '../../blocks/FeatureGrid/config'
+import { Gallery } from '../../blocks/Gallery/config'
+import { LogoCloud } from '../../blocks/LogoCloud/config'
+import { PricingTable } from '../../blocks/PricingTable/config'
+import { Stats } from '../../blocks/Stats/config'
+import { Testimonials } from '../../blocks/Testimonials/config'
 import { CallToAction } from '../../blocks/CallToAction/config'
 import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
@@ -75,7 +82,20 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, FormBlock, ...(modules.blog ? [Archive] : [])],
+              blocks: [
+                CallToAction,
+                Content,
+                MediaBlock,
+                FormBlock,
+                FeatureGrid,
+                Stats,
+                Testimonials,
+                LogoCloud,
+                PricingTable,
+                Gallery,
+                FAQ,
+                ...(modules.blog ? [Archive] : []),
+              ],
               required: true,
               admin: {
                 initCollapsed: true,

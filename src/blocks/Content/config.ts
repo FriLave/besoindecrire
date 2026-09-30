@@ -7,6 +7,7 @@ import {
   lexicalEditor,
 } from '@payloadcms/richtext-lexical'
 
+import { blockSettings } from '@/fields/blockSettings'
 import { link } from '@/fields/link'
 
 const columnFields: Field[] = [
@@ -76,5 +77,10 @@ export const Content: Block = {
       },
       fields: columnFields,
     },
+    blockSettings(),
   ],
+  labels: {
+    plural: { en: 'Content blocks', fr: 'Blocs de contenu' },
+    singular: { en: 'Content', fr: 'Contenu' },
+  },
 }

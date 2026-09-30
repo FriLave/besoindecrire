@@ -2,6 +2,7 @@ import React, { Fragment } from 'react'
 
 import type { Page } from '@/payload-types'
 import type { Locale } from '@/utilities/getLocalizedPath'
+import { isFeatureEnabled } from '@/utilities/features'
 import { stripDisabledPostLinks } from '@/utilities/stripDisabledPostLinks'
 
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
@@ -9,14 +10,29 @@ import { ContentBlock } from '@/blocks/Content/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 
+import { BlockSection } from '@/components/BlockSection'
+import { FAQBlock } from '@/blocks/FAQ/Component'
+import { FeatureGridBlock } from '@/blocks/FeatureGrid/Component'
+import { GalleryBlock } from '@/blocks/Gallery/Component'
+import { LogoCloudBlock } from '@/blocks/LogoCloud/Component'
+import { PricingTableBlock } from '@/blocks/PricingTable/Component'
+import { StatsBlock } from '@/blocks/Stats/Component'
+import { TestimonialsBlock } from '@/blocks/Testimonials/Component'
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
   content: ContentBlock,
   cta: CallToActionBlock,
+  faq: FAQBlock,
+  featureGrid: FeatureGridBlock,
   formBlock: FormBlock,
+  gallery: GalleryBlock,
+  logoCloud: LogoCloudBlock,
   mediaBlock: MediaBlock,
+  pricingTable: PricingTableBlock,
+  stats: StatsBlock,
+  testimonials: TestimonialsBlock,
 }
 
 export const RenderBlocks = async (props: {
@@ -24,7 +40,10 @@ export const RenderBlocks = async (props: {
   locale: Locale
 }) => {
   const { locale } = props
-  const blocks = await stripDisabledPostLinks(props.blocks)
+  const blogEnabled = await isFeatureEnabled('blog')
+  const blocks = (await stripDisabledPostLinks(props.blocks)).filter(
+    (b) => blogEnabled || b.blockType !== 'archive',
+  )
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -39,10 +58,15 @@ export const RenderBlocks = async (props: {
 
             if (Block) {
               return (
-                <div className="my-16" key={index}>
+                <BlockSection
+                  background={block.background}
+                  key={index}
+                  paddingBottom={block.paddingBottom}
+                  paddingTop={block.paddingTop}
+                >
                   {/* @ts-expect-error there may be some mismatch between the expected types here */}
                   <Block {...block} locale={locale} disableInnerContainer />
-                </div>
+                </BlockSection>
               )
             }
           }
