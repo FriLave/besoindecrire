@@ -48,14 +48,14 @@ export const contact: (args: ContactArgs) => RequiredDataFromCollectionSlug<'pag
     slug: contactSlugs[locale],
     _status: 'published',
     hero: {
-      type: 'none',
+      type: 'lowImpact',
+      richText: richText([heading('h1', headingText)]),
     },
     layout: [
       {
         blockType: 'formBlock',
-        enableIntro: true,
+        enableIntro: false,
         form: contactForm,
-        introContent: richText([heading('h3', headingText)]),
       },
     ],
     meta: {

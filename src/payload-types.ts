@@ -1149,7 +1149,7 @@ export interface PaidDownload {
   title: string;
   description?: string | null;
   /**
-   * En centimes TTC (ex: 990 = 9,90 EUR).
+   * In cents, tax included (e.g. 990 = 9.90 EUR).
    */
   price: number;
   currency: 'eur';
@@ -1225,7 +1225,7 @@ export interface Purchase {
   stripeSessionId?: string | null;
   status: 'pending' | 'paid';
   /**
-   * Cents
+   * In cents
    */
   amount?: number | null;
   currency?: string | null;

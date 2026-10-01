@@ -2,6 +2,7 @@ import type { Access, CollectionBeforeChangeHook, CollectionConfig } from 'paylo
 
 import { APIError } from 'payload'
 
+import { groups } from '../../utilities/adminGroups'
 import { adminOrAbove, hasRole, isSuperAdmin } from '../../access/roles'
 
 // Admins can manage users, but never a superadmin. Everyone can manage themselves.
@@ -15,7 +16,12 @@ const updateOrDelete: Access = ({ req: { user } }) => {
 
 const deleteAccess: Access = (args) => (adminOrAbove(args) ? updateOrDelete(args) : false)
 
-const enforceRole: CollectionBeforeChangeHook = async ({ data, operation, originalDoc, req }) => {
+export const enforceRole: CollectionBeforeChangeHook = async ({
+  data,
+  operation,
+  originalDoc,
+  req,
+}) => {
   if (operation === 'create') {
     const { totalDocs } = await req.payload.count({ collection: 'users', req })
     if (totalDocs === 0) {
@@ -42,22 +48,32 @@ export const Users: CollectionConfig = {
     admin: ({ req: { user } }) => hasRole(user, 'superadmin', 'admin', 'editor'),
     create: adminOrAbove,
     delete: deleteAccess,
-    read: ({ req: { user } }) => Boolean(user),
+    // Admins list everyone; others only see themselves (keeps /admin/account working).
+    read: ({ req: { user } }) =>
+      !user ? false : hasRole(user, 'superadmin', 'admin') ? true : { id: { equals: user.id } },
     update: updateOrDelete,
   },
   admin: {
     defaultColumns: ['name', 'email', 'role'],
+    group: groups.administration,
+    hidden: ({ user }) => !hasRole(user, 'superadmin', 'admin'),
     useAsTitle: 'name',
   },
   auth: true,
+  labels: {
+    singular: { en: 'User', fr: 'Utilisateur' },
+    plural: { en: 'Users', fr: 'Utilisateurs' },
+  },
   fields: [
     {
       name: 'name',
       type: 'text',
+      label: { en: 'Name', fr: 'Nom' },
     },
     {
       name: 'role',
       type: 'select',
+      label: { en: 'Role', fr: 'Rôle' },
       required: true,
       defaultValue: 'editor',
       saveToJWT: true,
@@ -65,9 +81,9 @@ export const Users: CollectionConfig = {
         update: ({ req: { user } }) => hasRole(user, 'superadmin', 'admin'),
       },
       options: [
-        { label: 'Super admin', value: 'superadmin' },
-        { label: 'Admin', value: 'admin' },
-        { label: 'Editor', value: 'editor' },
+        { label: { en: 'Super admin', fr: 'Super administrateur' }, value: 'superadmin' },
+        { label: { en: 'Admin', fr: 'Administrateur' }, value: 'admin' },
+        { label: { en: 'Editor', fr: 'Éditeur' }, value: 'editor' },
       ],
     },
   ],

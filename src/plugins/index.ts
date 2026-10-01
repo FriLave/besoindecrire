@@ -17,6 +17,7 @@ import { buildStoragePlugins } from '@/storage'
 import { privacyNoticeDefaults } from '@/i18n/legal'
 import type { Page, Post } from '@/payload-types'
 import { SITE_NAME } from '@/client/site'
+import { groups } from '@/utilities/adminGroups'
 import { getServerSideURL } from '@/utilities/getURL'
 import { getCachedSiteSettings } from '@/utilities/getGlobals'
 import { defaultLocale, getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
@@ -72,6 +73,11 @@ export const plugins: Plugin[] = [
     collections: modules.blog ? ['pages', 'posts'] : ['pages'],
     overrides: {
       access: { create: editorOrAbove, delete: editorOrAbove, update: editorOrAbove },
+      admin: { group: groups.administration },
+      labels: {
+        singular: { en: 'Redirect', fr: 'Redirection' },
+        plural: { en: 'Redirects', fr: 'Redirections' },
+      },
       // @ts-expect-error - This is a valid override, mapped fields don't resolve to the same type
       fields: ({ defaultFields }) => {
         return defaultFields.map((field) => {
@@ -79,7 +85,10 @@ export const plugins: Plugin[] = [
             return {
               ...field,
               admin: {
-                description: 'You will need to rebuild the website when changing this field.',
+                description: {
+                  en: 'You will need to rebuild the website when changing this field.',
+                  fr: 'Il faudra reconstruire le site après modification de ce champ.',
+                },
               },
               // Paths differ per locale (e.g. /a-propos vs /about)
               localized: true,
@@ -124,9 +133,19 @@ export const plugins: Plugin[] = [
     formSubmissionOverrides: {
       // create stays public (anonymous submissions); update stays false
       access: { delete: editorOrAbove },
+      admin: { group: groups.forms },
+      labels: {
+        singular: { en: 'Form submission', fr: 'Réponse de formulaire' },
+        plural: { en: 'Form submissions', fr: 'Réponses de formulaires' },
+      },
     },
     formOverrides: {
       access: { create: editorOrAbove, delete: editorOrAbove, update: editorOrAbove },
+      admin: { group: groups.forms },
+      labels: {
+        singular: { en: 'Form', fr: 'Formulaire' },
+        plural: { en: 'Forms', fr: 'Formulaires' },
+      },
       fields: ({ defaultFields }) => {
         const privacyNotice: Field = {
           name: 'privacyNotice',
@@ -157,7 +176,7 @@ export const plugins: Plugin[] = [
                   return [
                     ...rootFeatures,
                     FixedToolbarFeature(),
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                    HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
                   ]
                 },
               }),
@@ -185,6 +204,11 @@ export const plugins: Plugin[] = [
           beforeSync: beforeSyncWithSearch,
           searchOverrides: {
             access: { read: whenBlog(() => true) },
+            admin: { group: groups.administration },
+            labels: {
+              singular: { en: 'Search result', fr: 'Résultat de recherche' },
+              plural: { en: 'Search results', fr: 'Résultats de recherche' },
+            },
             fields: ({ defaultFields }) => [...defaultFields, ...searchFields],
           },
         }),

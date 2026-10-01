@@ -12,6 +12,7 @@ import {
 import { whenBlog } from '../../access/blogEnabled'
 import { editorOrAbove } from '../../access/roles'
 import { slugify } from '../../utilities/slugify'
+import { groups } from '../../utilities/adminGroups'
 import { authenticatedOrPublished } from '../../access/authenticatedOrPublished'
 import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
@@ -56,6 +57,7 @@ export const Posts: CollectionConfig<'posts'> = {
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
+    group: groups.content,
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
@@ -72,9 +74,11 @@ export const Posts: CollectionConfig<'posts'> = {
       }),
     useAsTitle: 'title',
   },
+  labels: { singular: { en: 'Post', fr: 'Article' }, plural: { en: 'Posts', fr: 'Articles' } },
   fields: [
     {
       name: 'title',
+      label: { en: 'Title', fr: 'Titre' },
       type: 'text',
       required: true,
       localized: true,
@@ -87,6 +91,7 @@ export const Posts: CollectionConfig<'posts'> = {
             {
               name: 'heroImage',
               type: 'upload',
+              label: { en: 'Hero image', fr: 'Image principale' },
               relationTo: 'media',
             },
             {
@@ -96,7 +101,7 @@ export const Posts: CollectionConfig<'posts'> = {
                 features: ({ rootFeatures }) => {
                   return [
                     ...rootFeatures,
-                    HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+                    HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
                     BlocksFeature({ blocks: [Banner, Code, MediaBlock] }),
                     FixedToolbarFeature(),
                     InlineToolbarFeature(),
@@ -109,13 +114,14 @@ export const Posts: CollectionConfig<'posts'> = {
               required: true,
             },
           ],
-          label: 'Content',
+          label: { en: 'Content', fr: 'Contenu' },
         },
         {
           fields: [
             {
               name: 'relatedPosts',
               type: 'relationship',
+              label: { en: 'Related posts', fr: 'Articles liés' },
               admin: {
                 position: 'sidebar',
               },
@@ -132,6 +138,7 @@ export const Posts: CollectionConfig<'posts'> = {
             {
               name: 'categories',
               type: 'relationship',
+              label: { en: 'Categories', fr: 'Catégories' },
               admin: {
                 position: 'sidebar',
               },
@@ -139,7 +146,7 @@ export const Posts: CollectionConfig<'posts'> = {
               relationTo: 'categories',
             },
           ],
-          label: 'Meta',
+          label: { en: 'Meta', fr: 'Informations' },
         },
         {
           name: 'meta',
@@ -180,6 +187,7 @@ export const Posts: CollectionConfig<'posts'> = {
     {
       name: 'publishedAt',
       type: 'date',
+      label: { en: 'Published at', fr: 'Publié le' },
       admin: {
         date: {
           pickerAppearance: 'dayAndTime',
@@ -200,6 +208,7 @@ export const Posts: CollectionConfig<'posts'> = {
     {
       name: 'authors',
       type: 'relationship',
+      label: { en: 'Authors', fr: 'Auteurs' },
       admin: {
         position: 'sidebar',
       },

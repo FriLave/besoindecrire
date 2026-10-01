@@ -5,13 +5,16 @@ import deepMerge from '@/utilities/deepMerge'
 
 export type LinkAppearances = 'default' | 'outline'
 
-export const appearanceOptions: Record<LinkAppearances, { label: string; value: string }> = {
+export const appearanceOptions: Record<
+  LinkAppearances,
+  { label: Record<string, string>; value: string }
+> = {
   default: {
-    label: 'Default',
+    label: { en: 'Default', fr: 'Par défaut' },
     value: 'default',
   },
   outline: {
-    label: 'Outline',
+    label: { en: 'Outline', fr: 'Contour' },
     value: 'outline',
   },
 }
@@ -43,11 +46,11 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
             defaultValue: 'reference',
             options: [
               {
-                label: 'Internal link',
+                label: { en: 'Internal link', fr: 'Lien interne' },
                 value: 'reference',
               },
               {
-                label: 'Custom URL',
+                label: { en: 'Custom URL', fr: 'URL personnalisée' },
                 value: 'custom',
               },
             ],
@@ -61,7 +64,7 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
               },
               width: '50%',
             },
-            label: 'Open in new tab',
+            label: { en: 'Open in new tab', fr: 'Ouvrir dans un nouvel onglet' },
           },
         ],
       },
@@ -75,7 +78,7 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'reference',
       },
-      label: 'Document to link to',
+      label: { en: 'Document to link to', fr: 'Document à lier' },
       relationTo: modules.blog ? ['pages', 'posts'] : ['pages'],
       required: true,
     },
@@ -85,7 +88,7 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'custom',
       },
-      label: 'Custom URL',
+      label: { en: 'Custom URL', fr: 'URL personnalisée' },
       localized: true,
       required: true,
     },
@@ -110,7 +113,7 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
           admin: {
             width: '50%',
           },
-          label: 'Label',
+          label: { en: 'Label', fr: 'Libellé' },
           localized: true,
           required: true,
         },
@@ -131,7 +134,10 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
       name: 'appearance',
       type: 'select',
       admin: {
-        description: 'Choose how the link should be rendered.',
+        description: {
+          en: 'Choose how the link should be rendered.',
+          fr: 'Choisissez le rendu du lien.',
+        },
       },
       defaultValue: 'default',
       options: appearanceOptionsToUse,

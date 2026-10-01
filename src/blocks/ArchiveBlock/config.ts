@@ -20,13 +20,13 @@ export const Archive: Block = {
         features: ({ rootFeatures }) => {
           return [
             ...rootFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+            HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
             FixedToolbarFeature(),
             InlineToolbarFeature(),
           ]
         },
       }),
-      label: 'Intro Content',
+      label: { en: 'Intro content', fr: "Texte d'introduction" },
       localized: true,
     },
     {
@@ -35,11 +35,11 @@ export const Archive: Block = {
       defaultValue: 'collection',
       options: [
         {
-          label: 'Collection',
+          label: { en: 'Collection', fr: 'Collection' },
           value: 'collection',
         },
         {
-          label: 'Individual Selection',
+          label: { en: 'Individual selection', fr: 'Sélection manuelle' },
           value: 'selection',
         },
       ],
@@ -51,10 +51,10 @@ export const Archive: Block = {
         condition: (_, siblingData) => siblingData.populateBy === 'collection',
       },
       defaultValue: 'posts',
-      label: 'Collections To Show',
+      label: { en: 'Collection to show', fr: 'Collection à afficher' },
       options: [
         {
-          label: 'Posts',
+          label: { en: 'Posts', fr: 'Articles' },
           value: 'posts',
         },
       ],
@@ -66,7 +66,7 @@ export const Archive: Block = {
         condition: (_, siblingData) => siblingData.populateBy === 'collection',
       },
       hasMany: true,
-      label: 'Categories To Show',
+      label: { en: 'Categories to show', fr: 'Catégories à afficher' },
       relationTo: 'categories',
     },
     {
@@ -77,7 +77,7 @@ export const Archive: Block = {
         step: 1,
       },
       defaultValue: 10,
-      label: 'Limit',
+      label: { en: 'Limit', fr: 'Limite' },
     },
     {
       name: 'selectedDocs',
@@ -86,7 +86,7 @@ export const Archive: Block = {
         condition: (_, siblingData) => siblingData.populateBy === 'selection',
       },
       hasMany: true,
-      label: 'Selection',
+      label: { en: 'Selection', fr: 'Sélection' },
       relationTo: ['posts'],
     },
     blockSettings(),

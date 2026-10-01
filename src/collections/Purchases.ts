@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
 import { adminOrAbove } from '../access/roles'
+import { groups } from '../utilities/adminGroups'
 import { whenFeature } from '../access/featureEnabled'
 
 // Only server code (checkout/webhook endpoints) creates or deletes purchases, via overrideAccess.
@@ -14,26 +15,50 @@ export const Purchases: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['email', 'paidDownload', 'status', 'createdAt'],
+    group: groups.shop,
     useAsTitle: 'email',
   },
+  labels: {
+    singular: { en: 'Purchase', fr: 'Achat' },
+    plural: { en: 'Purchases', fr: 'Achats' },
+  },
   fields: [
-    { name: 'email', type: 'email', required: true, index: true },
-    { name: 'paidDownload', type: 'relationship', relationTo: 'paid-downloads', required: true },
-    { name: 'stripeSessionId', type: 'text', unique: true, index: true },
+    { name: 'email', type: 'email', required: true, index: true, label: 'Email' },
+    {
+      name: 'paidDownload',
+      type: 'relationship',
+      relationTo: 'paid-downloads',
+      required: true,
+      label: { en: 'Paid download', fr: 'Téléchargement payant' },
+    },
+    {
+      name: 'stripeSessionId',
+      type: 'text',
+      unique: true,
+      index: true,
+      label: { en: 'Stripe session', fr: 'Session Stripe' },
+    },
     {
       name: 'status',
+      label: { en: 'Status', fr: 'Statut' },
       type: 'select',
       required: true,
       defaultValue: 'pending',
       options: [
-        { label: 'Pending', value: 'pending' },
-        { label: 'Paid', value: 'paid' },
+        { label: { en: 'Pending', fr: 'En attente' }, value: 'pending' },
+        { label: { en: 'Paid', fr: 'Payé' }, value: 'paid' },
       ],
     },
-    { name: 'amount', type: 'number', admin: { description: 'Cents' } },
-    { name: 'currency', type: 'text' },
+    {
+      name: 'amount',
+      type: 'number',
+      label: { en: 'Amount', fr: 'Montant' },
+      admin: { description: { en: 'In cents', fr: 'En centimes' } },
+    },
+    { name: 'currency', type: 'text', label: { en: 'Currency', fr: 'Devise' } },
     {
       name: 'locale',
+      label: { en: 'Language', fr: 'Langue' },
       type: 'select',
       options: [
         { label: 'Français', value: 'fr' },
@@ -44,9 +69,10 @@ export const Purchases: CollectionConfig = {
       // Consent to immediate digital delivery / loss of withdrawal right (Code de la conso. L221-28 13°).
       name: 'withdrawalWaiver',
       type: 'group',
+      label: { en: 'Withdrawal waiver', fr: 'Renonciation au droit de rétractation' },
       fields: [
-        { name: 'acceptedAt', type: 'date' },
-        { name: 'text', type: 'textarea' },
+        { name: 'acceptedAt', type: 'date', label: { en: 'Accepted at', fr: 'Accepté le' } },
+        { name: 'text', type: 'textarea', label: { en: 'Text', fr: 'Texte' } },
       ],
     },
   ],

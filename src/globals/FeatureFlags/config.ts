@@ -1,17 +1,23 @@
 import type { GlobalConfig } from 'payload'
 
 import { isSuperAdmin, superAdminOnly } from '@/access/roles'
+import { groups } from '@/utilities/adminGroups'
 import { modules } from '@/client/modules'
 import { revalidateFeatureFlags } from './hooks/revalidateFeatureFlags'
 
 export const FeatureFlags: GlobalConfig = {
   slug: 'feature-flags',
+  label: { en: 'Feature flags', fr: 'Modules optionnels' },
   access: {
     read: () => true,
     update: superAdminOnly,
   },
   admin: {
-    description: 'Turn optional modules on or off. Only visible to super admins.',
+    description: {
+      en: 'Turn optional modules on or off. Only visible to super admins.',
+      fr: 'Activer ou désactiver les modules optionnels. Visible uniquement par les super administrateurs.',
+    },
+    group: groups.settings,
     hidden: ({ user }) => !isSuperAdmin(user),
   },
   fields: [
@@ -21,7 +27,7 @@ export const FeatureFlags: GlobalConfig = {
             name: 'blog',
             type: 'checkbox' as const,
             defaultValue: false,
-            label: 'Blog',
+            label: { en: 'Blog', fr: 'Blog' },
           },
         ]
       : []),
@@ -31,7 +37,7 @@ export const FeatureFlags: GlobalConfig = {
             name: 'payments',
             type: 'checkbox' as const,
             defaultValue: false,
-            label: 'Payments (paid downloads)',
+            label: { en: 'Payments (paid downloads)', fr: 'Paiements (téléchargements payants)' },
           },
         ]
       : []),

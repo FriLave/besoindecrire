@@ -10,6 +10,7 @@ import { fileURLToPath } from 'url'
 
 import { anyone } from '../access/anyone'
 import { editorOrAbove } from '../access/roles'
+import { groups } from '../utilities/adminGroups'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -17,6 +18,8 @@ const dirname = path.dirname(filename)
 export const Media: CollectionConfig = {
   slug: 'media',
   folders: true,
+  admin: { group: groups.content },
+  labels: { singular: { en: 'Media', fr: 'Média' }, plural: { en: 'Media', fr: 'Médias' } },
   access: {
     create: editorOrAbove,
     delete: editorOrAbove,
@@ -26,12 +29,14 @@ export const Media: CollectionConfig = {
   fields: [
     {
       name: 'alt',
+      label: { en: 'Alt text', fr: 'Texte alternatif' },
       type: 'text',
       required: true,
       localized: true,
     },
     {
       name: 'caption',
+      label: { en: 'Caption', fr: 'Légende' },
       type: 'richText',
       editor: lexicalEditor({
         features: ({ rootFeatures }) => {

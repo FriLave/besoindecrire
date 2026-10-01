@@ -24,6 +24,8 @@ import { slugField } from 'payload'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
 import { slugify } from '../../utilities/slugify'
+import { groups } from '../../utilities/adminGroups'
+import { enforceSingleH1 } from './hooks/enforceSingleH1'
 import {
   revalidateDelete,
   revalidatePage,
@@ -55,6 +57,7 @@ export const Pages: CollectionConfig<'pages'> = {
   },
   admin: {
     defaultColumns: ['title', 'slug', 'updatedAt'],
+    group: groups.content,
     livePreview: {
       url: ({ data, req }) =>
         generatePreviewPath({
@@ -71,9 +74,11 @@ export const Pages: CollectionConfig<'pages'> = {
       }),
     useAsTitle: 'title',
   },
+  labels: { singular: { en: 'Page', fr: 'Page' }, plural: { en: 'Pages', fr: 'Pages' } },
   fields: [
     {
       name: 'title',
+      label: { en: 'Title', fr: 'Titre' },
       type: 'text',
       required: true,
       localized: true,
@@ -83,7 +88,7 @@ export const Pages: CollectionConfig<'pages'> = {
       tabs: [
         {
           fields: [hero],
-          label: 'Hero',
+          label: { en: 'Hero', fr: 'Bannière' },
         },
         {
           fields: [
@@ -113,7 +118,7 @@ export const Pages: CollectionConfig<'pages'> = {
               },
             },
           ],
-          label: 'Content',
+          label: { en: 'Content', fr: 'Contenu' },
         },
         {
           name: 'meta',
@@ -154,6 +159,7 @@ export const Pages: CollectionConfig<'pages'> = {
     {
       name: 'publishedAt',
       type: 'date',
+      label: { en: 'Published at', fr: 'Publié le' },
       admin: {
         position: 'sidebar',
       },
@@ -162,7 +168,7 @@ export const Pages: CollectionConfig<'pages'> = {
   ],
   hooks: {
     afterChange: [revalidatePage],
-    beforeChange: [populatePublishedAt],
+    beforeChange: [populatePublishedAt, enforceSingleH1],
     beforeDelete: [revalidatePageBeforeDelete],
     afterDelete: [revalidateDelete],
   },

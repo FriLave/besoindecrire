@@ -22,7 +22,7 @@ export const FormBlock: Block = {
     {
       name: 'enableIntro',
       type: 'checkbox',
-      label: 'Enable Intro Content',
+      label: { en: 'Enable intro content', fr: "Activer le texte d'introduction" },
     },
     {
       name: 'introContent',
@@ -34,13 +34,13 @@ export const FormBlock: Block = {
         features: ({ rootFeatures }) => {
           return [
             ...rootFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
+            HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
             FixedToolbarFeature(),
             InlineToolbarFeature(),
           ]
         },
       }),
-      label: 'Intro Content',
+      label: { en: 'Intro content', fr: "Texte d'introduction" },
       localized: true,
     },
     blockSettings(),

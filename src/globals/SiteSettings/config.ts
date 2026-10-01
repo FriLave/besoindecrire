@@ -1,6 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
-import { adminOrAbove } from '@/access/roles'
+import { adminOrAbove, hasRole } from '@/access/roles'
+import { groups } from '@/utilities/adminGroups'
 import { modules } from '@/client/modules'
 import { revalidateSiteSettings } from './hooks/revalidateSiteSettings'
 
@@ -20,11 +21,14 @@ const mediaField = (
 
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
+  label: { en: 'Site settings', fr: 'Réglages du site' },
   access: {
     read: () => true,
     update: adminOrAbove,
   },
   admin: {
+    group: groups.settings,
+    hidden: ({ user }) => !hasRole(user, 'superadmin', 'admin'),
     description: {
       en: 'General site identity settings (name, description, logo, SEO, social networks) shown across the public site.',
       fr: "Réglages d'identité du site (nom, description, logo, SEO, réseaux sociaux) utilisés sur tout le site public.",
