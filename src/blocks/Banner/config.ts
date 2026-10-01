@@ -12,6 +12,12 @@ export const Banner: Block = {
     {
       name: 'style',
       type: 'select',
+      admin: {
+        description: {
+          en: 'Coloured callout to draw attention to a piece of information.',
+          fr: 'Encadré coloré pour attirer l’attention sur une information.',
+        },
+      },
       defaultValue: 'info',
       options: [
         { label: { en: 'Info', fr: 'Info' }, value: 'info' },

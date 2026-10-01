@@ -1,4 +1,10 @@
-import { getLocalizedPath, locales, type Locale, type LocalizedValue } from './getLocalizedPath'
+import {
+  defaultLocale,
+  getLocalizedPath,
+  locales,
+  type Locale,
+  type LocalizedValue,
+} from './getLocalizedPath'
 
 export type SitemapDoc = { slug?: unknown; updatedAt?: string | null }
 
@@ -26,16 +32,20 @@ export const urlsetResponse = (
     const slugs = doc.slug as LocalizedValue<string | null | undefined>
     const urls: Partial<Record<Locale, string>> = {}
     for (const locale of locales) {
-      if (slugs?.[locale])
+      // `''` is valid: the blog index (`/blog`).
+      if (slugs?.[locale] != null)
         urls[locale] = siteUrl + getLocalizedPath(locale, slugs[locale], collection)
     }
     const available = locales.filter((l) => urls[l])
     const alternates = available
       .map((l) => `<xhtml:link rel="alternate" hreflang="${l}" href="${esc(urls[l]!)}"/>`)
       .join('')
+    const xDefault = urls[defaultLocale]
+      ? `<xhtml:link rel="alternate" hreflang="x-default" href="${esc(urls[defaultLocale])}"/>`
+      : ''
     const lastmod = doc.updatedAt ? `<lastmod>${esc(doc.updatedAt)}</lastmod>` : ''
     for (const l of available) {
-      entries.push(`<url><loc>${esc(urls[l]!)}</loc>${lastmod}${alternates}</url>`)
+      entries.push(`<url><loc>${esc(urls[l]!)}</loc>${lastmod}${alternates}${xDefault}</url>`)
     }
   }
 

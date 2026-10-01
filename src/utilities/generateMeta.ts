@@ -4,6 +4,7 @@ import type { Media, Page, Post, Config } from '../payload-types'
 
 import { SITE_DESCRIPTION, SITE_NAME } from '@/client/site'
 import { mergeOpenGraph } from './mergeOpenGraph'
+import { absoluteUrl } from './absoluteUrl'
 import { getSiteUrl } from './getSiteUrl'
 import { getCachedSiteSettings } from './getGlobals'
 import {
@@ -22,7 +23,7 @@ export const getImageURL = (
     return undefined
   }
 
-  return siteUrl + (image.sizes?.og?.url || image.url)
+  return absoluteUrl(siteUrl, image.sizes?.og?.url || image.url)
 }
 
 export const generateMeta = async (args: {
@@ -53,20 +54,27 @@ export const generateMeta = async (args: {
   const siteName = siteSettings?.siteName || SITE_NAME
   const siteDescription = siteSettings?.siteDescription || SITE_DESCRIPTION
 
-  const title = doc?.meta?.title ? doc?.meta?.title + ' | ' + siteName : siteName
+  const baseTitle = doc?.meta?.title || doc?.title
+  const title =
+    !baseTitle || baseTitle === siteName || baseTitle.endsWith(` | ${siteName}`)
+      ? baseTitle || siteName
+      : `${baseTitle} | ${siteName}`
 
-  const slugFor = (targetLocale: Locale) => localizedSlugs?.[targetLocale] ?? slug
+  // Without `localizedSlugs` the slug is shared by every locale; with them, a
+  // locale that has no slug has no translation and gets no alternate.
+  const slugFor = (targetLocale: Locale) => (localizedSlugs ? localizedSlugs[targetLocale] : slug)
 
-  const canonicalUrl = `${serverUrl}${getLocalizedPath(locale, slugFor(locale), collection)}`
+  const canonicalUrl = `${serverUrl}${getLocalizedPath(locale, slugFor(locale) ?? slug, collection)}`
 
   const languages: Record<string, string> = {}
   for (const targetLocale of locales) {
+    const targetSlug = slugFor(targetLocale)
+    if (targetSlug == null) continue
     languages[targetLocale] =
-      `${serverUrl}${getLocalizedPath(targetLocale, slugFor(targetLocale), collection)}`
+      `${serverUrl}${getLocalizedPath(targetLocale, targetSlug, collection)}`
   }
-  // x-default always points at the default-locale (fr) URL.
-  languages['x-default'] =
-    `${serverUrl}${getLocalizedPath(defaultLocale, slugFor(defaultLocale), collection)}`
+  // x-default points at the default-locale (fr) URL, only when it exists.
+  if (languages[defaultLocale]) languages['x-default'] = languages[defaultLocale]
 
   const description = doc?.meta?.description || siteDescription
   const images = ogImage ? [{ url: ogImage }] : undefined

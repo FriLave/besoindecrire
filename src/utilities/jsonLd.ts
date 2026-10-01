@@ -1,5 +1,6 @@
 import type { Media, Post, SiteSetting } from '@/payload-types'
 
+import { absoluteUrl } from './absoluteUrl'
 import { getLocalizedPath, type Locale } from './getLocalizedPath'
 
 type JsonLdObject = Record<string, unknown>
@@ -10,7 +11,7 @@ const mediaUrl = (media: unknown, siteUrl: string): string | undefined => {
   if (!media || typeof media !== 'object') return undefined
   const m = media as Media
   const url = m.sizes?.og?.url || m.url
-  return url ? siteUrl + url : undefined
+  return url ? absoluteUrl(siteUrl, url) : undefined
 }
 
 export const organization = (

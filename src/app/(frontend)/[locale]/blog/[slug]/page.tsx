@@ -15,6 +15,7 @@ import { PostHero } from '@/heros/PostHero'
 import { JsonLd } from '@/components/JsonLd'
 import { getUI } from '@/i18n/ui'
 import { getCachedSiteSettings } from '@/utilities/getGlobals'
+import { absoluteUrl } from '@/utilities/absoluteUrl'
 import { getSiteUrl } from '@/utilities/getSiteUrl'
 import { article, breadcrumbs } from '@/utilities/jsonLd'
 import { SITE_NAME } from '@/client/site'
@@ -29,7 +30,8 @@ import {
 } from '@/utilities/getLocalizedPath'
 import PageClient from '@/components/BlogArchive/PageClient'
 import { LivePreviewListener } from '@/components/LivePreviewListener'
-import type { AlternateLocaleLink } from '@/providers/AlternateLocale'
+import { Footer } from '@/Footer/Component'
+import type { AlternateLocaleLink } from '@/components/LocaleSwitcher'
 
 export async function generateStaticParams({
   params,
@@ -75,7 +77,9 @@ export default async function Post({ params: paramsPromise }: Args) {
   if (!post) return <PayloadRedirects locale={locale} url={url} />
 
   const otherLocale = locales.find((candidate) => candidate !== locale) ?? locale
-  const alternateSlug = await queryAlternateSlug({ id: post.id, locale: otherLocale })
+  const localizedSlugs = await queryPostLocalizedSlugs({ id: post.id })
+  // `''` = blog index when the post has no translation.
+  const alternateSlug = localizedSlugs?.[otherLocale] || ''
   const alternateLink: AlternateLocaleLink = {
     collection: 'posts',
     locale: otherLocale,
@@ -87,47 +91,50 @@ export default async function Post({ params: paramsPromise }: Args) {
   const settings = await getCachedSiteSettings(locale)()
   const postUrl = siteUrl + getLocalizedPath(locale, decodedSlug, 'posts')
   const logo = settings?.logo
-  const logoUrl = typeof logo === 'object' && logo?.url ? siteUrl + logo.url : undefined
+  const logoUrl = typeof logo === 'object' && logo?.url ? absoluteUrl(siteUrl, logo.url) : undefined
 
   return (
-    <article className="pt-16 pb-16">
-      <JsonLd
-        data={breadcrumbs([
-          { name: ui.breadcrumb.home, url: siteUrl + getLocalizedPath(locale, 'home') },
-          { name: ui.blog.title, url: siteUrl + getLocalizedPath(locale, '', 'posts') },
-          { name: post.title, url: postUrl },
-        ])}
-      />
-      <JsonLd
-        data={article(post, postUrl, locale, settings?.siteName || SITE_NAME, siteUrl, logoUrl)}
-      />
-      <PageClient alternateLink={alternateLink} headerTheme="dark" />
+    <>
+      <article className="pt-16 pb-16">
+        <JsonLd
+          data={breadcrumbs([
+            { name: ui.breadcrumb.home, url: siteUrl + getLocalizedPath(locale, 'home') },
+            { name: ui.blog.title, url: siteUrl + getLocalizedPath(locale, '', 'posts') },
+            { name: post.title, url: postUrl },
+          ])}
+        />
+        <JsonLd
+          data={article(post, postUrl, locale, settings?.siteName || SITE_NAME, siteUrl, logoUrl)}
+        />
+        <PageClient headerTheme="dark" />
 
-      {/* Allows redirects for valid pages too */}
-      <PayloadRedirects disableNotFound locale={locale} url={url} />
+        {/* Allows redirects for valid pages too */}
+        <PayloadRedirects disableNotFound locale={locale} url={url} />
 
-      {draft && <LivePreviewListener />}
+        {draft && <LivePreviewListener />}
 
-      <PostHero locale={locale} post={post} />
+        <PostHero locale={locale} post={post} />
 
-      <div className="flex flex-col items-center gap-4 pt-8">
-        <div className="container">
-          <RichText
-            className="max-w-[48rem] mx-auto"
-            data={post.content}
-            enableGutter={false}
-            locale={locale}
-          />
-          {post.relatedPosts && post.relatedPosts.length > 0 && (
-            <RelatedPosts
-              className="mt-12 max-w-[52rem] lg:grid lg:grid-cols-subgrid col-start-1 col-span-3 grid-rows-[2fr]"
-              docs={post.relatedPosts.filter((post) => typeof post === 'object')}
+        <div className="flex flex-col items-center gap-4 pt-8">
+          <div className="container">
+            <RichText
+              className="max-w-[48rem] mx-auto"
+              data={post.content}
+              enableGutter={false}
               locale={locale}
             />
-          )}
+            {post.relatedPosts && post.relatedPosts.length > 0 && (
+              <RelatedPosts
+                className="mt-12 max-w-[52rem] lg:grid lg:grid-cols-subgrid col-start-1 col-span-3 grid-rows-[2fr]"
+                docs={post.relatedPosts.filter((post) => typeof post === 'object')}
+                locale={locale}
+              />
+            )}
+          </div>
         </div>
-      </div>
-    </article>
+      </article>
+      <Footer alternateLink={alternateLink} locale={locale} />
+    </>
   )
 }
 
@@ -157,6 +164,7 @@ const queryPostBySlug = cache(async ({ slug, locale }: { slug: string; locale: L
 
   const result = await payload.find({
     collection: 'posts',
+    depth: 2,
     draft,
     limit: 1,
     locale,
@@ -194,28 +202,5 @@ const queryPostLocalizedSlugs = cache(async ({ id }: { id: number }) => {
     return doc?.slug as unknown as LocalizedValue<string | null | undefined>
   } catch {
     return undefined
-  }
-})
-
-/** The post's slug in the other locale, for the locale switcher (`''` = blog index fallback). */
-const queryAlternateSlug = cache(async ({ id, locale }: { id: number; locale: Locale }) => {
-  const { isEnabled: draft } = await draftMode()
-
-  const payload = await getPayload({ config: configPromise })
-
-  try {
-    const doc = await payload.findByID({
-      collection: 'posts',
-      id,
-      depth: 0,
-      draft,
-      locale,
-      overrideAccess: draft,
-      select: { slug: true },
-    })
-
-    return doc?.slug || ''
-  } catch {
-    return ''
   }
 })

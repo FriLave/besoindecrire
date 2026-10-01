@@ -27,6 +27,12 @@ export const CallToAction: Block = {
           ]
         },
       }),
+      admin: {
+        description: {
+          en: 'Highlighted message with up to 2 buttons, to push visitors to act.',
+          fr: 'Message mis en avant avec jusqu’à 2 boutons, pour inciter le visiteur à agir.',
+        },
+      },
       label: false,
       localized: true,
     },

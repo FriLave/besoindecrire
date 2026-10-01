@@ -9,6 +9,12 @@ export const MediaBlock: Block = {
     {
       name: 'media',
       type: 'upload',
+      admin: {
+        description: {
+          en: 'A single image or video displayed on its own.',
+          fr: 'Une image ou une vidéo affichée seule.',
+        },
+      },
       relationTo: 'media',
       required: true,
     },

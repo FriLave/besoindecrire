@@ -47,6 +47,9 @@ const getPostsSitemap = unstable_cache(
 export async function GET() {
   // Blog switched off (or not installed): empty urlset, and no posts query
   // (its read access is closed anyway).
-  const docs = (await isFeatureEnabled('blog')) ? await getPostsSitemap() : []
+  if (!(await isFeatureEnabled('blog'))) return urlsetResponse([], 'posts', await getSiteUrl())
+
+  // The blog index itself (`/blog`, `/en/blog`) rides along as a pseudo-doc with empty slugs.
+  const docs = [{ slug: { fr: '', en: '' } }, ...(await getPostsSitemap())]
   return urlsetResponse(docs, 'posts', await getSiteUrl())
 }

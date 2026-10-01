@@ -65,3 +65,19 @@ export function getLocalizedPath(
 
   return `${localePrefix}/${slug}`
 }
+
+/**
+ * Internal route path (`/fr`, `/fr/contact`, `/en/blog/x`) as seen by the
+ * `[locale]` segment after the `src/proxy.ts` rewrite. This is what
+ * `revalidatePath` needs: Next tags cache entries with the rewrite
+ * destination, not the public URL from `getLocalizedPath`.
+ */
+export function getInternalPath(
+  locale: Locale,
+  slug?: string | null,
+  collection: 'pages' | 'posts' = 'pages',
+): string {
+  const path = getLocalizedPath(defaultLocale, slug, collection)
+
+  return path === '/' ? `/${locale}` : `/${locale}${path}`
+}

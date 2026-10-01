@@ -40,7 +40,7 @@ export const HighImpactHero: React.FC<Page['hero'] & { locale: Locale }> = ({
       </div>
       <div className="min-h-[80vh] select-none">
         {media && typeof media === 'object' && (
-          <Media fill imgClassName="-z-10 object-cover" priority resource={media} />
+          <Media fill size="100vw" imgClassName="-z-10 object-cover" priority resource={media} />
         )}
       </div>
     </div>

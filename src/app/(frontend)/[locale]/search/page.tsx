@@ -11,6 +11,7 @@ import { Search } from '@/search/Component'
 import { isFeatureEnabled } from '@/utilities/features'
 import { isLocale, locales } from '@/utilities/getLocalizedPath'
 import PageClient from './page.client'
+import { Footer } from '@/Footer/Component'
 
 type Args = {
   params: Promise<{ locale: string }>
@@ -58,24 +59,27 @@ export default async function Page({ params, searchParams: searchParamsPromise }
   const otherLocale = locales.find((candidate) => candidate !== locale) ?? locale
 
   return (
-    <div className="pt-24 pb-24">
-      <PageClient alternateLink={{ locale: otherLocale, slug: 'search' }} />
-      <div className="container mb-16">
-        <div className="prose dark:prose-invert max-w-none text-center">
-          <h1 className="mb-8 lg:mb-16">{ui.search.title}</h1>
+    <>
+      <div className="pt-24 pb-24">
+        <PageClient />
+        <div className="container mb-16">
+          <div className="prose dark:prose-invert max-w-none text-center">
+            <h1 className="mb-8 lg:mb-16">{ui.search.title}</h1>
 
-          <div className="max-w-[50rem] mx-auto">
-            <Search locale={locale} />
+            <div className="max-w-[50rem] mx-auto">
+              <Search locale={locale} />
+            </div>
           </div>
         </div>
-      </div>
 
-      {posts.totalDocs > 0 ? (
-        <CollectionArchive locale={locale} posts={posts.docs as CardPostData[]} />
-      ) : (
-        <div className="container">{ui.search.noResults}</div>
-      )}
-    </div>
+        {posts.totalDocs > 0 ? (
+          <CollectionArchive locale={locale} posts={posts.docs as CardPostData[]} />
+        ) : (
+          <div className="container">{ui.search.noResults}</div>
+        )}
+      </div>
+      <Footer alternateLink={{ locale: otherLocale, slug: 'search' }} locale={locale} />
+    </>
   )
 }
 

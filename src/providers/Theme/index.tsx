@@ -24,7 +24,7 @@ const getSnapshot = () => document.documentElement.getAttribute('data-theme') as
 const getServerSnapshot = () => undefined
 
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  // The `data-theme` attribute on <html> is the source of truth (also set by /theme-init.js).
+  // The `data-theme` attribute on <html> is the source of truth (also set by the inline InitTheme script).
   const theme = useSyncExternalStore(subscribeTheme, getSnapshot, getServerSnapshot) || undefined
 
   const setTheme = useCallback((themeToSet: Theme | null) => {

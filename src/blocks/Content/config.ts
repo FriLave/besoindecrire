@@ -73,6 +73,10 @@ export const Content: Block = {
       name: 'columns',
       type: 'array',
       admin: {
+        description: {
+          en: 'Free content laid out in columns (one third, half, two thirds or full width).',
+          fr: 'Contenu libre disposé en colonnes (un tiers, moitié, deux tiers ou pleine largeur).',
+        },
         initCollapsed: true,
       },
       fields: columnFields,

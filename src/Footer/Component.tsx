@@ -9,9 +9,15 @@ import React from 'react'
 import { ThemeSelector } from '@/providers/Theme/ThemeSelector'
 import { CMSLink } from '@/components/Link'
 import { Logo } from '@/components/Logo/Logo'
-import { LocaleSwitcher } from '@/components/LocaleSwitcher'
+import { LocaleSwitcher, type AlternateLocaleLink } from '@/components/LocaleSwitcher'
 
-export async function Footer({ locale }: { locale: Locale }) {
+export async function Footer({
+  alternateLink,
+  locale,
+}: {
+  alternateLink?: AlternateLocaleLink
+  locale: Locale
+}) {
   const footerData = await stripDisabledPostLinks(await getCachedGlobal('footer', locale, 1)())
 
   const navItems = footerData?.navItems || []
@@ -33,7 +39,7 @@ export async function Footer({ locale }: { locale: Locale }) {
 
         <div className="flex flex-col-reverse items-start md:flex-row gap-4 md:items-center">
           <ThemeSelector locale={locale} />
-          <LocaleSwitcher locale={locale} />
+          <LocaleSwitcher alternateLink={alternateLink} locale={locale} />
           <nav className="flex flex-col md:flex-row gap-4">
             {navItems.map(({ link }, i) => {
               return <CMSLink className="text-white" key={i} {...link} locale={locale} />

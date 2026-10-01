@@ -1,10 +1,12 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
+import { notFound } from 'next/navigation'
 import React from 'react'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
 import { PageRange } from '@/components/PageRange'
 import { Pagination } from '@/components/Pagination'
+import { Footer } from '@/Footer/Component'
 import { getUI } from '@/i18n/ui'
 import { locales, type Locale } from '@/utilities/getLocalizedPath'
 import PageClient from './PageClient'
@@ -22,6 +24,7 @@ export async function BlogArchive({ locale, page }: { locale: Locale; page: numb
     limit: BLOG_PAGE_SIZE,
     locale,
     page,
+    sort: '-publishedAt',
     overrideAccess: false,
     select: {
       title: true,
@@ -31,37 +34,43 @@ export async function BlogArchive({ locale, page }: { locale: Locale; page: numb
     },
   })
 
+  // Out-of-range page (e.g. posts deleted since): a real 404, not an empty 200.
+  if (page > 1 && page > posts.totalPages) notFound()
+
   const otherLocale = locales.find((candidate) => candidate !== locale) ?? locale
   const alternatePath = page > 1 ? `page/${page}` : ''
 
   return (
-    <div className="pt-24 pb-24">
-      <PageClient
-        alternateLink={{ collection: 'posts', locale: otherLocale, slug: alternatePath }}
-        headerTheme="light"
-      />
-      <div className="container mb-16">
-        <div className="prose dark:prose-invert max-w-none">
-          <h1>{ui.blog.title}</h1>
+    <>
+      <div className="pt-24 pb-24">
+        <PageClient headerTheme="light" />
+        <div className="container mb-16">
+          <div className="prose dark:prose-invert max-w-none">
+            <h1>{ui.blog.title}</h1>
+          </div>
+        </div>
+
+        <div className="container mb-8">
+          <PageRange
+            currentPage={posts.page}
+            limit={BLOG_PAGE_SIZE}
+            locale={locale}
+            totalDocs={posts.totalDocs}
+          />
+        </div>
+
+        <CollectionArchive locale={locale} posts={posts.docs} />
+
+        <div className="container">
+          {posts.totalPages > 1 && posts.page && (
+            <Pagination locale={locale} page={posts.page} totalPages={posts.totalPages} />
+          )}
         </div>
       </div>
-
-      <div className="container mb-8">
-        <PageRange
-          currentPage={posts.page}
-          limit={BLOG_PAGE_SIZE}
-          locale={locale}
-          totalDocs={posts.totalDocs}
-        />
-      </div>
-
-      <CollectionArchive locale={locale} posts={posts.docs} />
-
-      <div className="container">
-        {posts.totalPages > 1 && posts.page && (
-          <Pagination locale={locale} page={posts.page} totalPages={posts.totalPages} />
-        )}
-      </div>
-    </div>
+      <Footer
+        alternateLink={{ collection: 'posts', locale: otherLocale, slug: alternatePath }}
+        locale={locale}
+      />
+    </>
   )
 }

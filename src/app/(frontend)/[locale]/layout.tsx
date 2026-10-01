@@ -5,7 +5,6 @@ import { GeistMono, GeistSans } from '@/client/fonts'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
-import { Footer } from '@/Footer/Component'
 import { Header } from '@/Header/Component'
 import { Providers } from '@/providers'
 import { InitTheme } from '@/providers/Theme/InitTheme'
@@ -58,26 +57,15 @@ export default async function RootLayout({ children, params }: Args) {
     >
       <head>
         <InitTheme />
-        {/* Anti-flash: globals.css hides <html> until InitTheme sets
-            data-theme. If JS is disabled (or that script fails), that
-            hide would be permanent. This restores visibility in that
-            case without touching the anti-flash mechanism itself. */}
-        <noscript>
-          <style>{`html { opacity: initial; }`}</style>
-        </noscript>
       </head>
       <body>
         <Providers>
-          <AdminBar
-            adminBarProps={{
-              preview: isEnabled,
-            }}
-            locale={locale}
-          />
+          {/* Only shipped in draft mode (entered from the admin preview): avoids the bundle
+              and the /api/users/me call for every anonymous visitor of the static pages. */}
+          {isEnabled && <AdminBar adminBarProps={{ preview: true }} locale={locale} />}
 
           <Header locale={locale} />
           {children}
-          <Footer locale={locale} />
         </Providers>
       </body>
     </html>

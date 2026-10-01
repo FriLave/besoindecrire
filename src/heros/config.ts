@@ -12,6 +12,12 @@ import { linkGroup } from '@/fields/linkGroup'
 export const hero: Field = {
   name: 'hero',
   type: 'group',
+  admin: {
+    description: {
+      en: 'Banner at the top of the page: pick a type, then fill in the title, buttons and image.',
+      fr: 'Bandeau en haut de la page : choisissez un type, puis renseignez le titre, les boutons et l’image.',
+    },
+  },
   fields: [
     {
       name: 'type',

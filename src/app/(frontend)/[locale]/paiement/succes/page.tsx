@@ -2,6 +2,7 @@ import type { Metadata } from 'next/types'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
+import { Footer } from '@/Footer/Component'
 import { CheckoutStatus } from '@/modules/payments/CheckoutStatus.client'
 import { getUI } from '@/i18n/ui'
 import { isFeatureEnabled } from '@/utilities/features'
@@ -23,19 +24,26 @@ export default async function Page({ params, searchParams }: Args) {
   const t = getUI(locale).payments
 
   return (
-    <main className="container max-w-2xl py-16">
-      <h1 className="mb-6 text-3xl font-semibold tracking-tight">{t.successTitle}</h1>
-      <CheckoutStatus
-        homeHref={getLocalizedPath(locale, 'home')}
-        locale={locale}
-        sessionId={typeof session_id === 'string' ? session_id : undefined}
-      />
-    </main>
+    <>
+      <main className="container max-w-2xl py-16">
+        <h1 className="mb-6 text-3xl font-semibold tracking-tight">{t.successTitle}</h1>
+        <CheckoutStatus
+          homeHref={getLocalizedPath(locale, 'home')}
+          locale={locale}
+          sessionId={typeof session_id === 'string' ? session_id : undefined}
+        />
+      </main>
+      <Footer locale={locale} />
+    </>
   )
 }
 
 export async function generateMetadata({ params }: Pick<Args, 'params'>): Promise<Metadata> {
   const { locale } = await params
   if (!isLocale(locale) || !(await isFeatureEnabled('payments'))) return {}
-  return { robots: { index: false, follow: false }, title: getUI(locale).payments.successTitle }
+  return {
+    referrer: 'no-referrer',
+    robots: { index: false, follow: false },
+    title: getUI(locale).payments.successTitle,
+  }
 }

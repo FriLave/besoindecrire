@@ -8,10 +8,9 @@ import React from 'react'
 
 import type { Props as MediaProps } from '../types'
 
-import { cssVariables } from '@/cssVariables'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 
-const { breakpoints } = cssVariables
+const defaultSizes = '(max-width: 768px) 100vw, (max-width: 1280px) 80vw, 1280px'
 
 // A base64 encoded image to use as a placeholder while the image is loading
 const placeholderBlur =
@@ -77,12 +76,8 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
 
   const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
 
-  // NOTE: this is used by the browser to determine which image to download at different screen sizes
-  const sizes = sizeFromProps
-    ? sizeFromProps
-    : Object.entries(breakpoints)
-        .map(([, value]) => `(max-width: ${value}px) ${value * 2}w`)
-        .join(', ')
+  // Used by the browser to pick the srcset candidate; blocks rendering narrower images pass `size`.
+  const sizes = sizeFromProps || defaultSizes
 
   return (
     <picture className={cn(fill && 'absolute inset-0', pictureClassName)}>
@@ -94,7 +89,6 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
         placeholder="blur"
         blurDataURL={placeholderBlur}
         priority={priority}
-        quality={100}
         loading={loading}
         sizes={sizes}
         src={src}

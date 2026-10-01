@@ -7,6 +7,12 @@ export const Code: Block = {
     {
       name: 'language',
       type: 'select',
+      admin: {
+        description: {
+          en: 'Code snippet displayed in a monospaced block.',
+          fr: 'Extrait de code affiché dans un bloc à chasse fixe.',
+        },
+      },
       defaultValue: 'typescript',
       options: [
         {

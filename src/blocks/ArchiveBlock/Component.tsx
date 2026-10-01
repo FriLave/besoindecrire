@@ -1,4 +1,4 @@
-import type { Post, ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
+import type { ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
 
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
@@ -7,6 +7,7 @@ import RichText from '@/components/RichText'
 
 import { isFeatureEnabled } from '@/utilities/features'
 import type { Locale } from '@/utilities/getLocalizedPath'
+import type { CardPostData } from '@/components/Card'
 import { CollectionArchive } from '@/components/CollectionArchive'
 
 export const ArchiveBlock: React.FC<
@@ -29,7 +30,7 @@ export const ArchiveBlock: React.FC<
 
   const limit = limitFromProps || 3
 
-  let posts: Post[] = []
+  let posts: CardPostData[] = []
 
   if (populateBy === 'collection') {
     const payload = await getPayload({ config: configPromise })
@@ -44,6 +45,10 @@ export const ArchiveBlock: React.FC<
       depth: 1,
       locale,
       limit,
+      sort: '-publishedAt',
+      overrideAccess: false,
+      draft: false,
+      select: { title: true, slug: true, categories: true, meta: true },
       ...(flattenedCategories && flattenedCategories.length > 0
         ? {
             where: {
@@ -58,11 +63,10 @@ export const ArchiveBlock: React.FC<
     posts = fetchedPosts.docs
   } else {
     if (selectedDocs?.length) {
-      const filteredSelectedPosts = selectedDocs.map((post) => {
-        if (typeof post.value === 'object') return post.value
-      }) as Post[]
-
-      posts = filteredSelectedPosts
+      // Never surface a post that is not published (draft-only main row).
+      posts = selectedDocs.flatMap((post) =>
+        typeof post.value === 'object' && post.value._status === 'published' ? [post.value] : [],
+      )
     }
   }
 
