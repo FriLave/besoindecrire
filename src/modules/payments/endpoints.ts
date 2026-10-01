@@ -1,4 +1,5 @@
-import type { Endpoint, PayloadHandler, PayloadRequest } from 'payload'
+import { sql, type PostgresAdapter } from '@payloadcms/db-postgres'
+import type { Endpoint, Payload, PayloadHandler, PayloadRequest } from 'payload'
 import { createReadStream } from 'node:fs'
 import { stat } from 'node:fs/promises'
 import path from 'node:path'
@@ -37,6 +38,23 @@ const readBody = async (req: PayloadRequest): Promise<Record<string, unknown> | 
     return null
   }
 }
+
+// Raw SQL on purpose: Payload's update-many is find-then-update, so only one statement is an atomic
+// claim. True for exactly one caller among concurrent ones.
+const claim = async (payload: Payload, query: ReturnType<typeof sql>) =>
+  (await (payload.db as unknown as PostgresAdapter).drizzle.execute(query)).rows.length > 0
+
+export const claimPaid = (
+  payload: Payload,
+  id: number | string,
+  f: { amount?: number | null; stripeSessionId: string },
+) =>
+  claim(
+    payload,
+    sql`UPDATE purchases SET status = 'paid', paid_at = now(), updated_at = now(),
+      amount = ${f.amount ?? null}, stripe_session_id = ${f.stripeSessionId}
+      WHERE id = ${id} AND status <> 'paid' RETURNING id`,
+  )
 
 // Wraps a handler so it answers 404 while the runtime `payments` flag is off.
 const gated =
@@ -193,23 +211,20 @@ export const stripeWebhook: PayloadHandler = async (req) => {
     return json({ error: 'Purchase not found' }, 500)
   }
 
-  // Conditional update: only the delivery that flips pending -> paid gets a doc back and emails.
-  // ponytail: Payload's update-many is find + update, not one SQL statement; a truly simultaneous
-  // double delivery could still email twice (same valid link). A row lock would be needed to close it.
-  const { docs } = await payload.update({
-    collection: 'purchases',
-    where: { and: [{ id: { equals: purchase.id } }, { status: { not_equals: 'paid' } }] },
-    data: {
-      status: 'paid',
-      paidAt: new Date().toISOString(),
+  // Only the delivery that flips pending -> paid emails.
+  if (
+    !(await claimPaid(payload, purchase.id, {
       amount: session.amount_total ?? purchase.amount,
       stripeSessionId: session.id,
-    },
+    }))
+  )
+    return json({ received: true })
+  const paid = await payload.findByID({
+    collection: 'purchases',
+    id: purchase.id,
     depth: 0,
     overrideAccess: true,
   })
-  const paid = docs[0]
-  if (!paid) return json({ received: true })
 
   if (!(await isFeatureEnabledForReq(req, 'payments'))) {
     payload.logger.warn({ msg: 'Payments disabled: purchase recorded, no email sent', id: paid.id })
@@ -333,26 +348,14 @@ export const resend: PayloadHandler = gated(async (req) => {
   if (purchase) {
     // Claim the cooldown first; no doc back means another resend happened recently.
     const now = Date.now()
-    const claimed = await payload
-      .update({
-        collection: 'purchases',
-        where: {
-          and: [
-            { id: { equals: purchase.id } },
-            {
-              or: [
-                { lastResentAt: { exists: false } },
-                { lastResentAt: { less_than: new Date(now - RESEND_COOLDOWN_MS).toISOString() } },
-              ],
-            },
-          ],
-        },
-        data: { lastResentAt: new Date(now).toISOString() },
-        depth: 0,
-        overrideAccess: true,
-      })
-      .catch(() => ({ docs: [] }))
-    if (!claimed.docs.length) return same()
+    const claimed = await claim(
+      payload,
+      sql`UPDATE purchases SET last_resent_at = ${new Date(now).toISOString()}::timestamptz, updated_at = now()
+        WHERE id = ${purchase.id}
+        AND (last_resent_at IS NULL OR last_resent_at < ${new Date(now - RESEND_COOLDOWN_MS).toISOString()}::timestamptz)
+        RETURNING id`,
+    ).catch(() => false)
+    if (!claimed) return same()
 
     const locale = toLocale(b.locale) ?? toLocale(purchase.locale) ?? defaultLocale
     try {

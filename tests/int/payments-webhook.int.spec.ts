@@ -4,7 +4,7 @@ import Stripe from 'stripe'
 import config from '@/payload.config'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
-import { stripeWebhook } from '@/modules/payments/endpoints'
+import { claimPaid, resend, stripeWebhook } from '@/modules/payments/endpoints'
 
 const whsec = 'whsec_test_fake'
 
@@ -99,5 +99,111 @@ describe('stripe webhook: fallback, expiry, atomic paid transition', () => {
       payload.findByID({ collection: 'purchases', id: p.id, overrideAccess: true }),
     ).rejects.toThrow()
     expect((await send('checkout.session.expired', { id: 'cs_none' })).status).toBe(200)
+  })
+
+  it('concurrent deliveries: exactly one claims paid and emails; concurrent resends email once', async () => {
+    const context = { disableRevalidate: true }
+    const flag = Boolean((await payload.findGlobal({ slug: 'feature-flags' })).payments)
+    await payload.updateGlobal({
+      slug: 'feature-flags',
+      data: { payments: true },
+      overrideAccess: true,
+      context,
+    })
+    try {
+      const file = await payload.create({
+        collection: 'private-files',
+        overrideAccess: true,
+        data: {},
+        file: {
+          data: Buffer.from(PDF),
+          mimetype: 'application/pdf',
+          name: `c-${Date.now()}.pdf`,
+          size: PDF.length,
+        },
+      })
+      cleanup.push({ collection: 'private-files', id: file.id })
+      const dl = await payload.create({
+        collection: 'paid-downloads',
+        overrideAccess: true,
+        data: {
+          title: 'Guide',
+          slug: `c-${Date.now()}`,
+          price: 990,
+          currency: 'eur',
+          file: file.id,
+        },
+      })
+      cleanup.push({ collection: 'paid-downloads', id: dl.id })
+      const mk = (stripeSessionId: string) =>
+        payload.create({
+          collection: 'purchases',
+          overrideAccess: true,
+          data: {
+            email: 'race@example.com',
+            paidDownload: dl.id,
+            status: 'pending',
+            stripeSessionId,
+          },
+        })
+
+      const raw = await mk(`cs_raw_${Date.now()}`)
+      created.push(raw.id)
+      const claims = await Promise.all(
+        Array.from({ length: 10 }, () =>
+          claimPaid(payload, raw.id, { amount: 990, stripeSessionId: raw.stripeSessionId! }),
+        ),
+      )
+      expect(claims.filter(Boolean)).toHaveLength(1)
+
+      const sessionId = `cs_race_${Date.now()}`
+      const p = await mk(sessionId)
+      created.push(p.id)
+      sendEmail.mockClear()
+      const results = await Promise.all(
+        Array.from({ length: 5 }, async () =>
+          send('checkout.session.completed', {
+            id: sessionId,
+            payment_status: 'paid',
+            amount_total: 990,
+          }),
+        ),
+      )
+      expect(results.map((r) => r.status)).toEqual([200, 200, 200, 200, 200])
+      expect(sendEmail).toHaveBeenCalledTimes(1)
+      const paid = await payload.findByID({ collection: 'purchases', id: p.id })
+      expect(paid.status).toBe('paid')
+      expect(paid.paidAt).toBeTruthy()
+      expect(paid.amount).toBe(990)
+
+      sendEmail.mockClear()
+      const body = JSON.stringify({
+        email: 'race@example.com',
+        paidDownloadId: dl.id,
+        locale: 'en',
+      })
+      await Promise.all(
+        Array.from({ length: 3 }, async () =>
+          resend(
+            Object.assign(
+              new Request('http://localhost/api/downloads/resend', {
+                method: 'POST',
+                headers: { 'content-type': 'application/json' },
+                body,
+              }),
+              { payload, context: {} },
+            ) as unknown as PayloadRequest,
+          ),
+        ),
+      )
+      expect(sendEmail).toHaveBeenCalledTimes(1)
+    } finally {
+      await payload.updateGlobal({
+        slug: 'feature-flags',
+        data: { payments: flag },
+        overrideAccess: true,
+        context,
+      })
+    }
   })
 })
