@@ -12,6 +12,7 @@ if (process.env.TEST_DATABASE_URL) process.env.DATABASE_URL = process.env.TEST_D
 // Port-configurable: E2E_BASE_URL also drives the started dev server (PORT + NEXT_PUBLIC_SERVER_URL).
 const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:3000'
 const port = new URL(baseURL).port || '80'
+const flagSpecs = /(blog|payments)\.e2e/
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -34,9 +35,27 @@ export default defineConfig({
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
   },
+  // Cold `next dev` compiles a route on its first hit (6s+ under load), well past the 5s default.
+  expect: { timeout: 30_000 },
+  timeout: 60_000,
   projects: [
     {
       name: 'chromium',
+      testIgnore: flagSpecs,
+      use: { ...devices['Desktop Chrome'], channel: 'chromium' },
+    },
+    // These specs toggle fields of the shared `feature-flags` global. Concurrent partial updates
+    // overwrite each other (Payload rewrites the whole row), so they must never run in parallel:
+    // a project dependency chain serializes them across workers.
+    {
+      name: 'blog-flag',
+      testMatch: /blog\.e2e/,
+      use: { ...devices['Desktop Chrome'], channel: 'chromium' },
+    },
+    {
+      name: 'payments-flag',
+      testMatch: /payments\.e2e/,
+      dependencies: ['blog-flag'],
       use: { ...devices['Desktop Chrome'], channel: 'chromium' },
     },
   ],

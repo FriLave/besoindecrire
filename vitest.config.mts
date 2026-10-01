@@ -8,5 +8,8 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     include: ['tests/int/**/*.int.spec.ts'],
+    // Specs share one DB: parallel files race on schema push and on the feature-flags global
+    // (Payload rewrites the whole global on a partial update, so concurrent toggles get lost).
+    fileParallelism: false,
   },
 })
