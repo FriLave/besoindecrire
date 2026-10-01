@@ -31,6 +31,8 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    env:
+      PAYLOAD_PUSH: '0'
     services:
       postgres:
         image: postgres:16-alpine
@@ -53,9 +55,20 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm test:int
-      # Seed before build (static params read the DB) and before e2e (specs assert on demo content).
+      # Fresh DB: committed migrations must apply, then the config must not drift from them.
+      # From here on PAYLOAD_PUSH=0: tests run on the migrated schema, no dev `push` racing them.
+      - run: pnpm migrate
+      - name: Schema drift check
+        run: |
+          pnpm migrate:create --skip-empty
+          if [ -n "$(git status --porcelain src/migrations)" ]; then
+            git status --porcelain src/migrations
+            echo "::error::Schema drift: run pnpm migrate:create and commit"
+            exit 1
+          fi
+      # Seed before int tests (api specs read the demo pages), build (static params read the DB) and e2e.
       - run: pnpm seed:local
+      - run: pnpm test:int
       - run: pnpm build
       - name: Get Playwright version
         id: pw
@@ -80,6 +93,9 @@ jobs:
   lighthouse:
     needs: test
     runs-on: ubuntu-latest
+    env:
+      # Migrated schema, no dev `push`: `pnpm start` (prod) would refuse a pushed schema.
+      PAYLOAD_PUSH: '0'
     services:
       postgres:
         image: postgres:16-alpine
@@ -102,6 +118,7 @@ jobs:
           node-version-file: .nvmrc
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm migrate
       - run: pnpm seed:local
       - run: pnpm build
       - name: Start production server

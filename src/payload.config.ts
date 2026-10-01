@@ -1,4 +1,5 @@
 import { postgresAdapter } from '@payloadcms/db-postgres'
+import { isNextBuild } from 'payload/shared'
 import { en } from '@payloadcms/translations/languages/en'
 import { fr } from '@payloadcms/translations/languages/fr'
 import sharp from 'sharp'
@@ -27,6 +28,7 @@ import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 import { healthEndpoint } from './endpoints/health'
 import { purgeFormSubmissions } from './jobs/purgeFormSubmissions'
+import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -66,6 +68,12 @@ export default buildConfig({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
     },
+    // Dev: schema auto-pushed from the config. PAYLOAD_PUSH=0 (CI, tests on a migrated DB) disables it.
+    push: process.env.PAYLOAD_PUSH !== '0',
+    // Production: pending migrations are applied when Payload initialises (container start / cold start).
+    // Never during `next build`: it runs in production mode against whatever DB it reads, and a
+    // dev-pushed DB makes Payload prompt for confirmation, hanging the build.
+    prodMigrations: isNextBuild() ? undefined : migrations,
   }),
   collections: [
     Pages,

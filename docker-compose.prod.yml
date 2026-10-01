@@ -52,7 +52,8 @@ services:
     profiles: [storage]
     image: dxflrs/garage:v2.2.0
     environment:
-      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET:?set GARAGE_RPC_SECRET (openssl rand -hex 32)}
+      # Required with --profile storage (openssl rand -hex 32): Garage refuses to start when empty.
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET:-}
     volumes:
       - ./docker/garage/garage.toml:/etc/garage.toml:ro
       - garage-meta:/var/lib/garage/meta

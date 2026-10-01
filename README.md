@@ -60,7 +60,7 @@ les conventions de code.
 
 Deux options, selon le client : Docker (par défaut) ou Vercel.
 
-> **Schéma de base** : le projet n'a pas encore de migrations (le schéma est créé par le mode `push` de Payload, actif seulement en développement). Tant que les migrations ne sont pas ajoutées, une base de production vierge n'a pas de tables. Lors d'un déploiement, une fois les migrations générées (`pnpm payload migrate:create`), les appliquer au démarrage avec l'option `prodMigrations` de `postgresAdapter` (fonctionne en image standalone, sans CLI Payload).
+> **Schéma de base** : voir « Migrations de base de données » ci-dessous. En production, les migrations commitées s'appliquent toutes seules au démarrage (`prodMigrations`) : une base vierge est initialisée par le conteneur Docker ou au cold start Vercel. Sur Vercel, on peut aussi appliquer les migrations pendant le build avec le build command `pnpm migrate && pnpm build` (nécessite `DATABASE_URL` au build).
 
 ### Docker
 
@@ -182,6 +182,15 @@ depuis `.env.example` avec des secrets aléatoires s'il n'existe pas. Ensuite : 
 renseigner les réglages du site (`siteUrl`, onglet Légal). Changer les modules ne demande pas de
 `pnpm generate:types` : les types couvrent tous les modules.
 
+## Migrations de base de données
+
+- **Dev** : le mode `push` de Payload synchronise la base avec la config automatiquement, rien à faire.
+- **Après tout changement de schéma** (champ, collection, block, module) : `pnpm migrate:create`, puis commiter `src/migrations/`. Sans cela la production n'aura pas le changement, et la CI échoue (« Schema drift »).
+- **Attention** : une base créée par `push` (dev) ne doit pas servir à un `pnpm start`/`dev:prod` : Payload y détecte le schéma poussé et demande confirmation (perte de données). Pour tester la prod en local, utiliser une base vierge (`pnpm migrate` d'abord).
+- **Production** : les migrations en attente sont appliquées à l'init de Payload (`prodMigrations`), sans CLI.
+- `migrate*` forcent `PAYLOAD_ALL_MODULES=1` (comme `generate:types`) : les migrations couvrent toujours tous les modules (blog, paiements...). Un fork qui désinstalle un module garde ses tables inertes et ne génère jamais de migration qui les supprime.
+- **CI** : `pnpm migrate` sur base vierge, puis `pnpm migrate:create --skip-empty` ne doit rien produire. Les tests tournent ensuite avec `PAYLOAD_PUSH=0` (pas de `push` concurrent, d'où plus de courses). En local, `PAYLOAD_PUSH=0 pnpm migrate && PAYLOAD_PUSH=0 pnpm test:int` reproduit ce mode.
+
 ## Scripts utiles
 
 ```bash
@@ -191,8 +200,9 @@ pnpm start                # démarre le serveur en production
 pnpm generate:types        # régénère les types TypeScript depuis la config Payload
 pnpm generate:importmap    # régénère l'import map des composants admin custom
 pnpm storage:init          # Garage local : buckets + clé, affiche les variables S3
-pnpm payload migrate       # applique les migrations de base de données
-pnpm payload migrate:create # crée une nouvelle migration
+pnpm migrate               # applique les migrations en attente
+pnpm migrate:create        # crée une migration après un changement de schéma (à commiter)
+pnpm migrate:status        # état des migrations
 pnpm test:int              # tests d'intégration (Vitest)
 pnpm test:e2e              # tests end-to-end (Playwright)
 ```
