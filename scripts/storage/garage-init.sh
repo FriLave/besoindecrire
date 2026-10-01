@@ -1,6 +1,6 @@
 #!/bin/sh
 # Idempotent Garage bootstrap for local dev: layout, access key, buckets, public media.
-# Usage: pnpm storage:init   (after `docker compose up -d garage`)
+# Usage: pnpm storage:init   (after `docker compose --profile storage up -d garage`)
 set -eu
 G="docker compose exec -T -e RUST_LOG=warn garage /garage"
 KEY=payload-dev

@@ -5,9 +5,11 @@ client démarre par un fork de ce dépôt : tout le contenu éditable des pages 
 Blocks configurés dans l'admin, afin qu'un utilisateur non-technique puisse modifier son
 site sans toucher au code.
 
-Ce dépôt est forké depuis le template officiel Payload `website`, débarrassé du blog, de
-la recherche et de la marque Payload. Voir `CLAUDE.md` pour la vision produit complète et
-les conventions de code.
+Ce dépôt est forké depuis le template officiel Payload `website`, débarrassé de la marque
+Payload. Le cœur reste un site vitrine ; le **blog** (articles, catégories, recherche) et le
+**paiement** (téléchargements payants Stripe) sont des **modules optionnels**, activés ou non
+par fork (`src/client/modules.ts`, choisis via `pnpm client:init`). Voir `CLAUDE.md` pour la
+vision produit complète et les conventions de code.
 
 ## Prérequis
 
@@ -23,7 +25,8 @@ les conventions de code.
    cp .env.example .env
    ```
 
-2. Démarrer Postgres :
+2. Démarrer Postgres (seul service lancé par défaut ; Garage, le stockage S3 local, est
+   optionnel : `docker compose --profile storage up -d`, voir « Stockage des fichiers ») :
 
    ```bash
    docker compose up -d
@@ -52,7 +55,7 @@ les conventions de code.
 
 ## CI
 
-`.github/workflows/ci.yml` (push et PR) : `quality` (`pnpm check`), `test` (Postgres 16, `test:int`, seed, build, `test:e2e`, rapport Playwright en artefact si échec) et `lighthouse` (build de prod seedé, `lhci autorun` selon `lighthouserc.json` : SEO/accessibilité/bonnes pratiques bloquants, performance en avertissement). Dependabot regroupe `payload`/`@payloadcms/*` et `next`.
+`.github/workflows/ci.yml` (push sur `main` et PR) : `quality` (`pnpm check`, puis régénération de `payload-types.ts` et de l'import map : échec si le résultat diffère du commit), `docker` (build des images app et backup, sans push), `test` (Postgres 16, `migrate`, contrôle de dérive du schéma, seed, `test:int`, build, `test:e2e`, rapport Playwright en artefact si échec) et `lighthouse` (build de prod seedé, `lhci autorun` selon `lighthouserc.json` : SEO/accessibilité/bonnes pratiques bloquants, performance en avertissement). Dependabot regroupe `payload`/`@payloadcms/*` et `next`.
 
 `pnpm seed:local` peuple la base de démo via la Local API (sans serveur, sans passer par `/next/seed`, qui reste désactivé en production). Destructif.
 
@@ -72,7 +75,7 @@ docker compose -f docker-compose.prod.yml up --build -d
 
 - L'app écoute sur le port 3000 (`APP_PORT`), `DATABASE_URL` est forcée vers le service `postgres` par le compose. Volumes : `media` (`public/media`), `private-files` (PDF payants) et `postgres-data`.
 - Le build n'a pas besoin de base : `SKIP_BUILD_DB=1` (posé par le `Dockerfile`) fait renvoyer `[]` aux `generateStaticParams`. Les pages sont générées à la première requête puis mises en cache (ISR), et revalidées à la publication.
-- Healthcheck : `GET /api/health` (200 + ping base). Le cron Payload (purge RGPD, queue `maintenance`) démarre avec le process (`src/instrumentation.ts`).
+- Healthcheck : `GET /api/health` (200 + ping base). Le cron Payload (purges, queue `maintenance`, et publications programmées, queue `default` chaque minute) démarre avec le process (`src/instrumentation.ts`). Pool Postgres réglable par `DB_POOL_MAX`, `DB_IDLE_TIMEOUT_MS`, `DB_CONNECTION_TIMEOUT_MS` (voir `.env.example`).
 - Premier compte : `https://<domaine>/admin/create-first-user`.
 - Données de démo (hors production uniquement, destructif) : `pnpm seed:local` depuis un poste ayant accès à la base.
 - Reverse proxy : placer Caddy ou Traefik devant le service `app` pour le TLS (ne pas exposer le port 3000 tel quel) et le faire pointer sur `app:3000`.
@@ -85,11 +88,13 @@ Prérequis :
 - **Stockage distant obligatoire** : le disque de Vercel n'est pas persistant. Voir « Stockage des fichiers » (Vercel Blob ou S3/R2 pour les médias, S3/R2 pour les PDF payants).
 - Variables d'env du projet, dont `CRON_SECRET` (Vercel l'envoie en `Authorization: Bearer`).
 
-`vercel.json` déclenche chaque jour à 3 h `GET /api/payload-jobs/run?queue=maintenance` : cet endpoint planifie les tâches dues (`handleSchedules`) puis exécute la queue. Sur Vercel, `autoRun` et `instrumentation.ts` sont désactivés (pas de process long). L'accès est accepté avec `CRON_SECRET` uniquement quand `VERCEL` est défini. Les plans Hobby limitent les crons à une exécution par jour.
+`vercel.json` déclenche toutes les 5 minutes `GET /api/payload-jobs/run?allQueues=true` : cet endpoint planifie les tâches dues (`handleSchedules`, dont les purges RGPD et des achats en attente) puis exécute toutes les queues, y compris `default` qui porte les publications programmées (`schedulePublish`). Sur Vercel, `autoRun` et `instrumentation.ts` sont désactivés (pas de process long). L'accès est accepté avec `CRON_SECRET` (comparaison en temps constant) uniquement quand `VERCEL` est défini, sinon réservé aux rôles `superadmin` et `admin`.
+
+> **Plan Hobby** : Vercel n'autorise qu'un cron par jour, et refuse le déploiement d'un cron plus fréquent. Sur Hobby, remplacer le schedule par `0 3 * * *` : les publications programmées ne partent alors qu'une fois par jour (ne pas les promettre au client), ou passer en Pro.
 
 ### Sauvegardes
 
-Le service `backup` de `docker-compose.prod.yml` (image `postgres:16-alpine` + `rclone`) lance `pg_dump -Fc` chaque jour à 2 h UTC (`BACKUP_CRON`, avant la purge de 3 h). Variables : voir `.env.example`.
+Le service `backup` de `docker-compose.prod.yml` (image `postgres:16-alpine` + `rclone`) lance `pg_dump -Fc` chaque jour à 2 h UTC (`BACKUP_CRON`, avant la purge de 3 h). Variables : voir `.env.example`. Le service ne reçoit que `DATABASE_URL` et les `BACKUP_*` (pas les secrets de l'app) : ils sont lus dans le `.env` du projet (avec un `ENV_FILE` personnalisé, ajouter `--env-file`).
 
 - **Mode local** (défaut) : dumps `payload-<horodatage UTC>.dump` dans le volume `backups`. Sans copie hors de la machine, ce mode ne protège pas d'une perte du serveur : copier le volume ailleurs.
 - **Mode S3** : si `BACKUP_S3_BUCKET` est défini (+ `BACKUP_S3_ENDPOINT`, `BACKUP_S3_REGION`, `BACKUP_S3_ACCESS_KEY_ID`, `BACKUP_S3_SECRET_ACCESS_KEY`, `BACKUP_S3_PREFIX` optionnel), le dump est envoyé vers le bucket (tout stockage compatible S3) et la copie locale supprimée.
@@ -142,7 +147,7 @@ Ajouter `--yes` pour ne pas demander de confirmation. Arrêter `app` avant de re
 ### Garage en local
 
 ```bash
-docker compose up -d garage && pnpm storage:init
+docker compose --profile storage up -d garage && pnpm storage:init
 ```
 
 Le script (idempotent) configure Garage (layout, clé, buckets `media` et `private-files`) et affiche les lignes à coller dans `.env` (`STORAGE_DRIVER=s3`...). Sans cela, `.env` reste en `local`. En local, ne pas définir `S3_PUBLIC_URL` : Next.js refuse de charger des images depuis une adresse loopback.
@@ -197,6 +202,11 @@ renseigner les réglages du site (`siteUrl`, onglet Légal). Changer les modules
 pnpm dev                 # lance Payload + Next.js en développement
 pnpm build                # build de production (Next.js)
 pnpm start                # démarre le serveur en production
+pnpm check                # tsc + ESLint + Prettier (à lancer avant chaque livraison)
+pnpm lint                 # ESLint, zéro warning (lint:fix pour corriger)
+pnpm format               # Prettier (format:check pour vérifier seulement)
+pnpm client:init          # personnalise le fork pour un nouveau client
+pnpm seed:local           # peuple la base de démo via la Local API (destructif)
 pnpm generate:types        # régénère les types TypeScript depuis la config Payload
 pnpm generate:importmap    # régénère l'import map des composants admin custom
 pnpm storage:init          # Garage local : buckets + clé, affiche les variables S3
@@ -210,6 +220,7 @@ pnpm test:e2e              # tests end-to-end (Playwright)
 ## Qualité de code
 
 - `pnpm check` = `tsc --noEmit` + ESLint + Prettier (`format:check`). À lancer avant chaque livraison.
+- **Tests** : `E2E_BASE_URL` (défaut `http://localhost:3000`) change l'URL/le port des tests e2e et du serveur lancé par Playwright (`PORT`, `NEXT_PUBLIC_SERVER_URL`), utile si le port 3000 est pris. `test:int` et `test:e2e` supposent une base seedée (`pnpm seed:local`, contenu de démo attendu par `api.int.spec`). Pour ne pas toucher à la base de dev, définir `TEST_DATABASE_URL` (voir `.env.example`) : Vitest et Playwright l'utilisent alors à la place de `DATABASE_URL` (en e2e, un serveur déjà lancé n'est plus réutilisé). Préparer cette base jetable avec `DATABASE_URL=<url de test> pnpm migrate && DATABASE_URL=<url de test> pnpm seed:local`. Les comptes de test sont créés avec un e-mail unique par exécution (`<rôle>-<id>@e2e.test`, helper `tests/helpers/users.ts`) et supprimés par ce préfixe : aucun compte existant n'est jamais supprimé.
 - Politique **zéro warning** : `pnpm lint` échoue au moindre warning (`--max-warnings 0`). Règles typées (promesses, `any`, imports de types, exhaustivité des `switch`) sur `src/` et `tests/`.
 - `pnpm format` reformate le projet ; `pnpm lint:fix` applique les corrections automatiques.
 - Hook pre-commit (`simple-git-hooks` + `lint-staged`, installé par `pnpm install` via `prepare`) : ESLint `--fix` + Prettier sur les fichiers indexés.

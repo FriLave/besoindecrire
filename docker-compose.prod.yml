@@ -35,9 +35,18 @@ services:
   # One-off: `docker compose -f docker-compose.prod.yml run --rm backup backup.sh`
   backup:
     build: scripts/backup
-    env_file: ${ENV_FILE:-.env}
+    # No env_file: the sidecar only gets what it needs, not the app secrets. Values are read from the
+    # compose interpolation env (`.env`, or `--env-file` if you use a custom ENV_FILE).
     environment:
       DATABASE_URL: postgres://payload:${POSTGRES_PASSWORD:-payload}@postgres:5432/payload
+      BACKUP_CRON: ${BACKUP_CRON:-}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-}
+      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-}
+      BACKUP_S3_ENDPOINT: ${BACKUP_S3_ENDPOINT:-}
+      BACKUP_S3_REGION: ${BACKUP_S3_REGION:-}
+      BACKUP_S3_ACCESS_KEY_ID: ${BACKUP_S3_ACCESS_KEY_ID:-}
+      BACKUP_S3_SECRET_ACCESS_KEY: ${BACKUP_S3_SECRET_ACCESS_KEY:-}
+      BACKUP_S3_PREFIX: ${BACKUP_S3_PREFIX:-}
     depends_on:
       postgres:
         condition: service_healthy

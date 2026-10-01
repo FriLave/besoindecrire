@@ -2,8 +2,8 @@ name: CI
 
 on:
   push:
-  pull_request:
     branches: [main]
+  pull_request:
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -28,6 +28,34 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
+      # Committed generated files must match the config (CLAUDE.md: generate:types after every change).
+      - name: Generated files drift check
+        run: |
+          pnpm generate:types
+          pnpm generate:importmap
+          if ! git diff --exit-code -- src/payload-types.ts 'src/app/(payload)/admin/importMap.js'; then
+            echo "::error::Generated files out of date: run pnpm generate:types and pnpm generate:importmap, then commit"
+            exit 1
+          fi
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      # Build only (no push): catches a broken Dockerfile before client deploy time.
+      - name: Build app image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Build backup image
+        uses: docker/build-push-action@v6
+        with:
+          context: scripts/backup
+          push: false
 
   test:
     runs-on: ubuntu-latest

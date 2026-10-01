@@ -15,8 +15,9 @@ services:
       timeout: 5s
       retries: 5
 
-  # S3-compatible blob storage (opt-in: STORAGE_DRIVER=s3). Run `pnpm storage:init` once after first start.
+  # S3-compatible blob storage (opt-in: `docker compose --profile storage up -d`, then STORAGE_DRIVER=s3). Run `pnpm storage:init` once after first start.
   garage:
+    profiles: [storage]
     image: dxflrs/garage:v2.2.0
     environment:
       # Dev only: fixed secret is fine, the RPC port is not published.
