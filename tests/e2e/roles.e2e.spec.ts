@@ -1,8 +1,7 @@
 import { expect, test } from '@playwright/test'
 import { login } from '../helpers/login'
-import { cleanupRoleUsers, roleUser, seedRoleUsers, type TestRole } from '../helpers/roleUsers'
+import { cleanupUsers, seedUsers, testUser, type TestRole } from '../helpers/users'
 
-const base = 'http://localhost:3000'
 const users = '/admin/collections/users'
 const siteSettings = '/admin/globals/site-settings'
 const featureFlags = '/admin/globals/feature-flags'
@@ -22,12 +21,12 @@ const matrix: Record<TestRole, { absent: string[]; present: string[] }> = {
 
 test.describe.configure({ mode: 'serial' })
 
-test.beforeAll(seedRoleUsers)
-test.afterAll(cleanupRoleUsers)
+test.beforeAll(() => seedUsers(['editor', 'admin', 'superadmin']))
+test.afterAll(cleanupUsers)
 
 for (const role of ['editor', 'admin', 'superadmin'] as const) {
   test(`${role}: admin navigation matches the role matrix`, async ({ page }) => {
-    await login({ page, user: roleUser(role) })
+    await login({ page, user: testUser(role) })
     await page.waitForSelector('nav a[href^="/admin/"]')
     const hrefs = await page
       .locator('nav a[href^="/admin/"]')
@@ -39,7 +38,7 @@ for (const role of ['editor', 'admin', 'superadmin'] as const) {
 }
 
 test('editor can still open their own account page', async ({ page }) => {
-  await login({ page, user: roleUser('editor') })
-  await page.goto(`${base}/admin/account`)
-  await expect(page.locator('#field-email')).toHaveValue(roleUser('editor').email)
+  await login({ page, user: testUser('editor') })
+  await page.goto(`/admin/account`)
+  await expect(page.locator('#field-email')).toHaveValue(testUser('editor').email)
 })

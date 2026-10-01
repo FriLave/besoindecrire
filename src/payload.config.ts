@@ -4,7 +4,6 @@ import { en } from '@payloadcms/translations/languages/en'
 import { fr } from '@payloadcms/translations/languages/fr'
 import sharp from 'sharp'
 import path from 'path'
-import type { PayloadRequest } from 'payload'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
 
@@ -28,10 +27,17 @@ import { defaultLexical } from '@/fields/defaultLexical'
 import { getServerSideURL } from './utilities/getURL'
 import { healthEndpoint } from './endpoints/health'
 import { purgeFormSubmissions } from './jobs/purgeFormSubmissions'
+import { purgePendingPurchases } from './jobs/purgePendingPurchases'
+import { jobsRunAccess } from './jobs/runAccess'
 import { migrations } from './migrations'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+
+const envInt = (value: string | undefined, fallback: number): number => {
+  const n = Number(value)
+  return Number.isFinite(n) && n > 0 ? n : fallback
+}
 
 export default buildConfig({
   admin: {
@@ -67,6 +73,10 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
+      // Each Next worker / ISR build opens its own pool: keep it small for managed Postgres limits.
+      max: envInt(process.env.DB_POOL_MAX, 10),
+      idleTimeoutMillis: envInt(process.env.DB_IDLE_TIMEOUT_MS, 30_000),
+      connectionTimeoutMillis: envInt(process.env.DB_CONNECTION_TIMEOUT_MS, 10_000),
     },
     // Dev: schema auto-pushed from the config. PAYLOAD_PUSH=0 (CI, tests on a migrated DB) disables it.
     push: process.env.PAYLOAD_PUSH !== '0',
@@ -100,6 +110,9 @@ export default buildConfig({
       }
     : {}),
   cors: [getServerSideURL()].filter(Boolean),
+  // Auth cookie is only accepted from our own origin. `serverURL` is deliberately not set: it would turn
+  // media URLs absolute, which Next.js image optimisation rejects for localhost/private hosts.
+  csrf: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer, SiteSettings, FeatureFlags],
   // Allows each admin user to pick their own interface language from their
   // account page. English stays the admin default (see `localization` below,
@@ -122,20 +135,15 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   jobs: {
-    access: {
-      run: ({ req }: { req: PayloadRequest }): boolean => {
-        // Logged-in users; on Vercel also the Vercel Cron call (it sends `Authorization: Bearer $CRON_SECRET`).
-        if (req.user) return true
-        const secret = process.env.CRON_SECRET
-        return Boolean(
-          process.env.VERCEL && secret && req.headers.get('authorization') === `Bearer ${secret}`,
-        )
-      },
-    },
+    access: { run: jobsRunAccess },
     // Serverless (Vercel) has no long-lived process: vercel.json cron calls /api/payload-jobs/run instead.
     shouldAutoRun: () => !process.env.VERCEL,
     // Needs a long-running Node process (Docker). Same queue as the task schedule: autoRun enqueues due schedules, then runs them.
-    autoRun: [{ cron: '*/15 * * * *', queue: 'maintenance', limit: 10 }],
-    tasks: [purgeFormSubmissions],
+    // 'default' holds the schedulePublish jobs queued from the admin (Pages/Posts): without this they never run.
+    autoRun: [
+      { cron: '*/15 * * * *', queue: 'maintenance', limit: 10 },
+      { cron: '* * * * *', queue: 'default', limit: 10 },
+    ],
+    tasks: [purgeFormSubmissions, ...(modules.payments ? [purgePendingPurchases] : [])],
   },
 })

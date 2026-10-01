@@ -31,15 +31,15 @@ describe('publishing a page requires exactly one H1', () => {
   const suffix = Date.now()
   const context = { disableRevalidate: true }
 
-  const create = (n: number, status: 'draft' | 'published', locale: 'fr' | 'en' = 'fr') =>
+  const create = (n: number, status: 'draft' | 'published', locale: 'fr' | 'en' = 'fr', tag = '') =>
     payload.create({
       collection: 'pages',
       locale,
       draft: status === 'draft',
       context,
       data: {
-        title: `h1-test-${suffix}-${n}-${status}`,
-        slug: `h1-test-${suffix}-${n}-${status}`,
+        title: `h1-test-${suffix}-${n}-${status}${tag}`,
+        slug: `h1-test-${suffix}-${n}-${status}${tag}`,
         _status: status,
         hero: {
           type: 'lowImpact',
@@ -82,5 +82,26 @@ describe('publishing a page requires exactly one H1', () => {
 
   it('error message follows the locale', async () => {
     await expect(create(0, 'published', 'fr')).rejects.toThrow(/exactement un H1/)
+  })
+
+  it('also checks the other locales that have content', async () => {
+    const page = await create(1, 'published', 'fr', '-locales')
+    await payload.update({
+      collection: 'pages',
+      id: page.id,
+      locale: 'en',
+      draft: true,
+      context,
+      data: { title: `h1-test-${suffix}-en`, hero: { type: 'lowImpact', richText: richText([]) } },
+    })
+    await expect(
+      payload.update({
+        collection: 'pages',
+        id: page.id,
+        locale: 'fr',
+        context,
+        data: { _status: 'published' },
+      }),
+    ).rejects.toThrow(/\(en\)/)
   })
 })

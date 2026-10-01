@@ -6,10 +6,7 @@ export const healthEndpoint: Endpoint = {
   method: 'get',
   handler: async (req) => {
     try {
-      const { pool } = req.payload.db as unknown as {
-        pool: { query: (sql: string) => Promise<unknown> }
-      }
-      await pool.query('select 1')
+      await req.payload.count({ collection: 'users', req })
       return Response.json({ status: 'ok' })
     } catch {
       return Response.json({ status: 'error' }, { status: 503 })

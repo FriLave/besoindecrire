@@ -137,6 +137,7 @@ export interface Config {
   jobs: {
     tasks: {
       purgeFormSubmissions: TaskPurgeFormSubmissions;
+      purgePendingPurchases: TaskPurgePendingPurchases;
       schedulePublish: TaskSchedulePublish;
       inline: {
         input: unknown;
@@ -171,6 +172,9 @@ export interface UserAuthOperations {
 export interface Page {
   id: number;
   title: string;
+  /**
+   * Banner at the top of the page: pick a type, then fill in the title, buttons and image.
+   */
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
     richText?: {
@@ -452,6 +456,9 @@ export interface Category {
 export interface User {
   id: number;
   name?: string | null;
+  /**
+   * Admins can only manage editors; only a super admin can create or change admins.
+   */
   role: 'superadmin' | 'admin' | 'editor';
   updatedAt: string;
   createdAt: string;
@@ -478,6 +485,9 @@ export interface User {
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
+  /**
+   * Highlighted message with up to 2 buttons, to push visitors to act.
+   */
   richText?: {
     root: {
       type: string;
@@ -529,6 +539,9 @@ export interface CallToActionBlock {
  * via the `definition` "ContentBlock".
  */
 export interface ContentBlock {
+  /**
+   * Free content laid out in columns (one third, half, two thirds or full width).
+   */
   columns?:
     | {
         size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
@@ -582,6 +595,9 @@ export interface ContentBlock {
  * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
+  /**
+   * A single image or video displayed on its own.
+   */
   media: number | Media;
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
@@ -595,6 +611,9 @@ export interface MediaBlock {
  * via the `definition` "FormBlock".
  */
 export interface FormBlock {
+  /**
+   * Displays a form created in the Forms section, with an optional intro text.
+   */
   form: number | Form;
   enableIntro?: boolean | null;
   introContent?: {
@@ -1224,6 +1243,8 @@ export interface Purchase {
   paidDownload: number | PaidDownload;
   stripeSessionId?: string | null;
   status: 'pending' | 'paid';
+  paidAt?: string | null;
+  lastResentAt?: string | null;
   /**
    * In cents
    */
@@ -1380,7 +1401,7 @@ export interface PayloadJob {
     | {
         executedAt: string;
         completedAt: string;
-        taskSlug: 'inline' | 'purgeFormSubmissions' | 'schedulePublish';
+        taskSlug: 'inline' | 'purgeFormSubmissions' | 'purgePendingPurchases' | 'schedulePublish';
         taskID: string;
         input?:
           | {
@@ -1413,7 +1434,7 @@ export interface PayloadJob {
         id?: string | null;
       }[]
     | null;
-  taskSlug?: ('inline' | 'purgeFormSubmissions' | 'schedulePublish') | null;
+  taskSlug?: ('inline' | 'purgeFormSubmissions' | 'purgePendingPurchases' | 'schedulePublish') | null;
   queue?: string | null;
   waitUntil?: string | null;
   processing?: boolean | null;
@@ -2131,6 +2152,8 @@ export interface PurchasesSelect<T extends boolean = true> {
   paidDownload?: T;
   stripeSessionId?: T;
   status?: T;
+  paidAt?: T;
+  lastResentAt?: T;
   amount?: T;
   currency?: T;
   locale?: T;
@@ -2493,7 +2516,7 @@ export interface SiteSetting {
    */
   logo?: (number | null) | Media;
   /**
-   * Small icon shown in browser tabs (PNG or SVG, square).
+   * Small icon shown in browser tabs (PNG, square).
    */
   favicon?: (number | null) | Media;
   /**
@@ -2784,6 +2807,16 @@ export interface TaskPurgeFormSubmissions {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TaskPurgePendingPurchases".
+ */
+export interface TaskPurgePendingPurchases {
+  input?: unknown;
+  output: {
+    deleted?: number | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskSchedulePublish".
  */
 export interface TaskSchedulePublish {
@@ -2812,6 +2845,9 @@ export interface TaskSchedulePublish {
  * via the `definition` "BannerBlock".
  */
 export interface BannerBlock {
+  /**
+   * Coloured callout to draw attention to a piece of information.
+   */
   style: 'info' | 'warning' | 'error' | 'success';
   content: {
     root: {
@@ -2837,6 +2873,9 @@ export interface BannerBlock {
  * via the `definition` "CodeBlock".
  */
 export interface CodeBlock {
+  /**
+   * Code snippet displayed in a monospaced block.
+   */
   language?: ('typescript' | 'javascript' | 'css') | null;
   code: string;
   id?: string | null;

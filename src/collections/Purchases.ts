@@ -50,6 +50,18 @@ export const Purchases: CollectionConfig = {
       ],
     },
     {
+      name: 'paidAt',
+      type: 'date',
+      label: { en: 'Paid at', fr: 'Payé le' },
+      admin: { readOnly: true },
+    },
+    {
+      name: 'lastResentAt',
+      type: 'date',
+      label: { en: 'Last link resend', fr: 'Dernier renvoi du lien' },
+      admin: { readOnly: true },
+    },
+    {
       name: 'amount',
       type: 'number',
       label: { en: 'Amount', fr: 'Montant' },

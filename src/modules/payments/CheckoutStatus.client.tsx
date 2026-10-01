@@ -27,12 +27,18 @@ export const CheckoutStatus: React.FC<{
     let timer: ReturnType<typeof setTimeout>
     const tick = async () => {
       try {
-        const res = await fetch(`/api/checkout/status?session_id=${encodeURIComponent(sessionId)}`)
+        const res = await fetch(
+          `/api/checkout/status?session_id=${encodeURIComponent(sessionId)}`,
+          {
+            referrerPolicy: 'no-referrer',
+          },
+        )
         const data = (await res.json()) as { status?: string; downloadUrl?: string }
         if (stop) return
         if (data.status === 'paid' && data.downloadUrl) {
           return setState({ phase: 'paid', url: data.downloadUrl })
         }
+        if (data.status === 'expired') return setState({ phase: 'pending' })
       } catch {
         // Network hiccup: retry until the budget is spent.
       }

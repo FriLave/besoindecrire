@@ -163,19 +163,20 @@ export const Pages: CollectionConfig<'pages'> = {
       admin: {
         position: 'sidebar',
       },
+      hooks: { beforeChange: [populatePublishedAt] },
     },
     slugField({ localized: true, slugify }),
   ],
   hooks: {
     afterChange: [revalidatePage],
-    beforeChange: [populatePublishedAt, enforceSingleH1],
+    beforeChange: [enforceSingleH1],
     beforeDelete: [revalidatePageBeforeDelete],
     afterDelete: [revalidateDelete],
   },
   versions: {
     drafts: {
       autosave: {
-        interval: 100, // We set this interval for optimal live preview
+        interval: 800,
       },
       schedulePublish: true,
     },

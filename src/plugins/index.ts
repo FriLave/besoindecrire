@@ -9,25 +9,20 @@ import { whenBlog } from '@/access/blogEnabled'
 import { modules } from '@/client/modules'
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
-import { revalidateRedirects } from '@/hooks/revalidateRedirects'
+import { revalidateRedirects, revalidateRedirectsAfterDelete } from '@/hooks/revalidateRedirects'
+import { validateFormSubmission } from '@/hooks/validateFormSubmission'
 import type { GenerateTitle, GenerateURL } from '@payloadcms/plugin-seo/types'
 import { FixedToolbarFeature, HeadingFeature, lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import { buildStoragePlugins } from '@/storage'
 import { privacyNoticeDefaults } from '@/i18n/legal'
 import type { Page, Post } from '@/payload-types'
-import { SITE_NAME } from '@/client/site'
 import { groups } from '@/utilities/adminGroups'
 import { getServerSideURL } from '@/utilities/getURL'
-import { getCachedSiteSettings } from '@/utilities/getGlobals'
 import { defaultLocale, getLocalizedPath, type Locale } from '@/utilities/getLocalizedPath'
 
-const generateTitle: GenerateTitle<Page | Post> = async ({ doc, locale }) => {
-  const siteSettings = await getCachedSiteSettings((locale as Locale) || defaultLocale)()
-  const siteName = siteSettings?.siteName || SITE_NAME
-
-  return doc?.title ? `${doc.title} | ${siteName}` : siteName
-}
+// Bare title: generateMeta appends the site name once.
+const generateTitle: GenerateTitle<Page | Post> = ({ doc }) => doc?.title ?? ''
 
 const generateURL: GenerateURL<Page | Post> = ({ collectionConfig, doc, locale }) => {
   const url = getServerSideURL()
@@ -111,6 +106,7 @@ export const plugins: Plugin[] = [
       },
       hooks: {
         afterChange: [revalidateRedirects],
+        afterDelete: [revalidateRedirectsAfterDelete],
       },
     },
   }),
@@ -131,8 +127,9 @@ export const plugins: Plugin[] = [
       payment: false,
     },
     formSubmissionOverrides: {
-      // create stays public (anonymous submissions); update stays false
+      // create stays public (anonymous submissions, guarded by validateFormSubmission); update stays false
       access: { delete: editorOrAbove },
+      hooks: { beforeValidate: [validateFormSubmission] },
       admin: { group: groups.forms },
       labels: {
         singular: { en: 'Form submission', fr: 'Réponse de formulaire' },

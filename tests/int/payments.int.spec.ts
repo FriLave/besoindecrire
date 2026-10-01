@@ -54,7 +54,11 @@ describe('payments endpoints', () => {
       ...extra,
     }) as unknown as PayloadRequest
   const post = (path: string, body: unknown) =>
-    mkReq(`http://localhost/api${path}`, { method: 'POST', body: JSON.stringify(body) })
+    mkReq(`http://localhost/api${path}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    })
 
   beforeAll(async () => {
     process.env.STRIPE_SECRET_KEY = 'sk_test_fake'

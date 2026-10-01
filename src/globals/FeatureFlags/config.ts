@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
-import { isSuperAdmin, superAdminOnly } from '@/access/roles'
+import { adminOrAbove, isSuperAdmin, superAdminOnly } from '@/access/roles'
 import { groups } from '@/utilities/adminGroups'
 import { modules } from '@/client/modules'
 import { revalidateFeatureFlags } from './hooks/revalidateFeatureFlags'
@@ -9,7 +9,8 @@ export const FeatureFlags: GlobalConfig = {
   slug: 'feature-flags',
   label: { en: 'Feature flags', fr: 'Modules optionnels' },
   access: {
-    read: () => true,
+    // Server code reads the flags through the Local API (overrideAccess), so this is not public.
+    read: adminOrAbove,
     update: superAdminOnly,
   },
   admin: {

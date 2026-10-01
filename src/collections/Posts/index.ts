@@ -18,6 +18,7 @@ import { Banner } from '../../blocks/Banner/config'
 import { Code } from '../../blocks/Code/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { generatePreviewPath } from '../../utilities/generatePreviewPath'
+import { populatePublishedAt } from '../../hooks/populatePublishedAt'
 import { populateAuthors } from './hooks/populateAuthors'
 import {
   revalidateDelete,
@@ -187,6 +188,7 @@ export const Posts: CollectionConfig<'posts'> = {
     {
       name: 'publishedAt',
       type: 'date',
+      index: true,
       label: { en: 'Published at', fr: 'Publié le' },
       admin: {
         date: {
@@ -194,16 +196,7 @@ export const Posts: CollectionConfig<'posts'> = {
         },
         position: 'sidebar',
       },
-      hooks: {
-        beforeChange: [
-          ({ siblingData, value }) => {
-            if (siblingData._status === 'published' && !value) {
-              return new Date()
-            }
-            return value
-          },
-        ],
-      },
+      hooks: { beforeChange: [populatePublishedAt] },
     },
     {
       name: 'authors',
@@ -250,7 +243,7 @@ export const Posts: CollectionConfig<'posts'> = {
   versions: {
     drafts: {
       autosave: {
-        interval: 100, // We set this interval for optimal live preview
+        interval: 800,
       },
       schedulePublish: true,
     },

@@ -64,10 +64,10 @@ export const SiteSettings: GlobalConfig = {
               'favicon',
               { en: 'Favicon', fr: 'Favicon' },
               {
-                en: 'Small icon shown in browser tabs (PNG or SVG, square).',
-                fr: 'Petite icône affichée dans les onglets du navigateur (PNG ou SVG, carrée).',
+                en: 'Small icon shown in browser tabs (PNG, square).',
+                fr: 'Petite icône affichée dans les onglets du navigateur (PNG, carrée).',
               },
-              ['image/png', 'image/svg+xml'],
+              ['image/png'],
             ),
           ],
         },

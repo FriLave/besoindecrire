@@ -48,7 +48,6 @@ export const BuyForm: React.FC<Props> = ({ paidDownloadId, locale, termsHref }) 
         email,
         locale,
         waiverAccepted: waiver,
-        waiverText: t.waiver,
       })
       const data = (await res.json()) as { url?: string }
       if (!res.ok || !data.url) throw new Error('checkout failed')

@@ -16,6 +16,12 @@ export const FormBlock: Block = {
     {
       name: 'form',
       type: 'relationship',
+      admin: {
+        description: {
+          en: 'Displays a form created in the Forms section, with an optional intro text.',
+          fr: 'Affiche un formulaire créé dans la section Formulaires, avec un texte d’introduction facultatif.',
+        },
+      },
       relationTo: 'forms',
       required: true,
     },

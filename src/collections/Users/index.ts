@@ -5,16 +5,17 @@ import { APIError } from 'payload'
 import { groups } from '../../utilities/adminGroups'
 import { adminOrAbove, hasRole, isSuperAdmin } from '../../access/roles'
 
-// Admins can manage users, but never a superadmin. Everyone can manage themselves.
-const updateOrDelete: Access = ({ req: { user } }) => {
+// Superadmin: unrestricted. Admin: manages editors only, plus updates self (never deletes self).
+// Editor: updates self. Role changes are additionally guarded by enforceRole.
+const update: Access = ({ req: { user } }) => {
   if (!user) return false
   if (isSuperAdmin(user)) return true
   const self = { id: { equals: user.id } }
-  if (hasRole(user, 'admin')) return { or: [self, { role: { not_equals: 'superadmin' } }] }
-  return self
+  return hasRole(user, 'admin') ? { or: [self, { role: { equals: 'editor' } }] } : self
 }
 
-const deleteAccess: Access = (args) => (adminOrAbove(args) ? updateOrDelete(args) : false)
+const remove: Access = ({ req: { user } }) =>
+  isSuperAdmin(user) ? true : hasRole(user, 'admin') ? { role: { equals: 'editor' } } : false
 
 export const enforceRole: CollectionBeforeChangeHook = async ({
   data,
@@ -30,13 +31,21 @@ export const enforceRole: CollectionBeforeChangeHook = async ({
     }
   }
 
-  const touchesSuperAdmin =
-    data.role === 'superadmin' ||
-    (originalDoc?.role === 'superadmin' && data.role && data.role !== 'superadmin')
+  // No req.user = trusted Local API (seed, scripts); HTTP writes are already gated by access.
+  const actor = req.user
+  if (!actor || isSuperAdmin(actor)) return data
 
-  // No req.user = trusted Local API (seed, scripts); HTTP creates are already gated by access.
-  if (touchesSuperAdmin && req.user && !isSuperAdmin(req.user)) {
-    throw new APIError('Only a superadmin can grant or revoke the superadmin role.', 403)
+  // Non-superadmins: create editors, update editors, or update self without changing own role.
+  const newRole = data.role ?? (operation === 'create' ? 'editor' : originalDoc?.role)
+  const isSelf = operation === 'update' && originalDoc?.id === actor.id
+  const allowed = isSelf
+    ? newRole === originalDoc?.role
+    : newRole === 'editor' && (operation === 'create' || originalDoc?.role === 'editor')
+  if (!allowed) {
+    throw new APIError(
+      'Only a superadmin can create admins or change roles other than editors.',
+      403,
+    )
   }
 
   return data
@@ -47,11 +56,11 @@ export const Users: CollectionConfig = {
   access: {
     admin: ({ req: { user } }) => hasRole(user, 'superadmin', 'admin', 'editor'),
     create: adminOrAbove,
-    delete: deleteAccess,
+    delete: remove,
     // Admins list everyone; others only see themselves (keeps /admin/account working).
     read: ({ req: { user } }) =>
       !user ? false : hasRole(user, 'superadmin', 'admin') ? true : { id: { equals: user.id } },
-    update: updateOrDelete,
+    update,
   },
   admin: {
     defaultColumns: ['name', 'email', 'role'],
@@ -59,7 +68,9 @@ export const Users: CollectionConfig = {
     hidden: ({ user }) => !hasRole(user, 'superadmin', 'admin'),
     useAsTitle: 'name',
   },
-  auth: true,
+  auth: {
+    cookies: { sameSite: 'Lax', secure: process.env.NODE_ENV === 'production' },
+  },
   labels: {
     singular: { en: 'User', fr: 'Utilisateur' },
     plural: { en: 'Users', fr: 'Utilisateurs' },
@@ -77,8 +88,17 @@ export const Users: CollectionConfig = {
       required: true,
       defaultValue: 'editor',
       saveToJWT: true,
+      admin: {
+        description: {
+          en: 'Admins can only manage editors; only a super admin can create or change admins.',
+          fr: 'Un administrateur ne gère que les éditeurs ; seul un super administrateur peut créer ou modifier des administrateurs.',
+        },
+      },
       access: {
-        update: ({ req: { user } }) => hasRole(user, 'superadmin', 'admin'),
+        // Admins: only the role of another editor (enforceRole is the real guard).
+        update: ({ req: { user }, id, doc }) =>
+          isSuperAdmin(user) ||
+          (hasRole(user, 'admin') && id !== user?.id && doc?.role === 'editor'),
       },
       options: [
         { label: { en: 'Super admin', fr: 'Super administrateur' }, value: 'superadmin' },

@@ -13,6 +13,7 @@ import { fields } from './fields'
 import { getClientSideURL } from '@/utilities/getURL'
 import { getUI } from '@/i18n/ui'
 import type { Locale } from '@/utilities/getLocalizedPath'
+import { HONEYPOT_FIELD, FILL_MS_FIELD } from './spam'
 
 export type FormBlockType = {
   blockName?: string
@@ -40,6 +41,9 @@ export const FormBlock: React.FC<
   } = props
 
   const privacyNotice = (formFromProps as { privacyNotice?: string | null }).privacyNotice
+  // Time since first render is sent along: the server rejects implausibly fast submissions.
+  const [renderedAt] = useState(() => Date.now())
+  const [honeypot, setHoneypot] = useState('')
   const formMethods = useForm({
     defaultValues: formFromProps.fields,
   })
@@ -62,10 +66,15 @@ export const FormBlock: React.FC<
       const submitForm = async () => {
         setError(undefined)
 
-        const dataToSend = Object.entries(data).map(([name, value]) => ({
-          field: name,
-          value,
-        }))
+        // Only the form's own fields: the server rejects unknown names.
+        const names = new Set(formFromProps.fields?.flatMap((f) => ('name' in f ? [f.name] : [])))
+        const dataToSend = [
+          ...Object.entries(data)
+            .filter(([name]) => names.has(name))
+            .map(([name, value]) => ({ field: name, value })),
+          { field: HONEYPOT_FIELD, value: honeypot },
+          { field: FILL_MS_FIELD, value: String(Date.now() - renderedAt) },
+        ]
 
         // delay loading indicator by 1s
         loadingTimerID = setTimeout(() => {
@@ -122,6 +131,9 @@ export const FormBlock: React.FC<
     },
     [
       router,
+      formFromProps.fields,
+      renderedAt,
+      honeypot,
       formID,
       redirect,
       confirmationType,
@@ -149,6 +161,16 @@ export const FormBlock: React.FC<
           {error && <div>{`${error.status || '500'}: ${error.message || ''}`}</div>}
           {!hasSubmitted && (
             <form id={formID} onSubmit={handleSubmit(onSubmit)}>
+              {/* Honeypot: invisible to humans and assistive tech, bots fill it. */}
+              <input
+                aria-hidden="true"
+                autoComplete="off"
+                className="absolute -left-[9999px] h-0 w-0 opacity-0"
+                tabIndex={-1}
+                type="text"
+                onChange={(e) => setHoneypot(e.target.value)}
+                value={honeypot}
+              />
               <div className="mb-4 last:mb-0">
                 {formFromProps &&
                   formFromProps.fields &&
