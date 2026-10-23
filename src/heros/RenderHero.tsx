@@ -7,11 +7,13 @@ import { stripDisabledPostLinks } from '@/utilities/stripDisabledPostLinks'
 import { HighImpactHero } from '@/heros/HighImpact'
 import { LowImpactHero } from '@/heros/LowImpact'
 import { MediumImpactHero } from '@/heros/MediumImpact'
+import { SplitHero } from '@/heros/Split'
 
 const heroes = {
   highImpact: HighImpactHero,
   lowImpact: LowImpactHero,
   mediumImpact: MediumImpactHero,
+  split: SplitHero,
 }
 
 export const RenderHero = async (rawProps: Page['hero'] & { locale: Locale }) => {

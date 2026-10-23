@@ -17,5 +17,6 @@
  * file keeps exporting the same names so nothing breaks until they do.
  */
 
-export const SITE_NAME = 'Site Vitrine'
-export const SITE_DESCRIPTION = 'Un site vitrine simple, rapide et facile à mettre à jour.'
+export const SITE_NAME = "Besoin d'Écrire"
+export const SITE_DESCRIPTION =
+  'Accompagnement autobiographique depuis 2012 par Paulin Hassika. Écrire sa vie, comprendre son histoire, devenir auteur.'

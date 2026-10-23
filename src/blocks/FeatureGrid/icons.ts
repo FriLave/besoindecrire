@@ -1,9 +1,14 @@
 import {
+  BookOpen,
   Clock,
+  Compass,
+  Feather,
   Globe,
   Heart,
   Lightbulb,
   Mail,
+  MessageCircle,
+  PenLine,
   Rocket,
   Search,
   Settings,
@@ -17,11 +22,16 @@ import {
 
 // Curated set: keeps the icon select short and the client bundle free of the full icon pack.
 export const featureIcons = {
+  book: BookOpen,
   clock: Clock,
+  compass: Compass,
+  feather: Feather,
   globe: Globe,
   heart: Heart,
   lightbulb: Lightbulb,
   mail: Mail,
+  message: MessageCircle,
+  pen: PenLine,
   rocket: Rocket,
   search: Search,
   settings: Settings,

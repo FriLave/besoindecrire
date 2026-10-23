@@ -106,7 +106,7 @@ export default async function Post({ params: paramsPromise }: Args) {
         <JsonLd
           data={article(post, postUrl, locale, settings?.siteName || SITE_NAME, siteUrl, logoUrl)}
         />
-        <PageClient headerTheme="dark" />
+        <PageClient headerTheme="light" />
 
         {/* Allows redirects for valid pages too */}
         <PayloadRedirects disableNotFound locale={locale} url={url} />

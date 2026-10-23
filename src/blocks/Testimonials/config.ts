@@ -16,6 +16,22 @@ export const Testimonials: Block = {
       fr: 'Citations de clients avec auteur, rôle et photo facultative.',
     }),
     {
+      name: 'style',
+      type: 'select',
+      defaultValue: 'grid',
+      label: { en: 'Style', fr: 'Style' },
+      options: [
+        { label: { en: 'Grid of cards', fr: 'Grille de cartes' }, value: 'grid' },
+        {
+          label: {
+            en: 'Single column (first quote enlarged)',
+            fr: 'Une colonne (première citation agrandie)',
+          },
+          value: 'featured',
+        },
+      ],
+    },
+    {
       name: 'items',
       type: 'array',
       required: true,

@@ -81,6 +81,11 @@ export const Content: Block = {
       },
       fields: columnFields,
     },
+    {
+      name: 'dropCap',
+      type: 'checkbox',
+      label: { en: 'Drop cap on the first paragraph', fr: 'Lettrine sur le premier paragraphe' },
+    },
     blockSettings(),
   ],
   labels: {

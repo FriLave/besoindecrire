@@ -16,6 +16,7 @@ import { faqPage } from '@/utilities/jsonLd'
 import { lexicalToText } from '@/utilities/lexicalToText'
 
 export const FAQBlock: React.FC<Props & { locale: Locale }> = ({
+  eyebrow,
   heading,
   intro,
   items,
@@ -29,12 +30,14 @@ export const FAQBlock: React.FC<Props & { locale: Locale }> = ({
           items.map((i) => ({ question: i.question, answer: lexicalToText(i.answer) })),
         )}
       />
-      <BlockHeader heading={heading} intro={intro} />
-      <Accordion collapsible type="single">
+      <BlockHeader eyebrow={eyebrow} heading={heading} intro={intro} />
+      <Accordion className="mx-auto max-w-3xl" collapsible type="single">
         {items.map((item, i) => (
           <AccordionItem key={item.id ?? i} value={item.id ?? String(i)}>
-            <AccordionTrigger>{item.question}</AccordionTrigger>
-            <AccordionContent>
+            <AccordionTrigger className="py-5 text-lg font-semibold hover:no-underline">
+              {item.question}
+            </AccordionTrigger>
+            <AccordionContent className="pb-6 text-base text-muted-foreground">
               <RichText
                 data={item.answer}
                 enableGutter={false}

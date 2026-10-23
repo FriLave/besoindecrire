@@ -42,11 +42,11 @@ export async function BlogArchive({ locale, page }: { locale: Locale; page: numb
 
   return (
     <>
-      <div className="pt-24 pb-24">
+      <div className="pt-16 pb-24 md:pt-24">
         <PageClient headerTheme="light" />
-        <div className="container mb-16">
-          <div className="prose dark:prose-invert max-w-none">
-            <h1>{ui.blog.title}</h1>
+        <div className="container mb-12">
+          <div className="max-w-3xl border-b border-border pb-12">
+            <h1 className="text-5xl">{ui.blog.title}</h1>
           </div>
         </div>
 

@@ -8,7 +8,7 @@ import type { Locale } from '@/utilities/getLocalizedPath'
 import { CMSLink } from '../../components/Link'
 
 export const ContentBlock: React.FC<ContentBlockProps & { locale: Locale }> = (props) => {
-  const { columns, locale } = props
+  const { columns, dropCap, locale } = props
 
   const colsSpanClasses = {
     full: 'lg:col-span-12',
@@ -32,7 +32,14 @@ export const ContentBlock: React.FC<ContentBlockProps & { locale: Locale }> = (p
                 })}
                 key={index}
               >
-                {richText && <RichText data={richText} enableGutter={false} locale={locale} />}
+                {richText && (
+                  <RichText
+                    className={cn(dropCap && index === 0 && 'lettrine')}
+                    data={richText}
+                    enableGutter={false}
+                    locale={locale}
+                  />
+                )}
 
                 {enableLink && <CMSLink {...link} locale={locale} />}
               </div>

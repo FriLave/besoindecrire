@@ -110,7 +110,7 @@ export default async function Page({ params: paramsPromise }: Args) {
 
   return (
     <>
-      <article className="pt-16 pb-24">
+      <article className="pt-16">
         {/* Site-wide schemas live on the home page, not in the layout: Next client-renders the
           layout on 404s, where React warns about <script> elements. */}
         {isHome && (

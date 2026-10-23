@@ -14,6 +14,7 @@ import { getCachedSiteSettings } from '@/utilities/getGlobals'
 import { BuyForm } from './BuyForm.client'
 
 export const PaidDownloadBlockComponent: React.FC<Props & { locale: Locale }> = async ({
+  eyebrow,
   heading,
   intro,
   download,
@@ -44,7 +45,7 @@ export const PaidDownloadBlockComponent: React.FC<Props & { locale: Locale }> = 
 
   return (
     <div className="container max-w-2xl">
-      <BlockHeader heading={heading} intro={intro} />
+      <BlockHeader eyebrow={eyebrow} heading={heading} intro={intro} />
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">{doc.title}</CardTitle>

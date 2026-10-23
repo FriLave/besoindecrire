@@ -1,5 +1,5 @@
 {
-  "name": "payloadcms-template",
+  "name": "besoin-d-ecrire",
   "version": "1.0.0",
   "description": "Payload CMS boilerplate for brochure sites",
   "license": "MIT",
@@ -12,6 +12,7 @@
     "dev:prod": "cross-env NODE_OPTIONS=--no-deprecation rm -rf .next && pnpm build && pnpm start",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "import:site": "cross-env NODE_OPTIONS=--no-deprecation payload run scripts/import-besoindecrire/index.ts",
     "generate:importmap": "cross-env PAYLOAD_ALL_MODULES=1 NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env PAYLOAD_ALL_MODULES=1 NODE_OPTIONS=--no-deprecation payload generate:types",
     "ii": "cross-env NODE_OPTIONS=--no-deprecation pnpm --ignore-workspace install",

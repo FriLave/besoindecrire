@@ -18,11 +18,34 @@ export const FeatureGrid: Block = {
       fr: 'Une grille de fonctionnalités ou de services : icône, titre et court texte.',
     }),
     {
-      name: 'columns',
-      type: 'select',
-      defaultValue: '3',
-      label: { en: 'Columns', fr: 'Colonnes' },
-      options: ['2', '3', '4'],
+      type: 'row',
+      fields: [
+        {
+          name: 'columns',
+          type: 'select',
+          defaultValue: '3',
+          label: { en: 'Columns', fr: 'Colonnes' },
+          options: ['2', '3', '4'],
+        },
+        {
+          name: 'style',
+          type: 'select',
+          defaultValue: 'icons',
+          label: { en: 'Style', fr: 'Style' },
+          options: [
+            { label: { en: 'Icons', fr: 'Icônes' }, value: 'icons' },
+            {
+              label: { en: 'Numbered steps (01, 02...)', fr: 'Étapes numérotées (01, 02…)' },
+              value: 'numbered',
+            },
+            { label: { en: 'Cards', fr: 'Cartes' }, value: 'cards' },
+            {
+              label: { en: 'List (title beside its text)', fr: 'Liste (titre à côté du texte)' },
+              value: 'list',
+            },
+          ],
+        },
+      ],
     },
     {
       name: 'items',
@@ -37,6 +60,12 @@ export const FeatureGrid: Block = {
           type: 'select',
           label: { en: 'Icon', fr: 'Icône' },
           options: Object.keys(featureIcons),
+          admin: {
+            description: {
+              en: 'Not shown in the "Numbered" and "List" styles.',
+              fr: 'Non affichée dans les styles « Étapes numérotées » et « Liste ».',
+            },
+          },
         },
         {
           name: 'title',

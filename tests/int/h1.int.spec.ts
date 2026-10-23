@@ -104,4 +104,25 @@ describe('publishing a page requires exactly one H1', () => {
       }),
     ).rejects.toThrow(/\(en\)/)
   })
+
+  it('publishing in one locale leaves the other locale untouched', async () => {
+    // Regression: the cross-locale check used to leave req.locale on the last locale it read,
+    // so publishing in `en` wrote the English title over the French one.
+    const page = await create(1, 'published', 'fr', '-keep-fr')
+    await payload.update({
+      collection: 'pages',
+      id: page.id,
+      locale: 'en',
+      context,
+      data: {
+        _status: 'published',
+        title: `h1-test-${suffix}-en-title`,
+        hero: { type: 'lowImpact', richText: richText([heading('h1', 'EN')]) },
+      },
+    })
+    const fr = await payload.findByID({ collection: 'pages', id: page.id, locale: 'fr', depth: 0 })
+    const en = await payload.findByID({ collection: 'pages', id: page.id, locale: 'en', depth: 0 })
+    expect(fr.title).toBe(page.title)
+    expect(en.title).toBe(`h1-test-${suffix}-en-title`)
+  })
 })

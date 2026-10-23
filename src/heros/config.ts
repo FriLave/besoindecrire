@@ -41,8 +41,25 @@ export const hero: Field = {
           label: { en: 'Low impact', fr: 'Faible impact' },
           value: 'lowImpact',
         },
+        {
+          label: { en: 'Split (text + image)', fr: 'Partagé (texte + image)' },
+          value: 'split',
+        },
       ],
       required: true,
+    },
+    {
+      name: 'eyebrow',
+      type: 'text',
+      localized: true,
+      label: { en: 'Eyebrow', fr: 'Surtitre' },
+      admin: {
+        condition: (_, { type } = {}) => type && type !== 'none',
+        description: {
+          en: 'Optional short label shown above the title.',
+          fr: 'Court libellé facultatif affiché au-dessus du titre.',
+        },
+      },
     },
     {
       name: 'richText',
@@ -69,7 +86,7 @@ export const hero: Field = {
       name: 'media',
       type: 'upload',
       admin: {
-        condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
+        condition: (_, { type } = {}) => ['highImpact', 'mediumImpact', 'split'].includes(type),
       },
       relationTo: 'media',
       required: true,

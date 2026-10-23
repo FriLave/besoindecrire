@@ -31,6 +31,25 @@ export const Header: GlobalConfig = {
         },
       },
     },
+    {
+      name: 'enableCta',
+      type: 'checkbox',
+      label: { en: 'Show a call-to-action button', fr: 'Afficher un bouton d’action' },
+      admin: {
+        description: {
+          en: 'Highlighted button at the end of the menu (e.g. "Book a call").',
+          fr: 'Bouton mis en avant au bout du menu (ex. « Réserver un appel »).',
+        },
+      },
+    },
+    link({
+      appearances: false,
+      overrides: {
+        name: 'cta',
+        label: { en: 'Call-to-action button', fr: 'Bouton d’action' },
+        admin: { condition: (_, s) => Boolean(s?.enableCta) },
+      },
+    }),
   ],
   hooks: {
     afterChange: [revalidateHeader],

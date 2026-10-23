@@ -6,115 +6,222 @@
  * (light) block and a `[data-theme='dark']` block. Upstream (this repo's
  * own maintenance) never edits this file directly — see `src/client/`.
  *
- * For a basic rebrand, changing `--brand` (and its paired
- * `--brand-foreground`, if the new hue needs a different contrasting text
- * color) in both blocks below should be enough: it drives `--primary` and
- * `--ring`, so shadcn's `Button`, focus rings and links pick up the new
- * brand color automatically. Every other token here is intentionally
- * achromatic (chroma 0) — keep neutral surfaces/text neutral and let
- * `--brand` be the only source of color, unless the client's brand
- * identity calls for more.
+ * Besoin d'Écrire palette (taken from the 2026 besoindecrire.com home page):
+ *   cream #FAF7F2 (background) · ink #1C1C1C (text) · sepia #7A6A52 (secondary
+ *   text) · sage #4A5E52 (brand / actions) · gold #C8A96E (accents) ·
+ *   light sepia #F0EAE0 (muted surfaces) · border #E0D8CC.
  *
- * If you change `--brand`, re-check contrast against `--brand-foreground`
- * (WCAG AA, 4.5:1 for normal text) in BOTH modes — see the notes below for
- * how the shipped default was verified.
+ * Contrast (WCAG AA, 4.5:1), light: sage/cream 6.5, white/sage 7.0,
+ * muted-foreground #74644C on cream 5.4 and on light sepia 4.8.
+ * Dark: muted-foreground #B9AC97 on #171614 8.1, sage #9DB5A5 on #171614 8.3.
  */
 
 :root {
-  /* Brand accent. Default: a restrained, professional blue.
-     Verified oklch(54% 0.16 250deg) -> srgb(0, 113, 199) against
-     --brand-foreground oklch(98.5% 0 0deg) (near-white) = 4.83:1,
-     passes WCAG AA (4.5:1) for normal text with margin. */
-  --brand: oklch(54% 0.16 250deg);
+  --brand: oklch(46.1% 0.031 158.6deg);
   --brand-foreground: oklch(98.5% 0 0deg);
 
-  --background: oklch(100% 0 0deg);
-  --foreground: oklch(14.5% 0 0deg);
-  --card: oklch(96.5% 0.005 265deg);
-  --card-foreground: oklch(14.5% 0 0deg);
+  /* Editorial accent (thin rules, numbers, quote marks). Never for text on cream: 2.2:1. */
+  --gold: oklch(74.9% 0.085 82.8deg);
+
+  --background: oklch(97.7% 0.007 80.7deg);
+  --foreground: oklch(22.6% 0 0deg);
+  --card: oklch(100% 0 0deg);
+  --card-foreground: oklch(22.6% 0 0deg);
   --popover: oklch(100% 0 0deg);
-  --popover-foreground: oklch(14.5% 0 0deg);
+  --popover-foreground: oklch(22.6% 0 0deg);
   --primary: var(--brand);
   --primary-foreground: var(--brand-foreground);
-  --secondary: oklch(97% 0 0deg);
-  --secondary-foreground: oklch(20.5% 0 0deg);
-  --muted: oklch(97% 0 0deg);
-  --muted-foreground: oklch(55.6% 0 0deg);
-  --accent: oklch(97% 0 0deg);
-  --accent-foreground: oklch(20.5% 0 0deg);
+  --secondary: oklch(93.9% 0.015 80.7deg);
+  --secondary-foreground: oklch(22.6% 0 0deg);
+  --muted: oklch(93.9% 0.015 80.7deg);
+  --muted-foreground: oklch(51.2% 0.041 77.7deg);
+  --accent: oklch(93.9% 0.015 80.7deg);
+  --accent-foreground: oklch(22.6% 0 0deg);
   --destructive: oklch(57.7% 0.245 27.325deg);
-  /* Was equal to --destructive (invisible text on destructive bg).
-     oklch(98.5% 0 0deg) against oklch(57.7% 0.245 27.325deg) = 4.56:1,
-     passes WCAG AA (4.5:1). */
   --destructive-foreground: oklch(98.5% 0 0deg);
-  --border: oklch(92.2% 0 0deg);
-  --input: oklch(92.2% 0 0deg);
+  --border: oklch(88.5% 0.018 78.2deg);
+  --input: oklch(88.5% 0.018 78.2deg);
   --ring: var(--brand);
-  --chart-1: oklch(64.6% 0.222 41.116deg);
-  --chart-2: oklch(60% 0.118 184.704deg);
-  --chart-3: oklch(39.8% 0.07 227.392deg);
-  --chart-4: oklch(82.8% 0.189 84.429deg);
-  --chart-5: oklch(76.9% 0.188 70.08deg);
-  --radius: 0.625rem;
-  --sidebar: oklch(98.5% 0 0deg);
-  --sidebar-foreground: oklch(14.5% 0 0deg);
-  --sidebar-primary: oklch(20.5% 0 0deg);
+  --chart-1: oklch(46.1% 0.031 158.6deg);
+  --chart-2: oklch(74.9% 0.085 82.8deg);
+  --chart-3: oklch(53.3% 0.041 77.7deg);
+  --chart-4: oklch(65% 0.04 158deg);
+  --chart-5: oklch(85% 0.05 82deg);
+  /* Near-square corners, as on the original site (buttons 2px). */
+  --radius: 0.25rem;
+  --sidebar: oklch(97.7% 0.007 80.7deg);
+  --sidebar-foreground: oklch(22.6% 0 0deg);
+  --sidebar-primary: var(--brand);
   --sidebar-primary-foreground: oklch(98.5% 0 0deg);
-  --sidebar-accent: oklch(97% 0 0deg);
-  --sidebar-accent-foreground: oklch(20.5% 0 0deg);
-  --sidebar-border: oklch(92.2% 0 0deg);
-  --sidebar-ring: oklch(70.8% 0 0deg);
-  --success: oklch(78% 0.08 200deg);
+  --sidebar-accent: oklch(93.9% 0.015 80.7deg);
+  --sidebar-accent-foreground: oklch(22.6% 0 0deg);
+  --sidebar-border: oklch(88.5% 0.018 78.2deg);
+  --sidebar-ring: var(--brand);
+  --success: oklch(78% 0.08 158deg);
   --warning: oklch(89% 0.1 75deg);
   --error: oklch(75% 0.15 25deg);
 }
 
 [data-theme='dark'] {
-  /* Brand accent, dark mode. Lightened so it reads against a dark
-     background while keeping the same hue as light mode.
-     Verified oklch(74% 0.16 250deg) -> srgb(80, 176, 255) against
-     --brand-foreground oklch(20.5% 0 0deg) (near-black, matches the
-     existing dark-mode --primary-foreground) = 7.66:1, passes WCAG AA
-     (4.5:1) with a comfortable margin (also clears AAA's 7:1). */
-  --brand: oklch(74% 0.16 250deg);
+  --brand: oklch(75% 0.035 156.3deg);
   --brand-foreground: oklch(20.5% 0 0deg);
 
-  --background: oklch(14.5% 0 0deg);
-  --foreground: oklch(98.5% 0 0deg);
-  --card: oklch(17% 0 0deg);
-  --card-foreground: oklch(98.5% 0 0deg);
-  --popover: oklch(14.5% 0 0deg);
-  --popover-foreground: oklch(98.5% 0 0deg);
+  --gold: oklch(79.4% 0.08 84.2deg);
+
+  --background: oklch(20.1% 0.004 84.6deg);
+  --foreground: oklch(95.1% 0.012 79.8deg);
+  --card: oklch(24% 0.006 78.2deg);
+  --card-foreground: oklch(95.1% 0.012 79.8deg);
+  --popover: oklch(24% 0.006 78.2deg);
+  --popover-foreground: oklch(95.1% 0.012 79.8deg);
   --primary: var(--brand);
   --primary-foreground: var(--brand-foreground);
-  --secondary: oklch(26.9% 0 0deg);
-  --secondary-foreground: oklch(98.5% 0 0deg);
-  --muted: oklch(26.9% 0 0deg);
-  --muted-foreground: oklch(70.8% 0 0deg);
-  --accent: oklch(26.9% 0 0deg);
-  --accent-foreground: oklch(98.5% 0 0deg);
+  --secondary: oklch(27.5% 0.008 75.2deg);
+  --secondary-foreground: oklch(95.1% 0.012 79.8deg);
+  --muted: oklch(27.5% 0.008 75.2deg);
+  --muted-foreground: oklch(75% 0.033 79.9deg);
+  --accent: oklch(27.5% 0.008 75.2deg);
+  --accent-foreground: oklch(95.1% 0.012 79.8deg);
   --destructive: oklch(39.6% 0.141 25.723deg);
-  /* Was a red on a red background (about 2.3:1). Near-white instead:
-     oklch(98.5% 0 0deg) on --destructive oklch(39.6% 0.141 25.723deg)
-     = 8.6:1, passes WCAG AA and AAA. */
   --destructive-foreground: oklch(98.5% 0 0deg);
-  --border: oklch(26.9% 0 0deg);
-  --input: oklch(26.9% 0 0deg);
+  --border: oklch(33.2% 0.014 76.4deg);
+  --input: oklch(33.2% 0.014 76.4deg);
   --ring: var(--brand);
-  --chart-1: oklch(48.8% 0.243 264.376deg);
-  --chart-2: oklch(69.6% 0.17 162.48deg);
-  --chart-3: oklch(76.9% 0.188 70.08deg);
-  --chart-4: oklch(62.7% 0.265 303.9deg);
-  --chart-5: oklch(64.5% 0.246 16.439deg);
-  --sidebar: oklch(20.5% 0 0deg);
-  --sidebar-foreground: oklch(98.5% 0 0deg);
-  --sidebar-primary: oklch(48.8% 0.243 264.376deg);
-  --sidebar-primary-foreground: oklch(98.5% 0 0deg);
-  --sidebar-accent: oklch(26.9% 0 0deg);
-  --sidebar-accent-foreground: oklch(98.5% 0 0deg);
-  --sidebar-border: oklch(26.9% 0 0deg);
-  --sidebar-ring: oklch(43.9% 0 0deg);
-  --success: oklch(28% 0.1 200deg);
+  --chart-1: oklch(75% 0.035 156.3deg);
+  --chart-2: oklch(79.4% 0.08 84.2deg);
+  --chart-3: oklch(75% 0.033 79.9deg);
+  --chart-4: oklch(60% 0.04 158deg);
+  --chart-5: oklch(55% 0.05 82deg);
+  --sidebar: oklch(20.1% 0.004 84.6deg);
+  --sidebar-foreground: oklch(95.1% 0.012 79.8deg);
+  --sidebar-primary: var(--brand);
+  --sidebar-primary-foreground: oklch(20.5% 0 0deg);
+  --sidebar-accent: oklch(27.5% 0.008 75.2deg);
+  --sidebar-accent-foreground: oklch(95.1% 0.012 79.8deg);
+  --sidebar-border: oklch(33.2% 0.014 76.4deg);
+  --sidebar-ring: var(--brand);
+  --success: oklch(35% 0.05 158deg);
   --warning: oklch(35% 0.08 70deg);
   --error: oklch(45% 0.1 25deg);
+}
+
+@theme inline {
+  --color-gold: var(--gold);
+}
+
+/* Classic typography: headings in Newsreader, body and interface in Hanken Grotesk
+   (`font-sans`, the Tailwind default) for easy reading. */
+@layer base {
+  body {
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    font-variant-numeric: lining-nums;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: color-mix(in oklch, var(--gold) 40%, transparent);
+  }
+}
+
+/* Visible keyboard focus everywhere. Unlayered so it wins over component utilities. */
+:focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 3px;
+}
+
+/* Rich text (Tailwind typography): serif headings, gold-ruled quotes, brand links.
+   The plugin wraps its selectors in :where(), so these win without !important. */
+.prose {
+  --tw-prose-links: var(--brand);
+  --tw-prose-quotes: var(--foreground);
+  --tw-prose-quote-borders: var(--gold);
+  --tw-prose-bullets: var(--brand);
+  --tw-prose-counters: var(--muted-foreground);
+  --tw-prose-hr: var(--border);
+  --tw-prose-bold: var(--foreground);
+  font-size: 1.0625rem;
+  line-height: 1.75;
+}
+
+.prose :is(h1, h2, h3, h4) {
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.prose :is(h1, h2, h3, h4) strong {
+  font-weight: inherit;
+}
+
+.prose h2 {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+}
+
+.prose h3 {
+  font-size: 1.5rem;
+}
+
+.prose blockquote {
+  font-family: var(--font-display);
+  font-size: 1.3em;
+  font-style: italic;
+  font-weight: 400;
+  border-left-width: 2px;
+}
+
+.prose a {
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+/* Drop cap on the first paragraph (Content block "Lettrine"). */
+.lettrine > p:first-of-type::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-size: 4em;
+  line-height: 0.8;
+  margin: 0.08em 0.1em 0 0;
+  color: var(--brand);
+}
+
+/* Buttons (shadcn `Button`, also used by CMS links). Unlayered so it wins over the component's
+   Tailwind size utilities. */
+[data-slot='button'] {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  box-shadow: none;
+}
+
+/* Page heroes: clear serif title, readable lead paragraphs. */
+.hero-richtext h1 {
+  font-size: clamp(2.5rem, 4.5vw, 3.75rem);
+  line-height: 1.1;
+  margin-bottom: 0.6em;
+}
+
+.hero-richtext p {
+  font-size: 1.1875rem;
+  color: var(--muted-foreground);
+  max-width: 36rem;
+}
+
+/* Call to action. */
+.cta-richtext h2 {
+  font-size: clamp(2rem, 3.5vw, 2.75rem);
+  margin-bottom: 0.5em;
+}
+
+.cta-richtext p {
+  font-size: 1.1875rem;
+  color: var(--muted-foreground);
 }

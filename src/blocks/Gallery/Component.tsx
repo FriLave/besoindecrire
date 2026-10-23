@@ -16,11 +16,11 @@ const sizes = {
   '4': '(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw',
 }
 
-export const GalleryBlock: React.FC<Props> = ({ columns, heading, images, intro }) => {
+export const GalleryBlock: React.FC<Props> = ({ columns, eyebrow, heading, images, intro }) => {
   const c = columns || '3'
   return (
     <div className="container">
-      <BlockHeader heading={heading} intro={intro} />
+      <BlockHeader eyebrow={eyebrow} heading={heading} intro={intro} />
       <ul className={`grid gap-4 ${cols[c]}`}>
         {images?.map((item, i) => (
           <li key={item.id ?? i}>

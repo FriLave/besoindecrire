@@ -39,6 +39,7 @@ export const blockSettings = (): Field => ({
             { label: { en: 'None', fr: 'Aucun' }, value: 'none' },
             { label: { en: 'Muted', fr: 'Discret' }, value: 'muted' },
             { label: { en: 'Brand color', fr: 'Couleur de marque' }, value: 'brand' },
+            { label: { en: 'Inverted (dark)', fr: 'Inversé (sombre)' }, value: 'inverted' },
           ],
         },
       ],

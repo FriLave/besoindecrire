@@ -35,7 +35,7 @@ export const Logo = async ({ className, locale, priority }: Props) => {
   return (
     <span
       className={clsx(
-        'max-w-[9.375rem] w-full h-[34px] flex items-center font-semibold text-xl tracking-tight text-foreground',
+        'h-[34px] flex items-center whitespace-nowrap font-serif text-2xl text-foreground',
         className,
       )}
     >

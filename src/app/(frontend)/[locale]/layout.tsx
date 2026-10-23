@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 
-import { cn } from '@/utilities/ui'
-import { GeistMono, GeistSans } from '@/client/fonts'
+import { fontVariables } from '@/client/fonts'
 import React from 'react'
 
 import { AdminBar } from '@/components/AdminBar'
@@ -50,11 +49,7 @@ export default async function RootLayout({ children, params }: Args) {
   const locale = localeParam
 
   return (
-    <html
-      className={cn(GeistSans.variable, GeistMono.variable)}
-      lang={locale}
-      suppressHydrationWarning
-    >
+    <html className={fontVariables} lang={locale} suppressHydrationWarning>
       <head>
         <InitTheme />
       </head>

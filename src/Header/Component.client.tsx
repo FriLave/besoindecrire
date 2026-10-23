@@ -37,10 +37,16 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ children, locale, lo
   if (hydrated && headerTheme && headerTheme !== theme) setTheme(headerTheme)
 
   return (
-    <header className="container relative z-20   " {...(theme ? { 'data-theme': theme } : {})}>
-      <div className="py-8 flex justify-between">
+    <header
+      className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm"
+      {...(theme ? { 'data-theme': theme } : {})}
+    >
+      <div className="container relative flex h-18 items-center justify-between gap-6">
         <Link href={getLocalizedPath(locale, 'home')}>{logo}</Link>
-        {children}
+        {/* Keyed on the path: remounting closes the mobile menu after a navigation. */}
+        <div className="contents" key={pathname}>
+          {children}
+        </div>
       </div>
     </header>
   )

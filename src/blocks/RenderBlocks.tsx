@@ -10,6 +10,8 @@ import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
+import { MediaContentBlock } from '@/blocks/MediaContent/Component'
+import { QuoteBlock } from '@/blocks/Quote/Component'
 
 import { BlockSection } from '@/components/BlockSection'
 import { FAQBlock } from '@/blocks/FAQ/Component'
@@ -36,9 +38,11 @@ const blockComponents = {
   legalNotice: LegalNoticeBlock,
   logoCloud: LogoCloudBlock,
   mediaBlock: MediaBlock,
+  mediaContent: MediaContentBlock,
   paidDownload: PaidDownloadBlockComponent,
   pricingTable: PricingTableBlock,
   privacyPolicy: PrivacyPolicyBlock,
+  quote: QuoteBlock,
   stats: StatsBlock,
   termsOfSale: TermsOfSaleBlock,
   testimonials: TestimonialsBlock,

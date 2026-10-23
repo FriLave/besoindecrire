@@ -73,6 +73,9 @@ export type UIDictionary = {
     /** aria-label / visible copy: "Switch to <language>". */
     switchTo: (targetLanguageLabel: string) => string
   }
+  nav: {
+    menu: string
+  }
   notFound: {
     cta: string
     description: string
@@ -119,6 +122,9 @@ const dictionaries: Record<Locale, UIDictionary> = {
       relatedPosts: 'Articles similaires',
       title: 'Blog',
       untitledCategory: 'Catégorie sans titre',
+    },
+    nav: {
+      menu: 'Menu',
     },
     search: {
       noResults: 'Aucun résultat.',
@@ -199,6 +205,9 @@ const dictionaries: Record<Locale, UIDictionary> = {
       relatedPosts: 'Related posts',
       title: 'Blog',
       untitledCategory: 'Untitled category',
+    },
+    nav: {
+      menu: 'Menu',
     },
     search: {
       noResults: 'No results found.',

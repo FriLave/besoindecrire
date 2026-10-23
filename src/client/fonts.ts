@@ -1,19 +1,38 @@
 /**
  * Client-owned zone: typography.
  *
- * This is the file a client fork edits to swap the site's typeface.
- * Geist is the neutral default. Any replacement MUST stay `next/font`
- * -based (self-hosted, no blocking external request) — this project's
- * rendering/SEO requirements rule out `next/font/google` or any other
- * remote font fetch (see CLAUDE.md section 8, "Performance / Core Web
- * Vitals"). The `geist` package itself wraps `next/font/local`, so it is
- * already self-hosted.
+ * This is the file a client fork edits to swap the site's typefaces. Any
+ * replacement MUST stay `next/font`-based and self-hosted (no blocking
+ * external request, see CLAUDE.md section 8).
  *
- * Export the font objects (and/or their `.variable` class names); the
- * root layout only imports from here.
+ * Contract with the layout and `globals.css`: export `fontVariables`, the
+ * class names that define three CSS variables:
+ * - `--font-body`    -> Tailwind `font-sans` (body text)
+ * - `--font-display` -> Tailwind `font-serif` (headings)
+ * - `--font-geist-mono` -> Tailwind `font-mono` (Geist Mono, kept from upstream)
+ *
+ * Besoin d'Écrire: Newsreader (headings, with optical sizes) + Hanken Grotesk
+ * (body), both OFL, variable woff2 files from Fontsource in `./fonts/`.
  */
 
 import { GeistMono } from 'geist/font/mono'
-import { GeistSans } from 'geist/font/sans'
+import localFont from 'next/font/local'
 
-export { GeistMono, GeistSans }
+const display = localFont({
+  src: [
+    { path: './fonts/newsreader-latin-standard-normal.woff2', style: 'normal', weight: '200 800' },
+    { path: './fonts/newsreader-latin-standard-italic.woff2', style: 'italic', weight: '200 800' },
+  ],
+  variable: '--font-display',
+  display: 'swap',
+})
+
+const body = localFont({
+  src: [
+    { path: './fonts/hanken-grotesk-latin-wght-normal.woff2', style: 'normal', weight: '100 900' },
+  ],
+  variable: '--font-body',
+  display: 'swap',
+})
+
+export const fontVariables = [display.variable, body.variable, GeistMono.variable].join(' ')

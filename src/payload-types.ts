@@ -176,7 +176,11 @@ export interface Page {
    * Banner at the top of the page: pick a type, then fill in the title, buttons and image.
    */
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
+    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'split';
+    /**
+     * Optional short label shown above the title.
+     */
+    eyebrow?: string | null;
     richText?: {
       root: {
         type: string;
@@ -222,6 +226,8 @@ export interface Page {
     | CallToActionBlock
     | ContentBlock
     | MediaBlock
+    | MediaContentBlock
+    | QuoteBlock
     | FormBlock
     | FeatureGridBlock
     | StatsBlock
@@ -529,7 +535,7 @@ export interface CallToActionBlock {
     | null;
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'cta';
@@ -583,9 +589,10 @@ export interface ContentBlock {
         id?: string | null;
       }[]
     | null;
+  dropCap?: boolean | null;
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -601,10 +608,86 @@ export interface MediaBlock {
   media: number | Media;
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaContentBlock".
+ */
+export interface MediaContentBlock {
+  /**
+   * An image next to a text (presentation, product, book...), with up to 2 buttons. Eyebrow: optional short label above the text.
+   */
+  eyebrow?: string | null;
+  richText: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  links?:
+    | {
+        link: {
+          type?: ('reference' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: number | Post;
+              } | null);
+          url?: string | null;
+          label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
+          appearance?: ('default' | 'outline') | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  media?: (number | null) | Media;
+  mediaPosition?: ('left' | 'right') | null;
+  mediaShape?: ('portrait' | 'cover' | 'landscape' | 'square') | null;
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'mediaContent';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "QuoteBlock".
+ */
+export interface QuoteBlock {
+  /**
+   * A short statement or quote, set large. Tip: use the "Inverted" background for a dark band.
+   */
+  quote: string;
+  style?: ('centered' | 'epigraph') | null;
+  attribution?: string | null;
+  paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
+  paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'quote';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -633,7 +716,7 @@ export interface FormBlock {
   } | null;
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'formBlock';
@@ -813,19 +896,29 @@ export interface Form {
  */
 export interface FeatureGridBlock {
   /**
-   * A grid of features or services, each with an icon, a title and a short text.
+   * A grid of features or services, each with an icon, a title and a short text. Eyebrow: optional short label shown above the heading.
    */
+  eyebrow?: string | null;
   heading?: string | null;
   intro?: string | null;
   columns?: ('2' | '3' | '4') | null;
+  style?: ('icons' | 'numbered' | 'cards' | 'list') | null;
   items: {
+    /**
+     * Not shown in the "Numbered" and "List" styles.
+     */
     icon?:
       | (
+          | 'book'
           | 'clock'
+          | 'compass'
+          | 'feather'
           | 'globe'
           | 'heart'
           | 'lightbulb'
           | 'mail'
+          | 'message'
+          | 'pen'
           | 'rocket'
           | 'search'
           | 'settings'
@@ -859,7 +952,7 @@ export interface FeatureGridBlock {
   }[];
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'featureGrid';
@@ -870,8 +963,9 @@ export interface FeatureGridBlock {
  */
 export interface StatsBlock {
   /**
-   * Key figures, each with a value and a label.
+   * Key figures, each with a value and a label. Eyebrow: optional short label shown above the heading.
    */
+  eyebrow?: string | null;
   heading?: string | null;
   intro?: string | null;
   items: {
@@ -881,7 +975,7 @@ export interface StatsBlock {
   }[];
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'stats';
@@ -892,10 +986,12 @@ export interface StatsBlock {
  */
 export interface TestimonialsBlock {
   /**
-   * Customer quotes with author, role and an optional photo.
+   * Customer quotes with author, role and an optional photo. Eyebrow: optional short label shown above the heading.
    */
+  eyebrow?: string | null;
   heading?: string | null;
   intro?: string | null;
+  style?: ('grid' | 'featured') | null;
   items: {
     quote: string;
     author: string;
@@ -905,7 +1001,7 @@ export interface TestimonialsBlock {
   }[];
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'testimonials';
@@ -916,8 +1012,9 @@ export interface TestimonialsBlock {
  */
 export interface LogoCloudBlock {
   /**
-   * A row of partner or client logos, each optionally linking to a website.
+   * A row of partner or client logos, each optionally linking to a website. Eyebrow: optional short label shown above the heading.
    */
+  eyebrow?: string | null;
   heading?: string | null;
   intro?: string | null;
   logos: {
@@ -928,7 +1025,7 @@ export interface LogoCloudBlock {
   }[];
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'logoCloud';
@@ -939,13 +1036,15 @@ export interface LogoCloudBlock {
  */
 export interface PricingTableBlock {
   /**
-   * Side-by-side plans with price, included features and a call to action. One plan can be highlighted.
+   * Side-by-side plans with price, included features and a call to action. One plan can be highlighted. Eyebrow: optional short label shown above the heading.
    */
+  eyebrow?: string | null;
   heading?: string | null;
   intro?: string | null;
+  style?: ('cards' | 'contents') | null;
   plans: {
     name: string;
-    price: string;
+    price?: string | null;
     period?: string | null;
     description?: string | null;
     features?:
@@ -955,6 +1054,8 @@ export interface PricingTableBlock {
         }[]
       | null;
     highlighted?: boolean | null;
+    badge?: string | null;
+    audience?: string | null;
     link: {
       type?: ('reference' | 'custom') | null;
       newTab?: boolean | null;
@@ -978,7 +1079,7 @@ export interface PricingTableBlock {
   }[];
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'pricingTable';
@@ -989,8 +1090,9 @@ export interface PricingTableBlock {
  */
 export interface GalleryBlock {
   /**
-   * An image grid with optional captions.
+   * An image grid with optional captions. Eyebrow: optional short label shown above the heading.
    */
+  eyebrow?: string | null;
   heading?: string | null;
   intro?: string | null;
   columns?: ('2' | '3' | '4') | null;
@@ -1001,7 +1103,7 @@ export interface GalleryBlock {
   }[];
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'gallery';
@@ -1012,8 +1114,9 @@ export interface GalleryBlock {
  */
 export interface FAQBlock {
   /**
-   * Frequently asked questions as an accordion. Also improves search results (FAQ rich snippet).
+   * Frequently asked questions as an accordion. Also improves search results (FAQ rich snippet). Eyebrow: optional short label shown above the heading.
    */
+  eyebrow?: string | null;
   heading?: string | null;
   intro?: string | null;
   items: {
@@ -1037,7 +1140,7 @@ export interface FAQBlock {
   }[];
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'faq';
@@ -1067,7 +1170,7 @@ export interface LegalNoticeBlock {
   } | null;
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'legalNotice';
@@ -1097,7 +1200,7 @@ export interface PrivacyPolicyBlock {
   } | null;
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'privacyPolicy';
@@ -1134,7 +1237,7 @@ export interface ArchiveBlock {
     | null;
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
@@ -1145,14 +1248,15 @@ export interface ArchiveBlock {
  */
 export interface PaidDownloadBlock {
   /**
-   * Sells a downloadable file (PDF, guide...) with a buy button. Create the file and its price first in Paid downloads.
+   * Sells a downloadable file (PDF, guide...) with a buy button. Create the file and its price first in Paid downloads. Eyebrow: optional short label shown above the heading.
    */
+  eyebrow?: string | null;
   heading?: string | null;
   intro?: string | null;
   download: number | PaidDownload;
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'paidDownload';
@@ -1228,7 +1332,7 @@ export interface TermsOfSaleBlock {
   } | null;
   paddingTop?: ('none' | 'sm' | 'md' | 'lg') | null;
   paddingBottom?: ('none' | 'sm' | 'md' | 'lg') | null;
-  background?: ('none' | 'muted' | 'brand') | null;
+  background?: ('none' | 'muted' | 'brand' | 'inverted') | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'termsOfSale';
@@ -1561,6 +1665,7 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         type?: T;
+        eyebrow?: T;
         richText?: T;
         links?:
           | T
@@ -1585,6 +1690,8 @@ export interface PagesSelect<T extends boolean = true> {
         cta?: T | CallToActionBlockSelect<T>;
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
+        mediaContent?: T | MediaContentBlockSelect<T>;
+        quote?: T | QuoteBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
         featureGrid?: T | FeatureGridBlockSelect<T>;
         stats?: T | StatsBlockSelect<T>;
@@ -1663,6 +1770,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  dropCap?: T;
   paddingTop?: T;
   paddingBottom?: T;
   background?: T;
@@ -1675,6 +1783,51 @@ export interface ContentBlockSelect<T extends boolean = true> {
  */
 export interface MediaBlockSelect<T extends boolean = true> {
   media?: T;
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaContentBlock_select".
+ */
+export interface MediaContentBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
+  richText?: T;
+  links?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              url?: T;
+              label?: T;
+              appearance?: T;
+            };
+        id?: T;
+      };
+  media?: T;
+  mediaPosition?: T;
+  mediaShape?: T;
+  paddingTop?: T;
+  paddingBottom?: T;
+  background?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "QuoteBlock_select".
+ */
+export interface QuoteBlockSelect<T extends boolean = true> {
+  quote?: T;
+  style?: T;
+  attribution?: T;
   paddingTop?: T;
   paddingBottom?: T;
   background?: T;
@@ -1700,9 +1853,11 @@ export interface FormBlockSelect<T extends boolean = true> {
  * via the `definition` "FeatureGridBlock_select".
  */
 export interface FeatureGridBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
   heading?: T;
   intro?: T;
   columns?: T;
+  style?: T;
   items?:
     | T
     | {
@@ -1732,6 +1887,7 @@ export interface FeatureGridBlockSelect<T extends boolean = true> {
  * via the `definition` "StatsBlock_select".
  */
 export interface StatsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
   heading?: T;
   intro?: T;
   items?:
@@ -1752,8 +1908,10 @@ export interface StatsBlockSelect<T extends boolean = true> {
  * via the `definition` "TestimonialsBlock_select".
  */
 export interface TestimonialsBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
   heading?: T;
   intro?: T;
+  style?: T;
   items?:
     | T
     | {
@@ -1774,6 +1932,7 @@ export interface TestimonialsBlockSelect<T extends boolean = true> {
  * via the `definition` "LogoCloudBlock_select".
  */
 export interface LogoCloudBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
   heading?: T;
   intro?: T;
   logos?:
@@ -1795,8 +1954,10 @@ export interface LogoCloudBlockSelect<T extends boolean = true> {
  * via the `definition` "PricingTableBlock_select".
  */
 export interface PricingTableBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
   heading?: T;
   intro?: T;
+  style?: T;
   plans?:
     | T
     | {
@@ -1811,6 +1972,8 @@ export interface PricingTableBlockSelect<T extends boolean = true> {
               id?: T;
             };
         highlighted?: T;
+        badge?: T;
+        audience?: T;
         link?:
           | T
           | {
@@ -1834,6 +1997,7 @@ export interface PricingTableBlockSelect<T extends boolean = true> {
  * via the `definition` "GalleryBlock_select".
  */
 export interface GalleryBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
   heading?: T;
   intro?: T;
   columns?: T;
@@ -1855,6 +2019,7 @@ export interface GalleryBlockSelect<T extends boolean = true> {
  * via the `definition` "FAQBlock_select".
  */
 export interface FAQBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
   heading?: T;
   intro?: T;
   items?:
@@ -1916,6 +2081,7 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
  * via the `definition` "PaidDownloadBlock_select".
  */
 export interface PaidDownloadBlockSelect<T extends boolean = true> {
+  eyebrow?: T;
   heading?: T;
   intro?: T;
   download?: T;
@@ -2469,6 +2635,25 @@ export interface Header {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Highlighted button at the end of the menu (e.g. "Book a call").
+   */
+  enableCta?: boolean | null;
+  cta?: {
+    type?: ('reference' | 'custom') | null;
+    newTab?: boolean | null;
+    reference?:
+      | ({
+          relationTo: 'pages';
+          value: number | Page;
+        } | null)
+      | ({
+          relationTo: 'posts';
+          value: number | Post;
+        } | null);
+    url?: string | null;
+    label: string;
+  };
   updatedAt?: string | null;
   createdAt?: string | null;
 }
@@ -2659,6 +2844,16 @@ export interface HeaderSelect<T extends boolean = true> {
               label?: T;
             };
         id?: T;
+      };
+  enableCta?: T;
+  cta?:
+    | T
+    | {
+        type?: T;
+        newTab?: T;
+        reference?: T;
+        url?: T;
+        label?: T;
       };
   updatedAt?: T;
   createdAt?: T;

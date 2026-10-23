@@ -5,9 +5,9 @@ import type { LogoCloudBlock as Props } from '@/payload-types'
 import { BlockHeader } from '@/components/BlockHeader'
 import { Media } from '@/components/Media'
 
-export const LogoCloudBlock: React.FC<Props> = ({ heading, intro, logos }) => (
+export const LogoCloudBlock: React.FC<Props> = ({ eyebrow, heading, intro, logos }) => (
   <div className="container">
-    <BlockHeader heading={heading} intro={intro} />
+    <BlockHeader eyebrow={eyebrow} heading={heading} intro={intro} />
     <ul className="flex flex-wrap items-center justify-center gap-x-12 gap-y-8">
       {logos?.map((item, i) => {
         if (typeof item.logo !== 'object') return null

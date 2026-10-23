@@ -17,6 +17,19 @@ export const PricingTable: Block = {
       fr: 'Offres côte à côte avec prix, éléments inclus et bouton d’action. Une offre peut être mise en avant.',
     }),
     {
+      name: 'style',
+      type: 'select',
+      defaultValue: 'cards',
+      label: { en: 'Style', fr: 'Style' },
+      options: [
+        { label: { en: 'Cards side by side', fr: 'Cartes côte à côte' }, value: 'cards' },
+        {
+          label: { en: 'List (one plan per line)', fr: 'Liste (une offre par ligne)' },
+          value: 'contents',
+        },
+      ],
+    },
+    {
       name: 'plans',
       type: 'array',
       required: true,
@@ -37,9 +50,11 @@ export const PricingTable: Block = {
             {
               name: 'price',
               type: 'text',
-              required: true,
               localized: true,
-              label: { en: 'Price', fr: 'Prix' },
+              label: {
+                en: 'Price (or main figure, e.g. a duration)',
+                fr: 'Prix (ou mention principale, ex. une durée)',
+              },
             },
             {
               name: 'period',
@@ -70,9 +85,26 @@ export const PricingTable: Block = {
           ],
         },
         {
-          name: 'highlighted',
-          type: 'checkbox',
-          label: { en: 'Highlight this plan', fr: 'Mettre en avant cette offre' },
+          type: 'row',
+          fields: [
+            {
+              name: 'highlighted',
+              type: 'checkbox',
+              label: { en: 'Highlight this plan', fr: 'Mettre en avant cette offre' },
+            },
+            {
+              name: 'badge',
+              type: 'text',
+              localized: true,
+              label: { en: 'Badge (e.g. Most popular)', fr: 'Badge (ex. La plus suivie)' },
+            },
+          ],
+        },
+        {
+          name: 'audience',
+          type: 'textarea',
+          localized: true,
+          label: { en: 'Who it is for', fr: 'Pour qui' },
         },
         link({ appearances: ['default', 'outline'] }),
       ],

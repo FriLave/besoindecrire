@@ -35,20 +35,29 @@ export const enforceSingleH1: CollectionBeforeChangeHook = async ({ data, origin
   if (!originalDoc?.id || !localization) return data
   const others = (localization.localeCodes as TypedLocale[]).filter((code) => code !== req.locale)
 
-  for (const locale of others) {
-    const doc = await req.payload.findByID({
-      collection: 'pages',
-      id: originalDoc.id,
-      locale,
-      fallbackLocale: false,
-      draft: true,
-      depth: 0,
-      req,
-    })
-    // An untranslated locale (no title) is not published content yet.
-    if (!doc.title) continue
-    const n = countH1([doc.hero, doc.layout])
-    if (n !== 1) fail(n, locale)
+  // The Local API overwrites `req.locale` / `req.fallbackLocale` with the locale it is asked for
+  // (createLocalReq). Restore them, or the save in progress is written to the last locale checked
+  // (publishing in `en` would overwrite the `fr` content).
+  const { fallbackLocale, locale: reqLocale } = req
+  try {
+    for (const locale of others) {
+      const doc = await req.payload.findByID({
+        collection: 'pages',
+        id: originalDoc.id,
+        locale,
+        fallbackLocale: false,
+        draft: true,
+        depth: 0,
+        req,
+      })
+      // An untranslated locale (no title) is not published content yet.
+      if (!doc.title) continue
+      const n = countH1([doc.hero, doc.layout])
+      if (n !== 1) fail(n, locale)
+    }
+  } finally {
+    req.locale = reqLocale
+    req.fallbackLocale = fallbackLocale
   }
 
   return data
