@@ -25,3 +25,4 @@ node_modules/
 skills-lock.json
 .claude/skills
 *.tsbuildinfo
+.env*.local
