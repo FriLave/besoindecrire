@@ -1,4 +1,4 @@
-const installed = { blog: true, payments: false }
+export const installed = { blog: true, payments: false }
 
 export type ModuleKey = keyof typeof installed
 

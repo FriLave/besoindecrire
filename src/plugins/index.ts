@@ -6,7 +6,7 @@ import { searchPlugin } from '@payloadcms/plugin-search'
 import type { Block, Field, Plugin } from 'payload'
 import { editorOrAbove } from '@/access/roles'
 import { whenBlog } from '@/access/blogEnabled'
-import { modules } from '@/client/modules'
+import { installed, modules } from '@/client/modules'
 import { searchFields } from '@/search/fieldOverrides'
 import { beforeSyncWithSearch } from '@/search/beforeSync'
 import { revalidateRedirects, revalidateRedirectsAfterDelete } from '@/hooks/revalidateRedirects'
@@ -63,7 +63,9 @@ const localizeFormFieldLabels = (fields: Field[]): Field[] =>
   })
 
 export const plugins: Plugin[] = [
-  ...buildStoragePlugins(process.env, { payments: modules.payments }),
+  // `installed`, not `modules`: `migrate*` force every module on, but the storage check must
+  // follow what this fork really runs (a paid-files guard on a fork without payments blocks migrate).
+  ...buildStoragePlugins(process.env, { payments: installed.payments }),
   redirectsPlugin({
     collections: modules.blog ? ['pages', 'posts'] : ['pages'],
     overrides: {
